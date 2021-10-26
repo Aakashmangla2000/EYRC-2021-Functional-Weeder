@@ -55,6 +55,7 @@ defmodule ToyRobot do
     ###########################
     ## complete this funcion ##
     ###########################
+    ToyRobot.place(x,y,facing)
   end
 
   def stop(_robot, goal_x, goal_y, _cli_proc_name) when goal_x < 1 or goal_y < :a or goal_x > @table_top_x or goal_y > @table_top_y do
@@ -69,6 +70,15 @@ defmodule ToyRobot do
     ###########################
     ## complete this funcion ##
     ###########################
+    # if ToyRobot.Position{x: x} = robot != goal_x do
+    #   ToyRobot.move(robot)
+    # end
+    # ToyRobot.send_robot_status(robot,:cli_robot_state)
+    robot = move(robot)
+    send_robot_status(robot,:cli_robot_state)
+    # robot = move(robot)
+    # send_robot_status(robot,:cli_robot_state)
+    {:ok, robot}
   end
 
   @doc """
