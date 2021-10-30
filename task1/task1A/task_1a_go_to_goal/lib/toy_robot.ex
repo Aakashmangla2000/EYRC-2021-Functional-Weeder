@@ -70,15 +70,32 @@ defmodule ToyRobot do
     ###########################
     ## complete this funcion ##
     ###########################
-    # if ToyRobot.Position{x: x} = robot != goal_x do
-    #   ToyRobot.move(robot)
-    # end
-    # ToyRobot.send_robot_status(robot,:cli_robot_state)
+    send_robot_status(robot,:cli_robot_state)
+    robot = ToyRobot.goY(robot,goal_x,goal_y,cli_proc_name)
+    robot = right(robot)
+    send_robot_status(robot,:cli_robot_state)
+    robot = ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
+    {:ok, robot}
+  end
+
+  def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when x < goal_x do
     robot = move(robot)
     send_robot_status(robot,:cli_robot_state)
-    # robot = move(robot)
-    # send_robot_status(robot,:cli_robot_state)
-    {:ok, robot}
+    goX(robot,goal_x,goal_y,cli_proc_name)
+  end
+
+  def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
+    robot
+  end
+
+  def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when y < goal_y do
+    robot = move(robot)
+    send_robot_status(robot,:cli_robot_state)
+    goY(robot,goal_x,goal_y,cli_proc_name)
+  end
+
+  def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
+    robot
   end
 
   @doc """
