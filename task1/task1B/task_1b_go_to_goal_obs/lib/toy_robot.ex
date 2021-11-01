@@ -73,40 +73,135 @@ defmodule ToyRobot do
     ###########################
     # {:ok, pid} = ToyRobot.listen_from_server
     # pid = spawn(ToyRobot, :listen_from_server, [])
-    # pid = spawn_link(fn -> receive do
-    #   {:client_toyrobot, {:obstacle_presence, x: x, y: y, facing: facing}} -> IO.puts(:obstacle_presence)
-    # end
+    # pid = spawn_link(fn ->
+    #   result = receive do
+    #     :true -> true
+    #     :false -> false
+    #     _ -> :none
+    #   end
     #  end)
+  #   pid = spawn_link(fn ->
+  #     x = rec()
+  #     IO.puts(x)
+  #  end)
+    # pid = spawn_link(fn -> rec() end)
+    pid = spawn_link(fn ->
+      x = send_robot_status(robot,cli_proc_name)
+      IO.puts(x)
+      robot = forGoal_x(robot, goal_x)
+      robot = ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
+      robot = if(robot.x == goal_x) do
+        robot = forGoal_y(robot, goal_y)
+        ToyRobot.goY(robot,goal_x,goal_y,cli_proc_name)
+      else
+        robot = forGoal_x(robot, goal_x)
+        ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
+      end
 
-    pid = spawn_link(fn -> listen_from_server() end)
-    # pid = spawn_link(fn -> send(:client_toyrobot, {%ToyRobot.Position{x: x, y: y, facing: facing} = robot, :obstacle_presence}) end)
-
-    # pid = spawn_link(ToyRobot.send_robot_status(robot, :cli_robot_state),:client_toyrobot,[])
-    IO.puts(inspect(pid))
+    end)
     Process.register(pid, :client_toyrobot)
-    # spawn(fn -> send(:client_toyrobot, {:client_toyrobot, listen_from_server}) end)
-    IO.puts(send_robot_status(robot,cli_proc_name))
-    # robot = ToyRobot.goY(robot,goal_x,goal_y,cli_proc_name)
-    # robot = right(robot)
-    # send_robot_status(robot,:cli_robot_state)
-    # robot = ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
+
     {:ok, robot}
   end
 
-  def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when x < goal_x do
-    robot = move(robot)
+  def forGoal_x(robot,goal_x) when robot.x < goal_x and robot.facing != :east do
+    robot = cond do
+      robot.facing == :north ->
+        right(robot)
+      robot.facing == :west ->
+        robot = left(robot)
+        send_robot_status(robot,:cli_robot_state)
+        left(robot)
+      robot.facing == :south ->
+        left(robot)
+    end
     send_robot_status(robot,:cli_robot_state)
+  robot
+end
+
+def forGoal_x(robot,goal_x) when robot.x > goal_x and robot.facing != :west do
+  robot = cond do
+    robot.facing == :south ->
+      right(robot)
+    robot.facing == :east ->
+      robot = left(robot)
+      send_robot_status(robot,:cli_robot_state)
+      left(robot)
+    robot.facing == :north ->
+      left(robot)
+  end
+  send_robot_status(robot,:cli_robot_state)
+robot
+end
+
+def forGoal_x(robot,goal_x) do
+  robot
+end
+
+def forGoal_y(robot,goal_y) when robot.y < goal_y and robot.facing != :north do
+  robot = cond do
+    robot.facing == :west ->
+      right(robot)
+    robot.facing == :south ->
+      robot = left(robot)
+      send_robot_status(robot,:cli_robot_state)
+      left(robot)
+    robot.facing == :east ->
+      left(robot)
+  end
+  send_robot_status(robot,:cli_robot_state)
+robot
+end
+
+def forGoal_y(robot,goal_y) when robot.y > goal_y and robot.facing != :south do
+robot = cond do
+  robot.facing == :east ->
+    right(robot)
+  robot.facing == :north ->
+    robot = left(robot)
+    send_robot_status(robot,:cli_robot_state)
+    left(robot)
+  robot.facing == :west ->
+    left(robot)
+end
+send_robot_status(robot,:cli_robot_state)
+robot
+end
+
+def forGoal_y(robot,goal_y) do
+robot
+end
+
+  def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when x != goal_x do
+    robot = move(robot)
+    x = send_robot_status(robot,:cli_robot_state)
+    IO.puts(x)
+    robot = if(x == true) do
+      IO.puts("yup")
+      robot = ToyRobot.forGoal_y(robot,goal_y)
+      ToyRobot.goY(robot,goal_x,goal_y,cli_proc_name)
+    else
     goX(robot,goal_x,goal_y,cli_proc_name)
+    end
+    # robot
   end
 
   def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
     robot
   end
 
-  def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when y < goal_y do
+  def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when y != goal_y do
     robot = move(robot)
-    send_robot_status(robot,:cli_robot_state)
+    x = send_robot_status(robot,:cli_robot_state)
+    IO.puts(x)
+    robot = if(x == true) do
+      IO.puts("yup")
+      robot = ToyRobot.forGoal_x(robot,goal_x)
+      ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
+    else
     goY(robot,goal_x,goal_y,cli_proc_name)
+    end
+    # robot
   end
 
   def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
