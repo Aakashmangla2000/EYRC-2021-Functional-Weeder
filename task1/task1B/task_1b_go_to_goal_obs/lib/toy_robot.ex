@@ -54,6 +54,7 @@ defmodule ToyRobot do
     ###########################
     ## complete this funcion ##
     ###########################
+    ToyRobot.place(x,y,facing)
   end
 
   def stop(_robot, goal_x, goal_y, _cli_proc_name) when goal_x < 1 or goal_y < :a or goal_x > @table_top_x or goal_y > @table_top_y do
@@ -70,6 +71,46 @@ defmodule ToyRobot do
     ###########################
     ## complete this funcion ##
     ###########################
+    # {:ok, pid} = ToyRobot.listen_from_server
+    # pid = spawn(ToyRobot, :listen_from_server, [])
+    # pid = spawn_link(fn -> receive do
+    #   {:client_toyrobot, {:obstacle_presence, x: x, y: y, facing: facing}} -> IO.puts(:obstacle_presence)
+    # end
+    #  end)
+
+    pid = spawn_link(fn -> listen_from_server() end)
+    # pid = spawn_link(fn -> send(:client_toyrobot, {%ToyRobot.Position{x: x, y: y, facing: facing} = robot, :obstacle_presence}) end)
+
+    # pid = spawn_link(ToyRobot.send_robot_status(robot, :cli_robot_state),:client_toyrobot,[])
+    IO.puts(inspect(pid))
+    Process.register(pid, :client_toyrobot)
+    # spawn(fn -> send(:client_toyrobot, {:client_toyrobot, listen_from_server}) end)
+    IO.puts(send_robot_status(robot,cli_proc_name))
+    # robot = ToyRobot.goY(robot,goal_x,goal_y,cli_proc_name)
+    # robot = right(robot)
+    # send_robot_status(robot,:cli_robot_state)
+    # robot = ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
+    {:ok, robot}
+  end
+
+  def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when x < goal_x do
+    robot = move(robot)
+    send_robot_status(robot,:cli_robot_state)
+    goX(robot,goal_x,goal_y,cli_proc_name)
+  end
+
+  def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
+    robot
+  end
+
+  def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when y < goal_y do
+    robot = move(robot)
+    send_robot_status(robot,:cli_robot_state)
+    goY(robot,goal_x,goal_y,cli_proc_name)
+  end
+
+  def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
+    robot
   end
 
   @doc """

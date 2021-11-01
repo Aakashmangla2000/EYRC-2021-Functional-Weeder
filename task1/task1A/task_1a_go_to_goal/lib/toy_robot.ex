@@ -71,14 +71,83 @@ defmodule ToyRobot do
     ## complete this funcion ##
     ###########################
     send_robot_status(robot,:cli_robot_state)
+    robot = ToyRobot.forGoal_y(robot,goal_y)
     robot = ToyRobot.goY(robot,goal_x,goal_y,cli_proc_name)
-    robot = right(robot)
-    send_robot_status(robot,:cli_robot_state)
+    robot = ToyRobot.forGoal_x(robot,goal_x)
     robot = ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
     {:ok, robot}
   end
 
-  def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when x < goal_x do
+  def forGoal_x(robot,goal_x) when robot.x < goal_x and robot.facing != :east do
+      robot = cond do
+        robot.facing == :north ->
+          right(robot)
+        robot.facing == :west ->
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          left(robot)
+        robot.facing == :south ->
+          left(robot)
+      end
+      send_robot_status(robot,:cli_robot_state)
+    robot
+  end
+
+  def forGoal_x(robot,goal_x) when robot.x > goal_x and robot.facing != :west do
+    robot = cond do
+      robot.facing == :south ->
+        right(robot)
+      robot.facing == :east ->
+        robot = left(robot)
+        send_robot_status(robot,:cli_robot_state)
+        left(robot)
+      robot.facing == :north ->
+        left(robot)
+    end
+    send_robot_status(robot,:cli_robot_state)
+  robot
+  end
+
+  def forGoal_x(robot,goal_x) do
+    robot
+  end
+
+  def forGoal_y(robot,goal_y) when robot.y < goal_y and robot.facing != :north do
+    robot = cond do
+      robot.facing == :west ->
+        right(robot)
+      robot.facing == :south ->
+        robot = left(robot)
+        send_robot_status(robot,:cli_robot_state)
+        left(robot)
+      robot.facing == :east ->
+        left(robot)
+    end
+    send_robot_status(robot,:cli_robot_state)
+  robot
+end
+
+def forGoal_y(robot,goal_y) when robot.y > goal_y and robot.facing != :south do
+  robot = cond do
+    robot.facing == :east ->
+      right(robot)
+    robot.facing == :north ->
+      robot = left(robot)
+      send_robot_status(robot,:cli_robot_state)
+      left(robot)
+    robot.facing == :west ->
+      left(robot)
+  end
+  send_robot_status(robot,:cli_robot_state)
+  robot
+end
+
+def forGoal_y(robot,goal_y) do
+  robot
+end
+
+
+  def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when x != goal_x do
     robot = move(robot)
     send_robot_status(robot,:cli_robot_state)
     goX(robot,goal_x,goal_y,cli_proc_name)
@@ -88,7 +157,7 @@ defmodule ToyRobot do
     robot
   end
 
-  def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when y < goal_y do
+  def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when y != goal_y do
     robot = move(robot)
     send_robot_status(robot,:cli_robot_state)
     goY(robot,goal_x,goal_y,cli_proc_name)
