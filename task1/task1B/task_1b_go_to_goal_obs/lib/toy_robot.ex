@@ -71,37 +71,35 @@ defmodule ToyRobot do
     ###########################
     ## complete this funcion ##
     ###########################
-    # {:ok, pid} = ToyRobot.listen_from_server
-    # pid = spawn(ToyRobot, :listen_from_server, [])
-    # pid = spawn_link(fn ->
-    #   result = receive do
-    #     :true -> true
-    #     :false -> false
-    #     _ -> :none
-    #   end
-    #  end)
-  #   pid = spawn_link(fn ->
-  #     x = rec()
-  #     IO.puts(x)
-  #  end)
-    # pid = spawn_link(fn -> rec() end)
-    pid = spawn_link(fn ->
-      x = send_robot_status(robot,cli_proc_name)
-      IO.puts(x)
-      robot = forGoal_x(robot, goal_x)
-      robot = ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
-      robot = if(robot.x == goal_x) do
-        robot = forGoal_y(robot, goal_y)
-        ToyRobot.goY(robot,goal_x,goal_y,cli_proc_name)
-      else
-        robot = forGoal_x(robot, goal_x)
-        ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
-      end
+    parent = self()
 
+    get_value(robot,cli_proc_name, parent)
+    x = rec_value()
+    IO.puts(x)
+
+    # robot = forGoal_x(robot, goal_x)
+      # robot = ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
+      # robot = if(robot.x == goal_x) do
+      #   robot = forGoal_y(robot, goal_y)
+      #   ToyRobot.goY(robot,goal_x,goal_y,cli_proc_name)
+      # else
+      #   robot = forGoal_x(robot, goal_x)
+      #   ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
+      # end
+    {:ok, robot}
+  end
+
+  def get_value(robot,cli_proc_name, parent) do
+    pid = spawn_link(fn ->
+      send(parent, {:flag_value, send_robot_status(robot,cli_proc_name)})
     end)
     Process.register(pid, :client_toyrobot)
+  end
 
-    {:ok, robot}
+  def rec_value() do
+    receive do
+      {:flag_value, flag} -> flag
+    end
   end
 
   def forGoal_x(robot,goal_x) when robot.x < goal_x and robot.facing != :east do
