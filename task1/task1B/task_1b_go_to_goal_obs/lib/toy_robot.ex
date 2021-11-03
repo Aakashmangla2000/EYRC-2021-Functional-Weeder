@@ -68,50 +68,453 @@ defmodule ToyRobot do
   indication for the presence of obstacle ahead of robot's current position and facing.
   """
   def stop(robot, goal_x, goal_y, cli_proc_name) do
-    ###########################
-    ## complete this funcion ##
-    ###########################
-    # {:ok, pid} = ToyRobot.listen_from_server
-    # pid = spawn(ToyRobot, :listen_from_server, [])
-    # pid = spawn_link(fn -> receive do
-    #   {:client_toyrobot, {:obstacle_presence, x: x, y: y, facing: facing}} -> IO.puts(:obstacle_presence)
-    # end
-    #  end)
 
-    pid = spawn_link(fn -> listen_from_server() end)
-    # pid = spawn_link(fn -> send(:client_toyrobot, {%ToyRobot.Position{x: x, y: y, facing: facing} = robot, :obstacle_presence}) end)
+    check(robot,cli_proc_name,goal_x,goal_y)
 
-    # pid = spawn_link(ToyRobot.send_robot_status(robot, :cli_robot_state),:client_toyrobot,[])
-    IO.puts(inspect(pid))
-    Process.register(pid, :client_toyrobot)
-    # spawn(fn -> send(:client_toyrobot, {:client_toyrobot, listen_from_server}) end)
-    IO.puts(send_robot_status(robot,cli_proc_name))
-    # robot = ToyRobot.goY(robot,goal_x,goal_y,cli_proc_name)
-    # robot = right(robot)
-    # send_robot_status(robot,:cli_robot_state)
-    # robot = ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
     {:ok, robot}
   end
 
-  def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when x < goal_x do
+
+
+  def check(robot,cli_proc_name,goal_x,goal_y) do
+    pid = spawn_link(fn ->
+      flag = send_robot_status(robot,cli_proc_name)
+      IO.puts(flag)
+
+      robot1 = ToyRobot.for_x(robot,goal_x,goal_y,cli_proc_name)
+      IO.puts(robot1.x)
+      # send_robot_status(robot,cli_proc_name)
+      robot = ToyRobot.for_y(robot1,goal_x,goal_y,cli_proc_name)
+
+    end)
+    Process.register(pid, :client_toyrobot)
+
+
+  end
+
+  def forGoal_x(robot,goal_x) when robot.x < goal_x and robot.facing != :east do
+    robot = cond do
+      robot.facing == :north ->
+        right(robot)
+      robot.facing == :west ->
+        robot = left(robot)
+        send_robot_status(robot,:cli_robot_state)
+        left(robot)
+      robot.facing == :south ->
+        left(robot)
+    end
+    send_robot_status(robot,:cli_robot_state)
+  robot
+end
+
+def forGoal_x(robot,goal_x) when robot.x > goal_x and robot.facing != :west do
+  robot = cond do
+    robot.facing == :south ->
+      right(robot)
+    robot.facing == :east ->
+      robot = left(robot)
+      send_robot_status(robot,:cli_robot_state)
+      left(robot)
+    robot.facing == :north ->
+      left(robot)
+  end
+  send_robot_status(robot,:cli_robot_state)
+robot
+end
+
+def forGoal_x(robot,goal_x) do
+  robot
+end
+
+def forGoal_y(robot,goal_y) when robot.y < goal_y and robot.facing != :north do
+  robot = cond do
+    robot.facing == :west ->
+      right(robot)
+    robot.facing == :south ->
+      robot = left(robot)
+      send_robot_status(robot,:cli_robot_state)
+      left(robot)
+    robot.facing == :east ->
+      left(robot)
+  end
+  send_robot_status(robot,:cli_robot_state)
+robot
+end
+
+def forGoal_y(robot,goal_y) when robot.y > goal_y and robot.facing != :south do
+robot = cond do
+  robot.facing == :east ->
+    right(robot)
+  robot.facing == :north ->
+    robot = left(robot)
+    send_robot_status(robot,:cli_robot_state)
+    left(robot)
+  robot.facing == :west ->
+    left(robot)
+end
+send_robot_status(robot,:cli_robot_state)
+robot
+end
+
+def forGoal_y(robot,goal_y) do
+robot
+end
+
+def check_facex(robot,goal_x,goal_y) do
+  robot = cond do
+    robot.facing == :east ->
+      robot = cond do
+        robot.y < goal_y ->
+
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+
+        robot.y > goal_y ->
+
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+
+
+
+        robot.y == goal_y ->
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          IO.puts("new")
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+
+        robot.y == :e ->
+
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+
+      end
+
+    robot.facing == :west ->
+      robot = cond do
+        robot.y < goal_y ->
+
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+
+
+
+        robot.y > goal_y ->
+
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+
+
+
+        robot.y == goal_y ->
+
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+
+        robot.y == :e ->
+
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+
+
+
+      end
+
+
+  end
+  send_robot_status(robot,:cli_robot_state)
+  robot
+
+end
+
+def check_facex(robot,goal_x,goal_y) do
+  robot
+end
+
+def check_facey(robot,goal_x,goal_y) do
+  robot = cond do
+    robot.facing == :north ->
+      robot = cond do
+        robot.x < goal_x ->
+
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+
+
+        robot.x > goal_x ->
+
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+
+
+        robot.x == goal_x ->
+
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+
+
+        robot.x == 5 ->
+
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+      end
+    robot.facing == :south ->
+      robot = cond do
+        robot.x < goal_x ->
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+
+        robot.x > goal_x ->
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+
+        robot.x == goal_x ->
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+
+        robot.x == 5 ->
+          robot = right(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = left(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = move(robot)
+          send_robot_status(robot,:cli_robot_state)
+          robot = right(robot)
+      end
+  end
+  send_robot_status(robot,:cli_robot_state)
+  robot
+
+end
+
+def check_facey(robot,goal_x,goal_y) do
+  robot
+end
+
+
+
+def for_x(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when x != goal_x do
+  robot = forGoal_x(robot,goal_x)
+  IO.puts(robot.facing)
+  flag = send_robot_status(robot,:cli_robot_state)
+  IO.puts(flag)
+  robot = if (flag == :true) do
+    IO.puts(robot.facing)
+    robot = check_facex(robot,goal_x,goal_y)
+    IO.puts(robot.facing)
+    for_x(robot,goal_x,goal_y,cli_proc_name)
+  else
     robot = move(robot)
     send_robot_status(robot,:cli_robot_state)
-    goX(robot,goal_x,goal_y,cli_proc_name)
+    # IO.puts(flag)
+    for_x(robot,goal_x,goal_y,cli_proc_name)
   end
+  robot
+end
 
-  def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
-    robot
-  end
-
-  def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when y < goal_y do
+def for_y(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when y != goal_y do
+  robot = forGoal_y(robot,goal_y)
+  IO.puts(robot.facing)
+  flag = send_robot_status(robot,:cli_robot_state)
+  IO.puts(flag)
+  robot = if (flag == :true) do
+    IO.puts(robot.facing)
+    robot = check_facey(robot,goal_x,goal_y)
+    IO.puts(robot.facing)
+    for_y(robot,goal_x,goal_y,cli_proc_name)
+  else
     robot = move(robot)
     send_robot_status(robot,:cli_robot_state)
-    goY(robot,goal_x,goal_y,cli_proc_name)
+    # IO.puts(flag)
+    robot = if (robot.y == goal_y) do
+      robot
+    else
+      for_y(robot,goal_x,goal_y,cli_proc_name)
+    end
+    # for_y(robot,goal_x,goal_y,cli_proc_name)
+  end
+  robot
+end
+
+
+def for_x(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
+  robot
   end
 
-  def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
-    robot
-  end
+def for_y(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
+robot
+end
+
+
 
   @doc """
   Send Toy Robot's current status i.e. location (x, y) and facing
@@ -167,6 +570,7 @@ defmodule ToyRobot do
   @doc """
   Moves the robot to the north, but prevents it to fall
   """
+
   def move(%ToyRobot.Position{x: _, y: y, facing: :north} = robot) when y < @table_top_y do
     %ToyRobot.Position{robot | y: Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) + 1 end) |> elem(0)}
   end
