@@ -73,25 +73,25 @@ defmodule ToyRobot do
     ###########################
     parent = self()
 
-    get_value(robot,cli_proc_name, parent)
-    x = rec_value()
-    IO.puts(x)
+    get_value(robot,goal_x, goal_y,cli_proc_name, parent)
+    robot = rec_value()
 
-    # robot = forGoal_x(robot, goal_x)
-      # robot = ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
-      # robot = if(robot.x == goal_x) do
-      #   robot = forGoal_y(robot, goal_y)
-      #   ToyRobot.goY(robot,goal_x,goal_y,cli_proc_name)
-      # else
-      #   robot = forGoal_x(robot, goal_x)
-      #   ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
-      # end
     {:ok, robot}
   end
 
-  def get_value(robot,cli_proc_name, parent) do
+  def get_value(robot,goal_x, goal_y,cli_proc_name, parent) do
     pid = spawn_link(fn ->
-      send(parent, {:flag_value, send_robot_status(robot,cli_proc_name)})
+      len = 1
+      q = :queue.new()
+      visited = :queue.new()
+      q = :queue.in({robot.x,robot.y,0},q)
+      visited = :queue.in({robot.x,robot.y},visited)
+      send_robot_status(robot,cli_proc_name)
+      robot = if(robot.x == goal_x and robot.y == goal_y) do
+      else
+      ToyRobot.rep(q,visited,robot,goal_x,goal_y,cli_proc_name,len)
+      end
+      send(parent, {:flag_value, robot})
     end)
     Process.register(pid, :client_toyrobot)
   end
@@ -100,6 +100,232 @@ defmodule ToyRobot do
     receive do
       {:flag_value, flag} -> flag
     end
+  end
+
+  def plus(y) do
+    Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) + 1 end) |> elem(0)
+  end
+
+  def minus(y) do
+    Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) - 1 end) |> elem(0)
+  end
+
+  def rep(q,visited,robot,goal_x,goal_y,cli_proc_name, len) when len != 0 do
+
+    #getting next block
+    {{:value, value3}, q} = :queue.out_r(q)
+    {x,y, dir} = value3
+    new_goal_x = x
+    new_goal_y = y
+
+    #if reached destination
+    len = if(x == goal_x and y == goal_y) do
+      0
+    end
+
+    #travelling to new goals
+    robot = ToyRobot.forGoal_x(robot,new_goal_x)
+    robot = ToyRobot.goX(robot,new_goal_x,new_goal_y,cli_proc_name)
+    robot = ToyRobot.forGoal_y(robot,new_goal_y)
+    {robot,obs} = ToyRobot.goY(robot,new_goal_x,new_goal_y,cli_proc_name,false)
+
+    #putting back with changed dir
+    q = :queue.in({x,y,dir+1},q)
+
+    #setting robot's direction based on dir
+    both = cond do
+      dir == 0 ->
+        both = cond do
+          robot.facing == :east ->
+            robot = left(robot)
+            obs = send_robot_status(robot,:cli_robot_state)
+            {robot, obs}
+          robot.facing == :south ->
+            robot = left(robot)
+            send_robot_status(robot,:cli_robot_state)
+            robot = left(robot)
+            obs = send_robot_status(robot,:cli_robot_state)
+            {robot, obs}
+          robot.facing == :west ->
+            robot = right(robot)
+            obs = send_robot_status(robot,:cli_robot_state)
+            {robot, obs}
+          robot.facing == :north ->
+            {robot, obs}
+        end
+        both
+      dir == 1 ->
+        both = cond do
+          robot.facing == :north ->
+            robot = left(robot)
+            obs = send_robot_status(robot,:cli_robot_state)
+            {robot, obs}
+          robot.facing == :east ->
+            robot = left(robot)
+            send_robot_status(robot,:cli_robot_state)
+            robot = left(robot)
+            obs = send_robot_status(robot,:cli_robot_state)
+            {robot, obs}
+          robot.facing == :south ->
+            robot = right(robot)
+            obs = send_robot_status(robot,:cli_robot_state)
+            {robot, obs}
+          robot.facing == :west ->
+            {robot, obs}
+        end
+        both
+      dir == 2 ->
+        both = cond do
+          robot.facing == :west ->
+            robot = left(robot)
+            obs = send_robot_status(robot,:cli_robot_state)
+            {robot, obs}
+          robot.facing == :nprth ->
+            robot = left(robot)
+            send_robot_status(robot,:cli_robot_state)
+            robot = left(robot)
+            obs = send_robot_status(robot,:cli_robot_state)
+            {robot, obs}
+          robot.facing == :east ->
+            robot = right(robot)
+            obs = send_robot_status(robot,:cli_robot_state)
+            {robot, obs}
+          robot.facing == :south ->
+            {robot, obs}
+        end
+        both
+      dir == 3 ->
+        both = cond do
+          robot.facing == :south ->
+            robot = left(robot)
+            obs = send_robot_status(robot,:cli_robot_state)
+            {robot, obs}
+          robot.facing == :west ->
+            robot = left(robot)
+            send_robot_status(robot,:cli_robot_state)
+            robot = left(robot)
+            obs = send_robot_status(robot,:cli_robot_state)
+            {robot, obs}
+          robot.facing == :north ->
+            robot = right(robot)
+            obs = send_robot_status(robot,:cli_robot_state)
+            {robot, obs}
+          robot.facing == :east ->
+            {robot, obs}
+        end
+        both
+      dir > 3 ->
+        {robot, obs}
+    end
+
+    {robot, obs} = both
+    struc = {q,visited}
+
+    {q, visited} = cond do
+
+      dir == 0 ->
+        #up
+        check = if(y == :e or obs == true) do
+          false
+        else
+          !(:queue.member({x,plus(y)}, visited))
+        end
+          struc4 = if check do
+              q = :queue.in({x,plus(y),0}, q)
+              visited = :queue.in({x,plus(y)}, visited)
+              {q,visited}
+            else
+              {q,visited}
+          end
+
+          if(is_nil(struc4)) do
+            struc
+          else
+            struc4
+          end
+
+      dir == 1 ->
+        #left
+        check = if(x == 1 or obs == true) do
+          false
+        else
+          !(:queue.member({x-1,y}, visited))
+        end
+          struc1 = if check do
+              q = :queue.in({x-1,y,0}, q)
+              visited = :queue.in({x-1,y}, visited)
+              {q,visited}
+            else
+              {q,visited}
+          end
+
+          if(is_nil(struc1)) do
+            struc
+          else
+            struc1
+          end
+
+      dir == 2 ->
+        #down
+        check = if(y == :a or obs == true) do
+          false
+        else
+          !(:queue.member({x,minus(y)}, visited))
+        end
+        struc2 = if check do
+            q = :queue.in({x,minus(y),0}, q)
+            visited = :queue.in({x,minus(y)}, visited)
+            {q,visited}
+          else
+          {q,visited}
+        end
+
+
+        if(is_nil(struc2)) do
+          struc
+        else
+          struc2
+        end
+
+      dir == 3 ->
+        #right
+        check = if(x == 5 or obs == true) do
+          false
+        else
+          !(:queue.member({x+1,y}, visited))
+        end
+        struc3 = if check do
+            q = :queue.in({x+1,y,0}, q)
+            visited = :queue.in({x+1,y}, visited)
+            {q,visited}
+          else
+            {q,visited}
+        end
+
+        if(is_nil(struc3)) do
+          struc
+        else
+          struc3
+        end
+
+      dir > 3 ->
+        #backtracking
+        {{:value, val}, q} = :queue.out_r(q)
+        {{:value, val}, visited} = :queue.out_r(visited)
+        struc = {q,visited}
+        struc
+    end
+
+    len = if(len == 0) do
+      0
+    else
+      :queue.len(q)
+    end
+    rep(q,visited,robot,goal_x,goal_y,cli_proc_name, len)
+  end
+
+  def rep(q,visited,robot,goal_x,goal_y,cli_proc_name, len) do
+    robot
   end
 
   def forGoal_x(robot,goal_x) when robot.x < goal_x and robot.facing != :east do
@@ -170,41 +396,27 @@ def forGoal_y(robot,goal_y) do
 robot
 end
 
-  def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when x != goal_x do
-    robot = move(robot)
-    x = send_robot_status(robot,:cli_robot_state)
-    IO.puts(x)
-    robot = if(x == true) do
-      IO.puts("yup")
-      robot = ToyRobot.forGoal_y(robot,goal_y)
-      ToyRobot.goY(robot,goal_x,goal_y,cli_proc_name)
-    else
-    goX(robot,goal_x,goal_y,cli_proc_name)
-    end
-    # robot
-  end
 
-  def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
-    robot
-  end
+def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when x != goal_x do
+  robot = move(robot)
+  ob = send_robot_status(robot,:cli_robot_state)
+  # IO.puts(ob)
+  goX(robot,goal_x,goal_y,cli_proc_name)
+end
 
-  def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when y != goal_y do
-    robot = move(robot)
-    x = send_robot_status(robot,:cli_robot_state)
-    IO.puts(x)
-    robot = if(x == true) do
-      IO.puts("yup")
-      robot = ToyRobot.forGoal_x(robot,goal_x)
-      ToyRobot.goX(robot,goal_x,goal_y,cli_proc_name)
-    else
-    goY(robot,goal_x,goal_y,cli_proc_name)
-    end
-    # robot
-  end
+def goX(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
+  robot
+end
 
-  def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
-    robot
-  end
+def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name,ob) when y != goal_y do
+  robot = move(robot)
+  ob = send_robot_status(robot,:cli_robot_state)
+  goY(robot,goal_x,goal_y,cli_proc_name,ob)
+end
+
+def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name,ob) do
+  {robot,ob}
+end
 
   @doc """
   Send Toy Robot's current status i.e. location (x, y) and facing
