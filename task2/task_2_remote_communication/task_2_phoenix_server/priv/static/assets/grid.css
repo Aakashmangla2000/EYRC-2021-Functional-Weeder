@@ -61,6 +61,7 @@
 
 .robot-container{
     position: absolute;
+    width: 70px;
 
     transform:translate(-40%,40%)
 }
