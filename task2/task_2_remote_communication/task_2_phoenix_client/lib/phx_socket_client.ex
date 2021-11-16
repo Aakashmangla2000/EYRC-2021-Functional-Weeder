@@ -20,6 +20,9 @@ defmodule ToyRobot.PhoenixSocketClient do
     ###########################
     ## complete this funcion ##
     ###########################
+    url = Application.get_env(:phoenix_server, :url)
+    {:ok, socket} = PhoenixClient.Socket.start_link(url)
+
   end
 
   @doc """
@@ -33,6 +36,9 @@ defmodule ToyRobot.PhoenixSocketClient do
     ###########################
     ## complete this funcion ##
     ###########################
+
+
+    {:obstacle_presence, < true or false >}
   end
 
 end
