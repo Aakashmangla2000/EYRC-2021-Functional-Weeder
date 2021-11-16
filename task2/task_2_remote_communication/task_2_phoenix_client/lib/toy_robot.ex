@@ -73,6 +73,7 @@ defmodule ToyRobot do
     ## complete this funcion ##
     ###########################
     parent = self()
+    cli_proc_name = 0
 
     get_value(channel, robot,goal_x, goal_y,cli_proc_name, parent)
     robot = rec_value()
@@ -323,7 +324,7 @@ defmodule ToyRobot do
     else
       :queue.len(q)
     end
-    rep(q,visited,robot,goal_x,goal_y,cli_proc_name, len)
+    rep(channel,q,visited,robot,goal_x,goal_y,cli_proc_name, len)
   end
 
   def rep(channel,q,visited,robot,goal_x,goal_y,cli_proc_name, len) do
@@ -410,13 +411,13 @@ def goX(channel,%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, 
   robot
 end
 
-def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name,ob) when y != goal_y do
+def goY(channel, %ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name,ob) when y != goal_y do
   robot = move(robot)
   ob = ToyRobot.PhoenixSocketClient.send_robot_status(channel,robot)
-  goY(robot,goal_x,goal_y,cli_proc_name,ob)
+  goY(channel, robot,goal_x,goal_y,cli_proc_name,ob)
 end
 
-def goY(%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name,ob) do
+def goY(channel, %ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name,ob) do
   {robot,ob}
 end
 

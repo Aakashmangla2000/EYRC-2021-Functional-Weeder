@@ -29,6 +29,9 @@ defmodule Task2PhoenixServerWeb.RobotChannel do
     ###########################
     ## complete this funcion ##
     ###########################
+    :ok = Phoenix.PubSub.subscribe(Task2PhoenixServer.PubSub, "robot:update")
+    msg2 =  %{ "left" => message["x"], "bottom" => message["y"], "face" => message["face"]}
+    broadcast!(socket, "new_msg", msg2)
 
     # determine the obstacle's presence in front of the robot and return the boolean value
     is_obs_ahead = Task2PhoenixServerWeb.FindObstaclePresence.is_obstacle_ahead?(message["x"], message["y"], message["face"])
