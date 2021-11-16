@@ -47,8 +47,8 @@ defmodule ToyRobot.PhoenixSocketClient do
     ###########################
     ## complete this funcion ##
     ###########################
-    {:reply, tup, socket} = PhoenixClient.Channel.push(channel,"new_msg",%{"x" => x, "y" => y, "face" => facing},1000)
-    {:obstacle_presence, is_obs_ahead} = tup
+    tup = PhoenixClient.Channel.push(channel,"new_msg",%{"x" => x, "y" => y, "face" => facing},1000)
+    {:ok, is_obs_ahead} = tup
     is_obs_ahead
   end
 

@@ -25,13 +25,15 @@ defmodule Task2PhoenixServerWeb.RobotChannel do
   and return the boolean value in this format {:ok, < true OR false >}.
   """
   def handle_in("new_msg", message, socket) do
+    mp = %{"a" => 0, "b" => 1, "c" => 2, "d" => 3, "e" => 4}
+    msg2 =  %{ "left" => message["x"]*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"]}
+
+    :ok = Phoenix.PubSub.subscribe(Task2PhoenixServer.PubSub, "robot:update")
+    broadcast(socket, "new_msg", msg2)
 
     ###########################
     ## complete this funcion ##
     ###########################
-    :ok = Phoenix.PubSub.subscribe(Task2PhoenixServer.PubSub, "robot:update")
-    msg2 =  %{ "left" => message["x"]*150, "bottom" => message["y"]*150, "face" => message["face"]}
-    broadcast!(socket, "new_msg", msg2)
 
     # determine the obstacle's presence in front of the robot and return the boolean value
     is_obs_ahead = Task2PhoenixServerWeb.FindObstaclePresence.is_obstacle_ahead?(message["x"], message["y"], message["face"])

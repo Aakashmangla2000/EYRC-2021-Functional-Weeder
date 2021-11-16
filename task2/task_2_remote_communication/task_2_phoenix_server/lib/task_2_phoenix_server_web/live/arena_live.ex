@@ -9,7 +9,6 @@ defmodule Task2PhoenixServerWeb.ArenaLive do
   """
   def mount(_params, _session, socket) do
     :ok = Phoenix.PubSub.subscribe(Task2PhoenixServer.PubSub, "robot:update")
-
     socket = assign(socket, :img, "robot_facing_north.png")
     socket = assign(socket, :bottom, 0)
     socket = assign(socket, :left, 0)
@@ -86,6 +85,7 @@ defmodule Task2PhoenixServerWeb.ArenaLive do
     ## complete this funcion ##
     ###########################
     facing = data["face"]
+    IO.puts("balle balle")
     socket = cond do
       facing == :north ->
         assign(socket, :img, "robot_facing_north.png")
@@ -95,16 +95,10 @@ defmodule Task2PhoenixServerWeb.ArenaLive do
         assign(socket, :img, "robot_facing_east.png")
       facing == :west ->
         assign(socket, :img, "robot_facing_west.png")
-
-
-
     end
-    # socket = assign(socket, :img, "robot_facing_north.png")
     socket = assign(socket, :bottom,data["bottom"])
     socket = assign(socket, :left,data["left"])
 
-
     {:noreply, socket}
   end
-
 end

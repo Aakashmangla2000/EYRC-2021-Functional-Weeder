@@ -91,6 +91,7 @@ defmodule ToyRobot do
       visited = :queue.in({robot.x,robot.y},visited)
       ToyRobot.PhoenixSocketClient.send_robot_status(channel, robot)
       robot = if(robot.x == goal_x and robot.y == goal_y) do
+        robot
       else
       ToyRobot.rep(channel,q,visited,robot,goal_x,goal_y,cli_proc_name,len)
       end
@@ -130,7 +131,7 @@ defmodule ToyRobot do
     robot = ToyRobot.forGoal_x(channel, robot,new_goal_x)
     robot = ToyRobot.goX(channel,robot,new_goal_x,new_goal_y,cli_proc_name)
     robot = ToyRobot.forGoal_y(channel, robot,new_goal_y)
-    {robot,obs} = ToyRobot.goY(robot,new_goal_x,new_goal_y,cli_proc_name,false)
+    {robot,obs} = ToyRobot.goY(channel,robot,new_goal_x,new_goal_y,cli_proc_name,false)
 
     #putting back with changed dir
     q = :queue.in({x,y,dir+1},q)
@@ -403,7 +404,6 @@ end
 def goX(channel,%ToyRobot.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when x != goal_x do
   robot = move(robot)
   ob = ToyRobot.PhoenixSocketClient.send_robot_status(channel,robot)
-  # IO.puts(ob)
   goX(channel,robot,goal_x,goal_y,cli_proc_name)
 end
 
