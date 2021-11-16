@@ -21,8 +21,19 @@ defmodule ToyRobot.PhoenixSocketClient do
     ## complete this funcion ##
     ###########################
     url = Application.get_env(:phoenix_server, :url)
-    {:ok, socket} = PhoenixClient.Socket.start_link(url)
-    PhoenixClient.Channel.join(socket, "robot:status")
+    socket_opts = [
+      url: url
+    ]
+    {:ok, socket} = PhoenixClient.Socket.start_link(socket_opts)
+    wait_until_connected(socket)
+    PhoenixClient.Channel.join(socket,"robot:status")
+  end
+
+  def wait_until_connected(socket) do
+    if !PhoenixClient.Socket.connected?(socket) do
+      Process.sleep(100)
+      wait_until_connected(socket)
+    end
   end
 
   @doc """

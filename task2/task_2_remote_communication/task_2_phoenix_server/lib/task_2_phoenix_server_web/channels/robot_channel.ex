@@ -30,7 +30,7 @@ defmodule Task2PhoenixServerWeb.RobotChannel do
     ## complete this funcion ##
     ###########################
     :ok = Phoenix.PubSub.subscribe(Task2PhoenixServer.PubSub, "robot:update")
-    msg2 =  %{ "left" => message["x"], "bottom" => message["y"], "face" => message["face"]}
+    msg2 =  %{ "left" => message["x"]*150, "bottom" => message["y"]*150, "face" => message["face"]}
     broadcast!(socket, "new_msg", msg2)
 
     # determine the obstacle's presence in front of the robot and return the boolean value
