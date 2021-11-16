@@ -26,8 +26,11 @@ defmodule ToyRobot.PhoenixSocketClient do
     ]
     {:ok, socket} = PhoenixClient.Socket.start_link(socket_opts)
 <<<<<<< HEAD
+<<<<<<< HEAD
     PhoenixClient.Channel.join(socket, "robot:status")
 =======
+=======
+>>>>>>> 0c30363f2ce95a18da03a3102c782af5c45225f1
     wait_until_connected(socket)
     PhoenixClient.Channel.join(socket,"robot:status")
   end
@@ -37,6 +40,9 @@ defmodule ToyRobot.PhoenixSocketClient do
       Process.sleep(100)
       wait_until_connected(socket)
     end
+<<<<<<< HEAD
+>>>>>>> 0c30363f2ce95a18da03a3102c782af5c45225f1
+=======
 >>>>>>> 0c30363f2ce95a18da03a3102c782af5c45225f1
   end
 
