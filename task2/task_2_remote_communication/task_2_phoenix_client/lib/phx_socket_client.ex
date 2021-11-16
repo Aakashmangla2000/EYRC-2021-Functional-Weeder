@@ -22,7 +22,7 @@ defmodule ToyRobot.PhoenixSocketClient do
     ###########################
     url = Application.get_env(:phoenix_server, :url)
     {:ok, socket} = PhoenixClient.Socket.start_link(url)
-
+    PhoenixClient.Channel.join(socket, "robot:status")
   end
 
   @doc """
@@ -36,9 +36,9 @@ defmodule ToyRobot.PhoenixSocketClient do
     ###########################
     ## complete this funcion ##
     ###########################
-
-
-    {:obstacle_presence, < true or false >}
+    {:reply, tup, socket} = PhoenixClient.Channel.push(channel,"new_msg",%{"x" => x, "y" => y, "face" => facing},1000)
+    {:obstacle_presence, is_obs_ahead} = tup
+    is_obs_ahead
   end
 
 end
