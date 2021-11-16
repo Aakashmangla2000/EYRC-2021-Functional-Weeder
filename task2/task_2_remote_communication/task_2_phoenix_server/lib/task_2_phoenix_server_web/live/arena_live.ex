@@ -85,6 +85,24 @@ defmodule Task2PhoenixServerWeb.ArenaLive do
     ###########################
     ## complete this funcion ##
     ###########################
+    facing = data["face"]
+    socket = cond do
+      facing == :north ->
+        assign(socket, :img, "robot_facing_north.png")
+      facing == :south ->
+        assign(socket, :img, "robot_facing_south.png")
+      facing == :east ->
+        assign(socket, :img, "robot_facing_east.png")
+      facing == :west ->
+        assign(socket, :img, "robot_facing_west.png")
+
+
+
+    end
+    # socket = assign(socket, :img, "robot_facing_north.png")
+    socket = assign(socket, :bottom,data["bottom"])
+    socket = assign(socket, :left,data["left"])
+
 
     {:noreply, socket}
   end
