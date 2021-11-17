@@ -27,11 +27,10 @@ defmodule Task2PhoenixServerWeb.RobotChannel do
   def handle_in("new_msg", message, socket) do
     mp = %{"a" => 0, "b" => 1, "c" => 2, "d" => 3, "e" => 4}
     msg2 =  %{ "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"]}
-    # IO.puts("robotxhannel")
 
     :ok = Phoenix.PubSub.subscribe(Task2PhoenixServer.PubSub, "robot:update")
     Phoenix.PubSub.broadcast(Task2PhoenixServer.PubSub, "robot:update", msg2)
-    IO.puts("robotxhannel")
+
 
     ###########################
     ## complete this funcion ##
