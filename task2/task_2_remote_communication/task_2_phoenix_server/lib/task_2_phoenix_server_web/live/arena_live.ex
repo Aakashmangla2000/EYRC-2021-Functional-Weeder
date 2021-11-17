@@ -84,8 +84,8 @@ defmodule Task2PhoenixServerWeb.ArenaLive do
     ###########################
     ## complete this funcion ##
     ###########################
+    # :ok = Phoenix.PubSub.subscribe(Task2PhoenixServer.PubSub, "robot:update")
     facing = data["face"]
-    IO.puts("balle balle")
     socket = cond do
       facing == :north ->
         assign(socket, :img, "robot_facing_north.png")
@@ -94,6 +94,8 @@ defmodule Task2PhoenixServerWeb.ArenaLive do
       facing == :east ->
         assign(socket, :img, "robot_facing_east.png")
       facing == :west ->
+        assign(socket, :img, "robot_facing_west.png")
+      true ->
         assign(socket, :img, "robot_facing_west.png")
     end
     socket = assign(socket, :bottom,data["bottom"])
