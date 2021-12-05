@@ -93,12 +93,15 @@ defmodule CLI.ToyRobotA do
 
   def get_value(robot,goal_x, goal_y,cli_proc_name, parent) do
     pid = spawn_link(fn ->
+      IO.puts("a")
       len = 1
       q = :queue.new()
       visited = :queue.new()
       q = :queue.in({robot.x,robot.y,0},q)
       visited = :queue.in({robot.x,robot.y},visited)
       send_robot_status(robot,cli_proc_name)
+      # pid = spawn_link(fn -> listen_from_cli(goal_x,goal_y) end)
+      # Process.register(pid, :cli_robotB_state)
       robot = if(robot.x == goal_x and robot.y == goal_y) do
       else
       CLI.ToyRobotA.rep(q,visited,robot,goal_x,goal_y,cli_proc_name,len)
@@ -122,7 +125,35 @@ defmodule CLI.ToyRobotA do
     Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) - 1 end) |> elem(0)
   end
 
+  def listen_from_cli(goal_x,goal_y) do
+    receive do
+      {:get_botB} ->
+        send(:get_botB, {:obstacle_presence, goal_x})
+        listen_from_cli(goal_x,goal_y)
+      end
+    end
+
+  def rec_botB() do
+    receive do
+      {:positions, pos} -> pos
+    end
+  end
+
   def rep(q,visited,robot,goal_x,goal_y,cli_proc_name, len) when len != 0 do
+    # send(:get_botB,{:positions, goal_x})
+
+    # parent = self()
+
+    # coor = rec_botB()
+    IO.puts("helloA")
+    # pid = spawn_link(fn ->
+    #   val = rec_botB()
+    #   IO.puts("hello")
+    #   {x,y} = val
+    #   IO.puts(x)
+    #   IO.puts(y)
+    # end)
+    # Process.register(pid, :get_botB)
 
     #getting next block
     {{:value, value3}, q} = :queue.out_r(q)
@@ -333,6 +364,7 @@ defmodule CLI.ToyRobotA do
     else
       :queue.len(q)
     end
+    IO.puts("a over")
     rep(q,visited,robot,goal_x,goal_y,cli_proc_name, len)
   end
 

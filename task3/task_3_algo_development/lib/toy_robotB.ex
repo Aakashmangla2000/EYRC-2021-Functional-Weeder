@@ -94,12 +94,17 @@ defmodule CLI.ToyRobotB do
 
   def get_value(robot,goal_x, goal_y,cli_proc_name, parent) do
     pid = spawn_link(fn ->
+      IO.puts(("b"))
       len = 1
       q = :queue.new()
       visited = :queue.new()
       q = :queue.in({robot.x,robot.y,0},q)
       visited = :queue.in({robot.x,robot.y},visited)
       send_robot_status(robot,cli_proc_name)
+
+      pid = spawn_link(fn -> listen_from_cli(goal_x,goal_y) end)
+      Process.register(pid, :cli_robotB_state)
+
       robot = if(robot.x == goal_x and robot.y == goal_y) do
       else
       CLI.ToyRobotB.rep(q,visited,robot,goal_x,goal_y,cli_proc_name,len)
@@ -123,7 +128,37 @@ defmodule CLI.ToyRobotB do
     Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) - 1 end) |> elem(0)
   end
 
+  def listen_from_cli(goal_x,goal_y) do
+    receive do
+      {:get_botB} ->
+        send(:get_botB, {:obstacle_presence, goal_x})
+        listen_from_cli(goal_x,goal_y)
+      end
+    end
+
+    def send_robot_stat() do
+      send(:cli_robotB_state, {:get_botB})
+      rec_botB()
+    end
+
+    def rec_botB() do
+      receive do
+        {:positions, pos} -> pos
+      end
+    end
+
   def rep(q,visited,robot,goal_x,goal_y,cli_proc_name, len) when len != 0 do
+    IO.puts("helloB")
+
+    # pid = spawn_link(fn -> listen_from_cli(goal_x,goal_y) end)
+    # Process.register(pid, :cli_robotB_state)
+
+    # pid = spawn_link(fn ->
+    #   val = rec_botB()
+    #   IO.puts("hello")
+    #   IO.puts(val)
+    # end)
+    # Process.register(pid, :get_botB)
 
     #getting next block
     {{:value, value3}, q} = :queue.out_r(q)
@@ -136,11 +171,18 @@ defmodule CLI.ToyRobotB do
       0
     end
 
+    %CLI.Position{x: cx, y: cy, facing: _facing} = robot
     #travelling to new goals
     robot = CLI.ToyRobotB.forGoal_x(robot,new_goal_x, cli_proc_name)
     robot = CLI.ToyRobotB.goX(robot,new_goal_x,new_goal_y,cli_proc_name)
     robot = CLI.ToyRobotB.forGoal_y(robot,new_goal_y, cli_proc_name)
     {robot,obs} = CLI.ToyRobotB.goY(robot,new_goal_x,new_goal_y,cli_proc_name,false)
+    %CLI.Position{x: nx, y: ny, facing: _facing} = robot
+
+    # if(cx == nx and cy == ny) do
+    # else
+    #   send(:get_botB,{:positions, {nx,ny}})
+    # end
 
     #putting back with changed dir
     q = :queue.in({x,y,dir+1},q)
@@ -334,6 +376,7 @@ defmodule CLI.ToyRobotB do
     else
       :queue.len(q)
     end
+    IO.puts("b over")
     rep(q,visited,robot,goal_x,goal_y,cli_proc_name, len)
   end
 
