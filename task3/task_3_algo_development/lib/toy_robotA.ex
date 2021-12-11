@@ -72,6 +72,7 @@ defmodule CLI.ToyRobotA do
     ###########################
     ## complete this funcion ##
     ###########################
+
     mp = %{"1" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5}
     mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e}
     val = Enum.at(goal_locs,0)
@@ -79,36 +80,34 @@ defmodule CLI.ToyRobotA do
     goal_x = Map.get(mp, goal_x)
     goal_y = Enum.at(val,1)
     goal_y = Map.get(mp2, goal_y)
-    # IO.puts(goal_x)
-    # IO.puts(goal_y)
-    # IO.puts(inspect(goal_locs))
 
     parent = self()
 
     get_value(robot,goal_x, goal_y,cli_proc_name, parent)
     robot = rec_value()
+
     {:ok, robot}
   end
 
-  def repeat_process(robot) do
+  # def repeat_process(robot) do
 
-    wait_until_received()
-    pid2 = spawn_link(fn ->
-      coor = send_robot_stat()
-      {x,y,facing} = coor
-      IO.puts(x)
-      IO.puts(y)
-      IO.puts(facing)
-      end)
-    Process.register(pid2, :get_botB)
+  #   wait_until_received()
+  #   pid2 = spawn_link(fn ->
+  #     coor = send_robot_stat()
+  #     {x,y,facing} = coor
+  #     IO.puts(x)
+  #     IO.puts(y)
+  #     IO.puts(facing)
+  #     end)
+  #   Process.register(pid2, :get_botB)
 
-    #robot
+  #   #robot
 
-    wait_till_over()
-    %CLI.Position{x: px, y: py, facing: pfacing} = robot
-    pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
-    Process.register(pid, :cli_robotA_state)
-  end
+  #   wait_till_over()
+  #   %CLI.Position{x: px, y: py, facing: pfacing} = robot
+  #   pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
+  #   Process.register(pid, :cli_robotA_state)
+  # end
 
   def wait_until_received() do
     if (Process.whereis(:cli_robotB_state) == nil) do
@@ -134,12 +133,9 @@ defmodule CLI.ToyRobotA do
       send_robot_status(robot,cli_proc_name)
 
       %CLI.Position{x: px, y: py, facing: pfacing} = robot
-      pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
-      Process.register(pid, :cli_robotA_state)
+        pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
+        Process.register(pid, :cli_robotA_state)
 
-      # repeat_process(robot)
-
-      # IO.puts("a")
       robot = if(robot.x == goal_x and robot.y == goal_y) do
       else
       CLI.ToyRobotA.rep( q,visited,robot,goal_x,goal_y,cli_proc_name,len)
@@ -181,6 +177,24 @@ defmodule CLI.ToyRobotA do
     end
   end
 
+  def receiving_coor(parent) do
+    wait_until_received()
+    pid2 = spawn_link(fn ->
+      coor = send_robot_stat()
+      # {x,y,facing} = coor
+      # IO.puts("Robot B: #{x} #{y} #{facing}")
+      send(parent, {coor})
+      end)
+    Process.register(pid2, :get_botB)
+  end
+
+  def sending_coor(robot) do
+    wait_till_over()
+    %CLI.Position{x: px, y: py, facing: pfacing} = robot
+    pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
+    Process.register(pid, :cli_robotA_state)
+  end
+
   def rep( q,visited,robot,goal_x,goal_y,cli_proc_name, len) when len != 0 do
 
     #getting next block
@@ -191,28 +205,23 @@ defmodule CLI.ToyRobotA do
 
     #if reached destination
     len = if(x == goal_x and y == goal_y) do
+      IO.puts("Reached #{x} #{y}")
       0
     end
 
     parent = self()
+    #receiving coordinates from B
+    receiving_coor(parent)
 
-    wait_until_received()
-    pid2 = spawn_link(fn ->
-      coor = send_robot_stat()
-      {x,y,facing} = coor
-      # IO.puts("Robot B: #{x} #{y} #{facing}")
-      send(parent, {coor})
-      end)
-    Process.register(pid2, :get_botB)
-
-    {bx,by,bfacing} = receive do
+    {bx,by,_bfacing} = receive do
       {coor} -> coor
     end
 
-    {q,visited,robot} = if(new_goal_x == bx and new_goal_y == by) do
+    {q,visited,robot,len} = if(new_goal_x == bx and new_goal_y == by) do
       IO.puts("A crash into B")
+      send_robot_status(robot,cli_proc_name)
       q = :queue.in({x,y,dir},q)
-      {q,visited,robot}
+      {q,visited,robot,len}
     else
       #travelling to new goals
         robot = CLI.ToyRobotA.forGoal_x(robot,new_goal_x, cli_proc_name)
@@ -401,8 +410,8 @@ defmodule CLI.ToyRobotA do
 
           dir > 3 ->
             #backtracking
-            {{:value, val}, q} = :queue.out_r(q)
-            {{:value, val}, visited} = :queue.out_r(visited)
+            {{:value, _val}, q} = :queue.out_r(q)
+            {{:value, _val}, visited} = :queue.out_r(visited)
             struc = {q,visited}
             struc
         end
@@ -412,22 +421,16 @@ defmodule CLI.ToyRobotA do
         else
           :queue.len(q)
         end
-        {q,visited,robot}
+        {q,visited,robot,len}
     end
 
-
-
-    # IO.puts("a over")
-
-    wait_till_over()
-    %CLI.Position{x: px, y: py, facing: pfacing} = robot
-    pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
-    Process.register(pid, :cli_robotA_state)
+    #sends coordinates to B
+    sending_coor(robot)
 
     rep( q,visited,robot,goal_x,goal_y,cli_proc_name, len)
   end
 
-  def rep( q,visited,robot,goal_x,goal_y,cli_proc_name, len) do
+  def rep( _q,_visited,robot,_goal_x,_goal_y,_cli_proc_name, _len) do
     robot
   end
 
@@ -461,7 +464,7 @@ def forGoal_x(robot,goal_x, cli_proc_name) when robot.x > goal_x and robot.facin
 robot
 end
 
-def forGoal_x(robot,goal_x, cli_proc_name) do
+def forGoal_x(robot,_goal_x, _cli_proc_name) do
   robot
 end
 
@@ -495,29 +498,28 @@ send_robot_status(robot,cli_proc_name)
 robot
 end
 
-def forGoal_y(robot,goal_y, cli_proc_name) do
+def forGoal_y(robot,_goal_y, _cli_proc_name) do
 robot
 end
 
 
-def goX(%CLI.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) when x != goal_x do
+def goX(%CLI.Position{facing: _facing, x: x, y: _y} = robot, goal_x, goal_y, cli_proc_name) when x != goal_x do
   robot = move(robot)
-  ob = send_robot_status(robot,cli_proc_name)
-  # IO.puts(ob)
+  send_robot_status(robot,cli_proc_name)
   goX(robot,goal_x,goal_y,cli_proc_name)
 end
 
-def goX(%CLI.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name) do
+def goX(robot, _goal_x, _goal_y, _cli_proc_name) do
   robot
 end
 
-def goY(%CLI.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name,ob) when y != goal_y do
+def goY(%CLI.Position{facing: _facing, x: _x, y: y} = robot, goal_x, goal_y, cli_proc_name,_ob) when y != goal_y do
   robot = move(robot)
   ob = send_robot_status(robot,cli_proc_name)
   goY(robot,goal_x,goal_y,cli_proc_name,ob)
 end
 
-def goY(%CLI.Position{facing: facing, x: x, y: y} = robot, goal_x, goal_y, cli_proc_name,ob) do
+def goY(robot, _goal_x, _goal_y, _cli_proc_name,ob) do
   {robot,ob}
 end
 
