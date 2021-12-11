@@ -178,6 +178,7 @@ defmodule CLI.ToyRobotB do
 
 
   def receiving_coor(parent) do
+    if(Process.whereis(:client_toyrobotA) != nil) do
     wait_until_received()
     pid2 = spawn_link(fn ->
       coor = send_robot_stat()
@@ -187,12 +188,15 @@ defmodule CLI.ToyRobotB do
     end)
     Process.register(pid2, :get_botA)
   end
+  end
 
   def sending_coor(robot) do
+    if(Process.whereis(:client_toyrobotA) != nil) do
     wait_till_over()
     %CLI.Position{x: px, y: py, facing: pfacing} = robot
     pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
     Process.register(pid, :cli_robotB_state)
+    end
   end
 
   def rep( q,visited,robot,goal_x,goal_y,cli_proc_name, len) when len != 0 do
@@ -213,8 +217,13 @@ defmodule CLI.ToyRobotB do
     #receiving coordinates from A
     receiving_coor(parent)
 
-    {ax,ay,_afacing} = receive do
-      {coor} -> coor
+
+    {ax,ay,_afacing} = if (Process.whereis(:cli_robotA_state) == nil) do
+      receive do
+        {coor} -> coor
+      end
+    else
+      {0,0,0}
     end
 
     {q,visited,robot,len} = if(new_goal_x == ax and new_goal_y == ay) do
