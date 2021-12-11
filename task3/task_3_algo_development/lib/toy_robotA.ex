@@ -86,6 +86,15 @@ defmodule CLI.ToyRobotA do
     get_value(robot,goal_x, goal_y,cli_proc_name, parent)
     robot = rec_value()
 
+    val = Enum.at(goal_locs,1)
+    goal_x = Enum.at(val,0)
+    goal_x = Map.get(mp, goal_x)
+    goal_y = Enum.at(val,1)
+    goal_y = Map.get(mp2, goal_y)
+
+    get_value(robot,goal_x, goal_y,cli_proc_name, parent)
+    robot = rec_value()
+
     {:ok, robot}
   end
 
@@ -134,9 +143,11 @@ defmodule CLI.ToyRobotA do
       visited = :queue.in({robot.x,robot.y},visited)
       send_robot_status(robot,cli_proc_name)
 
+      if (Process.whereis(:cli_robotA_state) == nil) do
       %CLI.Position{x: px, y: py, facing: pfacing} = robot
         pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
         Process.register(pid, :cli_robotA_state)
+      end
 
       robot = if(robot.x == goal_x and robot.y == goal_y) do
       else
@@ -212,7 +223,7 @@ defmodule CLI.ToyRobotA do
 
     #if reached destination
     len = if(x == goal_x and y == goal_y) do
-      IO.puts("Reached #{x} #{y}")
+      IO.puts("A Reached #{x} #{y}")
       0
     end
     parent = self()
@@ -230,6 +241,7 @@ defmodule CLI.ToyRobotA do
       IO.puts("A crash into B")
       send_robot_status(robot,cli_proc_name)
       q = :queue.in({x,y,dir},q)
+      # len = :queue.len(q)
       {q,visited,robot,len}
     else
       #travelling to new goals
