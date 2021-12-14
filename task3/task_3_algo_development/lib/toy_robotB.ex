@@ -74,7 +74,7 @@ defmodule CLI.ToyRobotB do
     ###########################
     mp = %{"1" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5}
     mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e}
-    val = Enum.at(goal_locs,0)
+    val = Enum.at(goal_locs,3)
     goal_x = Enum.at(val,0)
     goal_x = Map.get(mp, goal_x)
     goal_y = Enum.at(val,1)
@@ -133,7 +133,7 @@ defmodule CLI.ToyRobotB do
       dir = [el]
       q = :queue.in({robot.x,robot.y,dir},q)
       visited = :queue.in({robot.x,robot.y},visited)
-      send_robot_status(robot,cli_proc_name)
+      # send_robot_status(robot,cli_proc_name)
 
       if (Process.whereis(:cli_robotB_state) == nil) do
       %CLI.Position{x: px, y: py, facing: pfacing} = robot
@@ -183,7 +183,7 @@ defmodule CLI.ToyRobotB do
     end
 
     def wait_until_received() do
-      if (Process.whereis(:cli_robotA_state) == nil) do
+      if (Process.whereis(:cli_robotA_state) == nil and Process.whereis(:get_botB) == nil) do
         Process.sleep(100)
         wait_until_received()
       end
@@ -480,7 +480,7 @@ defmodule CLI.ToyRobotB do
 
     #if reached destination
     len = if(x == goal_x and y == goal_y) do
-      IO.puts("B Reached #{x} #{y}")
+      # IO.puts("B Reached #{x} #{y}")
       0
     end
 
@@ -491,22 +491,28 @@ defmodule CLI.ToyRobotB do
     {q,visited,robot,len} = if(new_goal_x == ax and new_goal_y == ay) do
       IO.puts("B crash into A")
       send_robot_status(robot,cli_proc_name)
+      sending_coor(robot)
       q = :queue.in({x,y,dirs},q)
       len = :queue.len(q)
       {q,visited,robot,len}
     else
+      # send_robot_status(robot,cli_proc_name)
+      sending_coor(robot)
       #travelling to new goals
         robot = CLI.ToyRobotB.forGoal_x(robot,new_goal_x, cli_proc_name)
-        robot = CLI.ToyRobotB.goX(robot,new_goal_x,new_goal_y,cli_proc_name)
+        {robot,obs} = CLI.ToyRobotB.goX(robot,new_goal_x,new_goal_y,cli_proc_name,false)
         robot = CLI.ToyRobotB.forGoal_y(robot,new_goal_y, cli_proc_name)
-        {robot,obs} = CLI.ToyRobotB.goY(robot,new_goal_x,new_goal_y,cli_proc_name,false)
+        {robot,obs} = CLI.ToyRobotB.goY(robot,new_goal_x,new_goal_y,cli_proc_name,obs)
 
         #putting back with changed dir
         dir = List.last(dirs)
         new_dir = dir_select(x,y,goal_x,goal_y,dirs)
         q = :queue.in({x,y,new_dir},q)
-
         #setting robot's direction based on dir
+        both = if(robot.x == goal_x and robot.y == goal_y) do
+          {robot, obs}
+        else
+          {ax,ay,_afacing} = receiving_coor()
         both = cond do
           dir == 0 ->
             both = cond do
@@ -517,7 +523,9 @@ defmodule CLI.ToyRobotB do
               robot.facing == :south ->
                 robot = left(robot)
                 send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
                 robot = left(robot)
+                {ax,ay,_afacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
                 {robot, obs}
               robot.facing == :west ->
@@ -537,7 +545,9 @@ defmodule CLI.ToyRobotB do
               robot.facing == :east ->
                 robot = left(robot)
                 send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
                 robot = left(robot)
+                {ax,ay,_afacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
                 {robot, obs}
               robot.facing == :south ->
@@ -557,7 +567,9 @@ defmodule CLI.ToyRobotB do
               robot.facing == :north ->
                 robot = left(robot)
                 send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
                 robot = left(robot)
+                {ax,ay,_afacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
                 {robot, obs}
               robot.facing == :east ->
@@ -577,7 +589,9 @@ defmodule CLI.ToyRobotB do
               robot.facing == :west ->
                 robot = left(robot)
                 send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
                 robot = left(robot)
+                {ax,ay,_afacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
                 {robot, obs}
               robot.facing == :north ->
@@ -592,6 +606,9 @@ defmodule CLI.ToyRobotB do
             {robot, obs}
         end
 
+        sending_coor(robot)
+        both
+        end
         {robot, obs} = both
         struc = {q,visited}
 
@@ -707,7 +724,7 @@ defmodule CLI.ToyRobotB do
     end
 
     #sends coordinates to A
-    sending_coor(robot)
+    # sending_coor(robot)
     rep( q,visited,robot,goal_x,goal_y,cli_proc_name, len)
   end
 
@@ -721,12 +738,17 @@ defmodule CLI.ToyRobotB do
         right(robot)
       robot.facing == :west ->
         robot = left(robot)
+        {ax,ay,_afacing} = receiving_coor()
         send_robot_status(robot,cli_proc_name)
+        sending_coor(robot)
         left(robot)
       robot.facing == :south ->
         left(robot)
     end
+    {ax,ay,_afacing} = receiving_coor()
     send_robot_status(robot,cli_proc_name)
+    sending_coor(robot)
+
   robot
 end
 
@@ -736,12 +758,18 @@ def forGoal_x(robot,goal_x,cli_proc_name) when robot.x > goal_x and robot.facing
       right(robot)
     robot.facing == :east ->
       robot = left(robot)
+      {ax,ay,_afacing} = receiving_coor()
       send_robot_status(robot,cli_proc_name)
+      sending_coor(robot)
+
       left(robot)
     robot.facing == :north ->
       left(robot)
   end
+  {ax,ay,_afacing} = receiving_coor()
   send_robot_status(robot,cli_proc_name)
+  sending_coor(robot)
+
 robot
 end
 
@@ -755,12 +783,18 @@ def forGoal_y(robot,goal_y, cli_proc_name) when robot.y < goal_y and robot.facin
       right(robot)
     robot.facing == :south ->
       robot = left(robot)
+      {ax,ay,_afacing} = receiving_coor()
       send_robot_status(robot,cli_proc_name)
+      sending_coor(robot)
+
       left(robot)
     robot.facing == :east ->
       left(robot)
   end
+  {ax,ay,_afacing} = receiving_coor()
   send_robot_status(robot,cli_proc_name)
+  sending_coor(robot)
+
 robot
 end
 
@@ -770,12 +804,18 @@ robot = cond do
     right(robot)
   robot.facing == :north ->
     robot = left(robot)
+    {ax,ay,_afacing} = receiving_coor()
     send_robot_status(robot,cli_proc_name)
+    sending_coor(robot)
+
     left(robot)
   robot.facing == :west ->
     left(robot)
 end
+{ax,ay,_afacing} = receiving_coor()
 send_robot_status(robot,cli_proc_name)
+sending_coor(robot)
+
 robot
 end
 
@@ -784,19 +824,26 @@ robot
 end
 
 
-def goX(%CLI.Position{facing: _facing, x: x, y: _y} = robot, goal_x, goal_y, cli_proc_name) when x != goal_x do
+def goX(%CLI.Position{facing: _facing, x: x, y: _y} = robot, goal_x, goal_y, cli_proc_name,_ob) when x != goal_x do
   robot = move(robot)
-  send_robot_status(robot,cli_proc_name)
-  goX(robot,goal_x,goal_y,cli_proc_name)
+  # IO.puts("hello")
+  {ax,ay,_afacing} = receiving_coor()
+  ob = send_robot_status(robot,cli_proc_name)
+  sending_coor(robot)
+
+  goX(robot,goal_x,goal_y,cli_proc_name,ob)
 end
 
-def goX(robot, _goal_x, _goal_y, _cli_proc_name) do
-  robot
+def goX(robot, _goal_x, _goal_y, _cli_proc_name,ob) do
+  {robot,ob}
 end
 
 def goY(%CLI.Position{facing: _facing, x: _x, y: y} = robot, goal_x, goal_y, cli_proc_name,_ob) when y != goal_y do
   robot = move(robot)
+  {ax,ay,_afacing} = receiving_coor()
   ob = send_robot_status(robot,cli_proc_name)
+  sending_coor(robot)
+
   goY(robot,goal_x,goal_y,cli_proc_name,ob)
 end
 
