@@ -121,7 +121,7 @@ defmodule CLI.ToyRobotA do
   def wait_until_received() do
     if (Process.whereis(:cli_robotB_state) == nil and Process.whereis(:get_botA) == nil) do
       # IO.puts("waiting1")
-      Process.sleep(100)
+      Process.sleep(3000)
       wait_until_received()
     end
   end
@@ -129,7 +129,7 @@ defmodule CLI.ToyRobotA do
   def wait_till_over() do
     if (Process.whereis(:cli_robotA_state) != nil) do
       # IO.puts("waiting2")
-      Process.sleep(100)
+      Process.sleep(3000)
       wait_till_over()
     end
   end
@@ -143,7 +143,7 @@ defmodule CLI.ToyRobotA do
       dir = [el]
       q = :queue.in({robot.x,robot.y,dir},q)
       visited = :queue.in({robot.x,robot.y},visited)
-      # send_robot_status(robot,cli_proc_name)
+      send_robot_status(robot,cli_proc_name)
 
       if (Process.whereis(:cli_robotA_state) == nil) do
       %CLI.Position{x: px, y: py, facing: pfacing} = robot
@@ -517,100 +517,149 @@ defmodule CLI.ToyRobotA do
         both = if(robot.x == goal_x and robot.y == goal_y) do
           {robot, obs}
         else
-          {bx,by,_bfacing} = receiving_coor()
+          # {bx,by,_bfacing} = receiving_coor()
         both = cond do
           dir == 0 ->
             both = cond do
               robot.facing == :east ->
+                IO.puts("A-0-east")
                 robot = left(robot)
+                {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
+
                 {robot, obs}
               robot.facing == :south ->
+                IO.puts("A-0-south")
                 robot = left(robot)
+                {bx,by,_bfacing} = receiving_coor()
                 send_robot_status(robot,cli_proc_name)
                 sending_coor(robot)
                 robot = left(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
+
                 {robot, obs}
               robot.facing == :west ->
+                IO.puts("A-0-west")
                 robot = right(robot)
+                {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
+
                 {robot, obs}
               robot.facing == :north ->
+                IO.puts("A-0-north")
                 {robot, obs}
             end
             both
           dir == 1 ->
             both = cond do
               robot.facing == :north ->
+                IO.puts("A-1-north")
                 robot = left(robot)
+                {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
+
                 {robot, obs}
               robot.facing == :east ->
+                IO.puts("A-1-east")
                 robot = left(robot)
+                {bx,by,_bfacing} = receiving_coor()
                 send_robot_status(robot,cli_proc_name)
                 sending_coor(robot)
                 robot = left(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
+
                 {robot, obs}
               robot.facing == :south ->
+                IO.puts("A-1-south")
                 robot = right(robot)
+                {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
+
                 {robot, obs}
               robot.facing == :west ->
+                IO.puts("A-1-west")
                 {robot, obs}
             end
             both
           dir == 2 ->
             both = cond do
               robot.facing == :west ->
+                IO.puts("A-2-west")
                 robot = left(robot)
+                {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
                 {robot, obs}
               robot.facing == :north ->
+                IO.puts("A-2-north")
                 robot = left(robot)
+                {bx,by,_bfacing} = receiving_coor()
                 send_robot_status(robot,cli_proc_name)
+
                 robot = left(robot)
                 sending_coor(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
                 {robot, obs}
               robot.facing == :east ->
+                IO.puts("A-2-east")
                 robot = right(robot)
+                {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
                 {robot, obs}
               robot.facing == :south ->
+                IO.puts("A-2-south")
                 {robot, obs}
             end
             both
           dir == 3 ->
             both = cond do
               robot.facing == :south ->
+                IO.puts("A-3-south")
                 robot = left(robot)
+                {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
                 {robot, obs}
               robot.facing == :west ->
+                IO.puts("A-3-west")
                 robot = left(robot)
+                {bx,by,_bfacing} = receiving_coor()
                 send_robot_status(robot,cli_proc_name)
+
                 sending_coor(robot)
                 robot = left(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
                 {robot, obs}
               robot.facing == :north ->
+                IO.puts("A-3-north")
                 robot = right(robot)
+                {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
+                sending_coor(robot)
                 {robot, obs}
               robot.facing == :east ->
+                IO.puts("A-3-east")
                 {robot, obs}
             end
             both
           dir > 3 ->
+            IO.puts("A->3")
             {robot, obs}
         end
-        sending_coor(robot)
+        # sending_coor(robot)
         both
         end
         {robot, obs} = both
