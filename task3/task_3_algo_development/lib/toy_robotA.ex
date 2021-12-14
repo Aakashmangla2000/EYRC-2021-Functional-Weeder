@@ -121,7 +121,7 @@ defmodule CLI.ToyRobotA do
   def wait_until_received() do
     if (Process.whereis(:cli_robotB_state) == nil and Process.whereis(:get_botA) == nil) do
       # IO.puts("waiting1")
-      Process.sleep(3000)
+      Process.sleep(100)
       wait_until_received()
     end
   end
@@ -129,7 +129,7 @@ defmodule CLI.ToyRobotA do
   def wait_till_over() do
     if (Process.whereis(:cli_robotA_state) != nil) do
       # IO.puts("waiting2")
-      Process.sleep(3000)
+      Process.sleep(100)
       wait_till_over()
     end
   end
@@ -139,7 +139,7 @@ defmodule CLI.ToyRobotA do
       len = 1
       q = :queue.new()
       visited = :queue.new()
-      el = decide_dir(robot.x,robot.y,goal_x,goal_y)
+      el = decide_dir(robot.facing, robot.x,robot.y,goal_x,goal_y)
       dir = [el]
       q = :queue.in({robot.x,robot.y,dir},q)
       visited = :queue.in({robot.x,robot.y},visited)
@@ -225,38 +225,58 @@ defmodule CLI.ToyRobotA do
     end
   end
 
-  def decide_dir(x,y,goal_x,goal_y) do
+  def decide_dir(facing, x,y,goal_x,goal_y) do
+    # IO.puts("#{x} #{y}  #{facing}")
     mp2 = %{:a => 0, :b => 1, :c => 2, :d => 3, :e => 4}
     goal_y = Map.get(mp2, goal_y)
     y = Map.get(mp2, y)
-
     dir = cond do
       goal_x > x and goal_y > y ->
-        dir = if(goal_x - x < goal_y - y) do
-          3
+        dir = if(goal_x - x > goal_y - y) do
+          if(facing == :south) do
+            3
+          else
+            0
+          end
         else
-          0
+          if(facing == :west) do
+            0
+          else
+            3
+          end
         end
         dir
       goal_x > x and goal_y < y ->
-        dir = if(goal_x - x > y - goal_y) do
+        dir = if(goal_x - x > y - goal_y and facing != :north) do
           2
         else
-          3
+          if(facing == :west) do
+            2
+          else
+            3
+          end
         end
         dir
       goal_x < x and goal_y > y ->
-        dir = if(x - goal_x > goal_y - y) do
-          0
-        else
+        dir = if(x - goal_x < goal_y - y and facing != :east) do
           1
+        else
+          0
         end
         dir
       goal_x < x and goal_y < y ->
         dir = if(x - goal_x > y - goal_y) do
-          2
+          if(facing == :south or facing == :north) do
+            1
+          else
+            2
+          end
         else
-          1
+          if(facing == :east) do
+            2
+          else
+            1
+          end
         end
         dir
       goal_x == x ->
@@ -278,13 +298,13 @@ defmodule CLI.ToyRobotA do
     dir
   end
 
-  def dir_select(x, y, goal_x, goal_y, dir) do
+  def dir_select(facing,x, y, goal_x, goal_y, dir) do
     mp2 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5}
     goal_y = Map.get(mp2, goal_y)
     y = Map.get(mp2, y)
     # IO.puts("list is #{inspect(dir)}")
 
-
+# IO.puts(facing)
     cond do
       goal_x > x and goal_y > y ->
         if (goal_x - x) < (goal_y - y)  do
@@ -383,7 +403,7 @@ defmodule CLI.ToyRobotA do
            cond do
             (x - goal_x) < (goal_y - y) ->
               cond do
-                Enum.member?(dir, 1) == :false ->
+                (Enum.member?(dir, 1) or facing == :east) == :false ->
                   List.insert_at(dir,-1,1)
                 Enum.member?(dir, 0) == :false ->
                   List.insert_at(dir,-1,0)
@@ -416,7 +436,7 @@ defmodule CLI.ToyRobotA do
                cond do
                  Enum.member?(dir, 0) == :false ->
                   List.insert_at(dir,-1,0)
-                 (Enum.member?(dir, 1) or (x == 1)) == :false ->
+                 (Enum.member?(dir, 1) or (x == 1) or facing == :east) == :false ->
                   List.insert_at(dir,-1,1)
                  (Enum.member?(dir,3) or (x == 5)) == :false ->
                   List.insert_at(dir,-1,3)
@@ -430,7 +450,7 @@ defmodule CLI.ToyRobotA do
                cond do
                  Enum.member?(dir, 2) == :false ->
                   List.insert_at(dir,-1,2)
-                 (Enum.member?(dir, 1) or (x == 1)) == :false ->
+                 (Enum.member?(dir, 1) or (x == 1) or facing == :east) == :false ->
                   List.insert_at(dir,-1,1)
                  (Enum.member?(dir,3) or (x == 5)) == :false ->
                   List.insert_at(dir,-1,3)
@@ -447,7 +467,7 @@ defmodule CLI.ToyRobotA do
                cond do
                  Enum.member?(dir, 3) == :false ->
                   List.insert_at(dir,-1,3)
-                 (Enum.member?(dir,2) or (y == 1)) == :false ->
+                 (Enum.member?(dir,2) or (y == 1) or facing == :north) == :false ->
                   List.insert_at(dir,-1,2)
                  (Enum.member?(dir,0) or (y == 5)) == :false ->
                   List.insert_at(dir,-1,0)
@@ -461,7 +481,7 @@ defmodule CLI.ToyRobotA do
                cond do
                  Enum.member?(dir, 1) == :false ->
                   List.insert_at(dir,-1,1)
-                 (Enum.member?(dir, 2) or (y == 1)) == :false ->
+                 (Enum.member?(dir, 2) or (y == 1) or facing == :north) == :false ->
                   List.insert_at(dir,-1,2)
                  (Enum.member?(dir,0) or (y == 5)) == :false ->
                   List.insert_at(dir,-1,0)
@@ -473,7 +493,6 @@ defmodule CLI.ToyRobotA do
            end
     end
   end
-
 
 
   def rep( q,visited,robot,goal_x,goal_y,cli_proc_name, len) when len != 0 do
@@ -511,7 +530,7 @@ defmodule CLI.ToyRobotA do
 
         #putting back with changed dir
         dir = List.last(dirs)
-        new_dir = dir_select(x,y,goal_x,goal_y,dirs)
+        new_dir = dir_select(robot.facing,x,y,goal_x,goal_y,dirs)
         q = :queue.in({x,y,new_dir},q)
         #setting robot's direction based on dir
         both = if(robot.x == goal_x and robot.y == goal_y) do
@@ -675,7 +694,7 @@ defmodule CLI.ToyRobotA do
               !(:queue.member({x,plus(y)}, visited))
             end
               struc4 = if check do
-                  el = decide_dir(x,plus(y),goal_x,goal_y)
+                  el = decide_dir(robot.facing, x,plus(y),goal_x,goal_y)
                   dirs = [el]
                   q = :queue.in({x,plus(y),dirs}, q)
                   visited = :queue.in({x,plus(y)}, visited)
@@ -698,7 +717,7 @@ defmodule CLI.ToyRobotA do
               !(:queue.member({x-1,y}, visited))
             end
               struc1 = if check do
-                  el = decide_dir(x-1,y,goal_x,goal_y)
+                  el = decide_dir(robot.facing, x-1,y,goal_x,goal_y)
                   dirs = [el]
                   q = :queue.in({x-1,y,dirs}, q)
                   visited = :queue.in({x-1,y}, visited)
@@ -721,7 +740,7 @@ defmodule CLI.ToyRobotA do
               !(:queue.member({x,minus(y)}, visited))
             end
             struc2 = if check do
-                el = decide_dir(x,minus(y),goal_x,goal_y)
+                el = decide_dir(robot.facing, x,minus(y),goal_x,goal_y)
                 dirs = [el]
                 q = :queue.in({x,minus(y),dirs}, q)
                 visited = :queue.in({x,minus(y)}, visited)
@@ -745,7 +764,7 @@ defmodule CLI.ToyRobotA do
               !(:queue.member({x+1,y}, visited))
             end
             struc3 = if check do
-                el = decide_dir(x+1,y,goal_x,goal_y)
+                el = decide_dir(robot.facing, x+1,y,goal_x,goal_y)
                 dirs = [el]
                 q = :queue.in({x+1,y,dirs}, q)
                 visited = :queue.in({x+1,y}, visited)
