@@ -180,7 +180,7 @@ defmodule ToyRobot do
             robot = left(robot)
             obs = send_robot_status(robot,:cli_robot_state)
             {robot, obs}
-          robot.facing == :nprth ->
+          robot.facing == :north ->
             robot = left(robot)
             send_robot_status(robot,:cli_robot_state)
             robot = left(robot)

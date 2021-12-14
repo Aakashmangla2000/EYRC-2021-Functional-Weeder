@@ -74,7 +74,7 @@ defmodule CLI.ToyRobotB do
     ###########################
     mp = %{"1" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5}
     mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e}
-    val = Enum.at(goal_locs,3)
+    val = Enum.at(goal_locs,0)
     goal_x = Enum.at(val,0)
     goal_x = Map.get(mp, goal_x)
     goal_y = Enum.at(val,1)
@@ -85,36 +85,36 @@ defmodule CLI.ToyRobotB do
     get_value(robot,goal_x, goal_y,cli_proc_name, parent)
     robot = rec_value()
 
-    val = Enum.at(goal_locs,2)
-    goal_x = Enum.at(val,0)
-    goal_x = Map.get(mp, goal_x)
-    goal_y = Enum.at(val,1)
-    goal_y = Map.get(mp2, goal_y)
+    # val = Enum.at(goal_locs,1)
+    # goal_x = Enum.at(val,0)
+    # goal_x = Map.get(mp, goal_x)
+    # goal_y = Enum.at(val,1)
+    # goal_y = Map.get(mp2, goal_y)
 
-    get_value(robot,goal_x, goal_y,cli_proc_name, parent)
-    robot = rec_value()
+    # get_value(robot,goal_x, goal_y,cli_proc_name, parent)
+    # robot = rec_value()
 
     {:ok, robot}
   end
 
-  def repeat_process(robot) do
+  # def repeat_process(robot) do
 
-    wait_until_received()
-    pid2 = spawn_link(fn ->
-    coor = send_robot_stat()
-    {x,y,facing} = coor
-    IO.puts(x)
-    IO.puts(y)
-    IO.puts(facing)
-    end)
-    Process.register(pid2, :get_botA)
+  #   wait_until_received()
+  #   pid2 = spawn_link(fn ->
+  #   coor = send_robot_stat()
+  #   {x,y,facing} = coor
+  #   IO.puts(x)
+  #   IO.puts(y)
+  #   IO.puts(facing)
+  #   end)
+  #   Process.register(pid2, :get_botA)
 
-    wait_till_over()
-    %CLI.Position{x: px, y: py, facing: pfacing} = robot
-    pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
-    Process.register(pid, :cli_robotB_state)
+  #   wait_till_over()
+  #   %CLI.Position{x: px, y: py, facing: pfacing} = robot
+  #   pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
+  #   Process.register(pid, :cli_robotB_state)
 
-  end
+  # end
 
   def wait_till_over() do
     if (Process.whereis(:cli_robotB_state) != nil) do
@@ -129,7 +129,9 @@ defmodule CLI.ToyRobotB do
       len = 1
       q = :queue.new()
       visited = :queue.new()
-      q = :queue.in({robot.x,robot.y,0},q)
+      el = decide_dir(robot.x,robot.y,goal_x,goal_y)
+      dir = [el]
+      q = :queue.in({robot.x,robot.y,dir},q)
       visited = :queue.in({robot.x,robot.y},visited)
       send_robot_status(robot,cli_proc_name)
 
@@ -210,11 +212,260 @@ defmodule CLI.ToyRobotB do
     end
   end
 
+  def decide_dir(x,y,goal_x,goal_y) do
+    mp2 = %{:a => 0, :b => 1, :c => 2, :d => 3, :e => 4}
+    goal_y = Map.get(mp2, goal_y)
+    y = Map.get(mp2, y)
+
+    dir = cond do
+      goal_x > x and goal_y > y ->
+        dir = if(goal_x - x < goal_y - y) do
+          3
+        else
+          0
+        end
+        dir
+      goal_x > x and goal_y < y ->
+        dir = if(goal_x - x > y - goal_y) do
+          2
+        else
+          3
+        end
+        dir
+      goal_x < x and goal_y > y ->
+        dir = if(x - goal_x > goal_y - y) do
+          0
+        else
+          1
+        end
+        dir
+      goal_x < x and goal_y < y ->
+        dir = if(x - goal_x > y - goal_y) do
+          2
+        else
+          1
+        end
+        dir
+      goal_x == x ->
+        dir = if(goal_y > y) do
+          0
+        else
+          2
+        end
+        dir
+      goal_y == y ->
+        dir = if(goal_x > x) do
+          3
+        else
+          1
+        end
+        dir
+    end
+    # IO.puts(dir)
+    dir
+  end
+
+  def dir_select(x, y, goal_x, goal_y, dir) do
+    mp2 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5}
+    goal_y = Map.get(mp2, goal_y)
+    y = Map.get(mp2, y)
+    # IO.puts("list is #{inspect(dir)}")
+
+
+    cond do
+      goal_x > x and goal_y > y ->
+        if (goal_x - x) < (goal_y - y)  do
+            cond do
+              Enum.member?(dir, 3) == :false ->
+                List.insert_at(dir,-1,3)
+              Enum.member?(dir, 0) == :false ->
+                List.insert_at(dir,-1,0)
+              Enum.member?(dir,1) == :false ->
+                List.insert_at(dir,-1,1)
+              Enum.member?(dir,2) == :false ->
+                List.insert_at(dir,-1,2)
+              true ->
+                List.insert_at(dir,-1,4)
+            end
+
+          else
+          #up
+            cond do
+              Enum.member?(dir, 0) == :false ->
+                List.insert_at(dir,-1,0)
+              Enum.member?(dir, 3) == :false ->
+                List.insert_at(dir,-1,3)
+              Enum.member?(dir,1) == :false ->
+                List.insert_at(dir,-1,1)
+              Enum.member?(dir,2) == :false ->
+                List.insert_at(dir,-1,2)
+              true ->
+                List.insert_at(dir,-1,4)
+            end
+        end
+
+      goal_x < x and goal_y < y ->
+         cond do
+          (x - goal_x) < (y - goal_y) ->
+            cond do
+              Enum.member?(dir, 1) == :false ->
+                List.insert_at(dir,-1,1)
+              Enum.member?(dir, 2) == :false ->
+                List.insert_at(dir,-1,2)
+              Enum.member?(dir,3) == :false ->
+                List.insert_at(dir,-1,3)
+              Enum.member?(dir,0) == :false ->
+                List.insert_at(dir,-1,0)
+              true ->
+                List.insert_at(dir,-1,4)
+            end
+
+          true ->
+            cond do
+              Enum.member?(dir, 2) == :false ->
+                List.insert_at(dir,-1,2)
+              Enum.member?(dir, 1) == :false ->
+                List.insert_at(dir,-1,1)
+              Enum.member?(dir,3) == :false ->
+                List.insert_at(dir,-1,3)
+              Enum.member?(dir,0) == :false ->
+                List.insert_at(dir,-1,0)
+              true ->
+                List.insert_at(dir,-1,4)
+            end
+        end
+
+      goal_x > x and goal_y < y ->
+         cond do
+          (goal_x - x) < (y - goal_y) ->
+            cond do
+              Enum.member?(dir, 3) == :false ->
+                List.insert_at(dir,-1,3)
+              Enum.member?(dir, 2) == :false ->
+                List.insert_at(dir,-1,2)
+              Enum.member?(dir,1) == :false ->
+                List.insert_at(dir,-1,1)
+              Enum.member?(dir,0) == :false ->
+                List.insert_at(dir,-1,0)
+              true ->
+                List.insert_at(dir,-1,4)
+            end
+
+          true ->
+            cond do
+              Enum.member?(dir, 2) == :false ->
+                List.insert_at(dir,-1,2)
+              Enum.member?(dir, 3) == :false ->
+                List.insert_at(dir,-1,3)
+              Enum.member?(dir,1) == :false ->
+                List.insert_at(dir,-1,1)
+              Enum.member?(dir,0) == :false ->
+                List.insert_at(dir,-1,0)
+              true ->
+                List.insert_at(dir,-1,4)
+            end
+        end
+
+      goal_x < x and goal_y > y ->
+           cond do
+            (x - goal_x) < (goal_y - y) ->
+              cond do
+                Enum.member?(dir, 1) == :false ->
+                  List.insert_at(dir,-1,1)
+                Enum.member?(dir, 0) == :false ->
+                  List.insert_at(dir,-1,0)
+                Enum.member?(dir,3) == :false ->
+                  List.insert_at(dir,-1,3)
+                Enum.member?(dir,2) == :false ->
+                  List.insert_at(dir,-1,2)
+                true ->
+                  List.insert_at(dir,-1,4)
+              end
+
+            true ->
+              cond do
+                Enum.member?(dir, 0) == :false ->
+                  List.insert_at(dir,-1,0)
+                Enum.member?(dir, 1) == :false ->
+                  List.insert_at(dir,-1,1)
+                Enum.member?(dir,3) == :false ->
+                  List.insert_at(dir,-1,3)
+                Enum.member?(dir,2) == :false ->
+                  List.insert_at(dir,-1,2)
+                true ->
+                  List.insert_at(dir,-1,4)
+              end
+          end
+
+          goal_x == x ->
+            cond do
+             (goal_y > y) ->
+               cond do
+                 Enum.member?(dir, 0) == :false ->
+                  List.insert_at(dir,-1,0)
+                 (Enum.member?(dir, 1) or (x == 1)) == :false ->
+                  List.insert_at(dir,-1,1)
+                 (Enum.member?(dir,3) or (x == 5)) == :false ->
+                  List.insert_at(dir,-1,3)
+                  Enum.member?(dir,2) == :false ->
+                    List.insert_at(dir,-1,2)
+                 true ->
+                  List.insert_at(dir,-1,4)
+               end
+
+             true ->
+               cond do
+                 Enum.member?(dir, 2) == :false ->
+                  List.insert_at(dir,-1,2)
+                 (Enum.member?(dir, 1) or (x == 1)) == :false ->
+                  List.insert_at(dir,-1,1)
+                 (Enum.member?(dir,3) or (x == 5)) == :false ->
+                  List.insert_at(dir,-1,3)
+                 Enum.member?(dir,0) == :false ->
+                  List.insert_at(dir,-1,0)
+                 true ->
+                  List.insert_at(dir,-1,4)
+               end
+           end
+
+           goal_y == y ->
+            cond do
+             (goal_x > x) ->
+               cond do
+                 Enum.member?(dir, 3) == :false ->
+                  List.insert_at(dir,-1,3)
+                 (Enum.member?(dir,2) or (y == 1)) == :false ->
+                  List.insert_at(dir,-1,2)
+                 (Enum.member?(dir,0) or (y == 5)) == :false ->
+                  List.insert_at(dir,-1,0)
+                 Enum.member?(dir, 1) == :false ->
+                  List.insert_at(dir,-1,1)
+                 true ->
+                  List.insert_at(dir,-1,4)
+               end
+
+             true ->
+               cond do
+                 Enum.member?(dir, 1) == :false ->
+                  List.insert_at(dir,-1,1)
+                 (Enum.member?(dir, 2) or (y == 1)) == :false ->
+                  List.insert_at(dir,-1,2)
+                 (Enum.member?(dir,0) or (y == 5)) == :false ->
+                  List.insert_at(dir,-1,0)
+                 Enum.member?(dir,3) == :false ->
+                  List.insert_at(dir,-1,3)
+                 true ->
+                  List.insert_at(dir,-1,4)
+               end
+           end
+    end
+  end
+
   def rep( q,visited,robot,goal_x,goal_y,cli_proc_name, len) when len != 0 do
 
     #getting next block
     {{:value, value3}, q} = :queue.out_r(q)
-    {x,y, dir} = value3
+    {x,y, dirs} = value3
     new_goal_x = x
     new_goal_y = y
 
@@ -240,8 +491,8 @@ defmodule CLI.ToyRobotB do
     {q,visited,robot,len} = if(new_goal_x == ax and new_goal_y == ay) do
       IO.puts("B crash into A")
       send_robot_status(robot,cli_proc_name)
-      q = :queue.in({x,y,dir},q)
-      # len = :queue.len(q)
+      q = :queue.in({x,y,dirs},q)
+      len = :queue.len(q)
       {q,visited,robot,len}
     else
       #travelling to new goals
@@ -251,7 +502,9 @@ defmodule CLI.ToyRobotB do
         {robot,obs} = CLI.ToyRobotB.goY(robot,new_goal_x,new_goal_y,cli_proc_name,false)
 
         #putting back with changed dir
-        q = :queue.in({x,y,dir+1},q)
+        dir = List.last(dirs)
+        new_dir = dir_select(x,y,goal_x,goal_y,dirs)
+        q = :queue.in({x,y,new_dir},q)
 
         #setting robot's direction based on dir
         both = cond do
@@ -301,7 +554,7 @@ defmodule CLI.ToyRobotB do
                 robot = left(robot)
                 obs = send_robot_status(robot,cli_proc_name)
                 {robot, obs}
-              robot.facing == :nprth ->
+              robot.facing == :north ->
                 robot = left(robot)
                 send_robot_status(robot,cli_proc_name)
                 robot = left(robot)
@@ -352,7 +605,9 @@ defmodule CLI.ToyRobotB do
               !(:queue.member({x,plus(y)}, visited))
             end
               struc4 = if check do
-                  q = :queue.in({x,plus(y),0}, q)
+                  el = decide_dir(x,plus(y),goal_x,goal_y)
+                  dirs = [el]
+                  q = :queue.in({x,plus(y),dirs}, q)
                   visited = :queue.in({x,plus(y)}, visited)
                   {q,visited}
                 else
@@ -373,7 +628,9 @@ defmodule CLI.ToyRobotB do
               !(:queue.member({x-1,y}, visited))
             end
               struc1 = if check do
-                  q = :queue.in({x-1,y,0}, q)
+                  el = decide_dir(x-1,y,goal_x,goal_y)
+                  dirs = [el]
+                  q = :queue.in({x-1,y,dirs}, q)
                   visited = :queue.in({x-1,y}, visited)
                   {q,visited}
                 else
@@ -394,7 +651,9 @@ defmodule CLI.ToyRobotB do
               !(:queue.member({x,minus(y)}, visited))
             end
             struc2 = if check do
-                q = :queue.in({x,minus(y),0}, q)
+                el = decide_dir(x,minus(y),goal_x,goal_y)
+                dirs = [el]
+                q = :queue.in({x,minus(y),dirs}, q)
                 visited = :queue.in({x,minus(y)}, visited)
                 {q,visited}
               else
@@ -416,7 +675,9 @@ defmodule CLI.ToyRobotB do
               !(:queue.member({x+1,y}, visited))
             end
             struc3 = if check do
-                q = :queue.in({x+1,y,0}, q)
+                el = decide_dir(x+1,y,goal_x,goal_y)
+                dirs = [el]
+                q = :queue.in({x+1,y,dirs}, q)
                 visited = :queue.in({x+1,y}, visited)
                 {q,visited}
               else
@@ -447,7 +708,6 @@ defmodule CLI.ToyRobotB do
 
     #sends coordinates to A
     sending_coor(robot)
-
     rep( q,visited,robot,goal_x,goal_y,cli_proc_name, len)
   end
 
