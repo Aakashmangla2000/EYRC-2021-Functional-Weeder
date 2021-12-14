@@ -192,7 +192,8 @@ defmodule CLI.ToyRobotA do
     end
   end
 
-  def receiving_coor(parent) do
+  def receiving_coor() do
+    parent = self()
     if(Process.whereis(:client_toyrobotB) != nil) do
     wait_until_received()
     pid2 = spawn_link(fn ->
@@ -204,6 +205,14 @@ defmodule CLI.ToyRobotA do
     Process.register(pid2, :get_botB)
     else
       send(parent,{0,0,0})
+    end
+
+    if(Process.whereis(:client_toyrobotB) != nil) do
+      receive do
+        {coor} -> coor
+      end
+      else
+        {0,0,0}
     end
   end
 
@@ -479,16 +488,9 @@ defmodule CLI.ToyRobotA do
       IO.puts("A Reached #{x} #{y}")
       0
     end
-    parent = self()
     #receiving coordinates from B
-    receiving_coor(parent)
-    {bx,by,_bfacing} = if(Process.whereis(:client_toyrobotB) != nil) do
-    receive do
-      {coor} -> coor
-    end
-    else
-      {0,0,0}
-    end
+    {bx,by,_bfacing} = receiving_coor()
+
 
     {q,visited,robot,len} = if(new_goal_x == bx and new_goal_y == by) do
       IO.puts("A crash into B")
