@@ -72,28 +72,29 @@ defmodule CLI.ToyRobotA do
     ###########################
     ## complete this funcion ##
     ###########################
+    parent = self()
 
     mp = %{"1" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5}
     mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e}
-    val = Enum.at(goal_locs,1)
+    IO.puts(Enum.count(goal_locs))
+    val = Enum.at(goal_locs,3)
     goal_x = Enum.at(val,0)
     goal_x = Map.get(mp, goal_x)
     goal_y = Enum.at(val,1)
     goal_y = Map.get(mp2, goal_y)
 
-    parent = self()
 
     get_value(robot,goal_x, goal_y,cli_proc_name, parent)
     robot = rec_value()
 
-    # val = Enum.at(goal_locs,2)
-    # goal_x = Enum.at(val,0)
-    # goal_x = Map.get(mp, goal_x)
-    # goal_y = Enum.at(val,1)
-    # goal_y = Map.get(mp2, goal_y)
+    val = Enum.at(goal_locs,2)
+    goal_x = Enum.at(val,0)
+    goal_x = Map.get(mp, goal_x)
+    goal_y = Enum.at(val,1)
+    goal_y = Map.get(mp2, goal_y)
 
-    # get_value(robot,goal_x, goal_y,cli_proc_name, parent)
-    # robot = rec_value()
+    get_value(robot,goal_x, goal_y,cli_proc_name, parent)
+    robot = rec_value()
 
     {:ok, robot}
   end
@@ -118,22 +119,6 @@ defmodule CLI.ToyRobotA do
   #   Process.register(pid, :cli_robotA_state)
   # end
 
-  def wait_until_received() do
-    if (Process.whereis(:cli_robotB_state) == nil and Process.whereis(:get_botA) == nil) do
-      # IO.puts("waiting1")
-      Process.sleep(100)
-      wait_until_received()
-    end
-  end
-
-  def wait_till_over() do
-    if (Process.whereis(:cli_robotA_state) != nil) do
-      # IO.puts("waiting2")
-      Process.sleep(100)
-      wait_till_over()
-    end
-  end
-
   def get_value(robot,goal_x, goal_y,cli_proc_name, parent) do
     pid = spawn_link(fn ->
       len = 1
@@ -143,13 +128,13 @@ defmodule CLI.ToyRobotA do
       dir = [el]
       q = :queue.in({robot.x,robot.y,dir},q)
       visited = :queue.in({robot.x,robot.y},visited)
-      send_robot_status(robot,cli_proc_name)
+      # send_robot_status(robot,cli_proc_name)
 
-      if (Process.whereis(:cli_robotA_state) == nil) do
-      %CLI.Position{x: px, y: py, facing: pfacing} = robot
-        pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
-        Process.register(pid, :cli_robotA_state)
-      end
+      # if (Process.whereis(:cli_robotA_state) == nil) do
+      # %CLI.Position{x: px, y: py, facing: pfacing} = robot
+      #   pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
+      #   Process.register(pid, :cli_robotA_state)
+      # end
 
       robot = if(robot.x == goal_x and robot.y == goal_y) do
       else
@@ -192,7 +177,24 @@ defmodule CLI.ToyRobotA do
     end
   end
 
+  def wait_until_received() do
+    if (Process.whereis(:cli_robotB_state) == nil or Process.whereis(:get_botA) != nil) do
+      # IO.puts("waiting1")
+      Process.sleep(100)
+      wait_until_received()
+    end
+  end
+
+  def wait_till_over() do
+    if (Process.whereis(:cli_robotA_state) != nil) do
+      # IO.puts("waiting2")
+      Process.sleep(100)
+      wait_till_over()
+    end
+  end
+
   def receiving_coor() do
+    # IO.puts("A received")
     parent = self()
     if(Process.whereis(:client_toyrobotB) != nil) do
     wait_until_received()
@@ -217,6 +219,7 @@ defmodule CLI.ToyRobotA do
   end
 
   def sending_coor(robot) do
+    # IO.puts("A sent")
     if(Process.whereis(:client_toyrobotB) != nil) do
     wait_till_over()
     %CLI.Position{x: px, y: py, facing: pfacing} = robot
@@ -504,7 +507,7 @@ defmodule CLI.ToyRobotA do
 
     #if reached destination
     len = if(x == goal_x and y == goal_y) do
-      # IO.puts("A Reached #{x} #{y}")
+      IO.puts("A Reached #{x} #{y}")
       0
     end
     #receiving coordinates from B
@@ -519,7 +522,7 @@ defmodule CLI.ToyRobotA do
       len = :queue.len(q)
       {q,visited,robot,len}
     else
-      # send_robot_status(robot,cli_proc_name)
+      send_robot_status(robot,cli_proc_name)
       sending_coor(robot)
 
       #travelling to new goals
@@ -541,7 +544,6 @@ defmodule CLI.ToyRobotA do
           dir == 0 ->
             both = cond do
               robot.facing == :east ->
-                IO.puts("A-0-east")
                 robot = left(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
@@ -549,7 +551,6 @@ defmodule CLI.ToyRobotA do
 
                 {robot, obs}
               robot.facing == :south ->
-                IO.puts("A-0-south")
                 robot = left(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 send_robot_status(robot,cli_proc_name)
@@ -561,7 +562,6 @@ defmodule CLI.ToyRobotA do
 
                 {robot, obs}
               robot.facing == :west ->
-                IO.puts("A-0-west")
                 robot = right(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
@@ -569,14 +569,12 @@ defmodule CLI.ToyRobotA do
 
                 {robot, obs}
               robot.facing == :north ->
-                IO.puts("A-0-north")
                 {robot, obs}
             end
             both
           dir == 1 ->
             both = cond do
               robot.facing == :north ->
-                IO.puts("A-1-north")
                 robot = left(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
@@ -584,7 +582,6 @@ defmodule CLI.ToyRobotA do
 
                 {robot, obs}
               robot.facing == :east ->
-                IO.puts("A-1-east")
                 robot = left(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 send_robot_status(robot,cli_proc_name)
@@ -596,7 +593,6 @@ defmodule CLI.ToyRobotA do
 
                 {robot, obs}
               robot.facing == :south ->
-                IO.puts("A-1-south")
                 robot = right(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
@@ -604,21 +600,18 @@ defmodule CLI.ToyRobotA do
 
                 {robot, obs}
               robot.facing == :west ->
-                IO.puts("A-1-west")
                 {robot, obs}
             end
             both
           dir == 2 ->
             both = cond do
               robot.facing == :west ->
-                IO.puts("A-2-west")
                 robot = left(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(robot)
                 {robot, obs}
               robot.facing == :north ->
-                IO.puts("A-2-north")
                 robot = left(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 send_robot_status(robot,cli_proc_name)
@@ -630,28 +623,24 @@ defmodule CLI.ToyRobotA do
                 sending_coor(robot)
                 {robot, obs}
               robot.facing == :east ->
-                IO.puts("A-2-east")
                 robot = right(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(robot)
                 {robot, obs}
               robot.facing == :south ->
-                IO.puts("A-2-south")
                 {robot, obs}
             end
             both
           dir == 3 ->
             both = cond do
               robot.facing == :south ->
-                IO.puts("A-3-south")
                 robot = left(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(robot)
                 {robot, obs}
               robot.facing == :west ->
-                IO.puts("A-3-west")
                 robot = left(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 send_robot_status(robot,cli_proc_name)
@@ -663,19 +652,16 @@ defmodule CLI.ToyRobotA do
                 sending_coor(robot)
                 {robot, obs}
               robot.facing == :north ->
-                IO.puts("A-3-north")
                 robot = right(robot)
                 {bx,by,_bfacing} = receiving_coor()
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(robot)
                 {robot, obs}
               robot.facing == :east ->
-                IO.puts("A-3-east")
                 {robot, obs}
             end
             both
           dir > 3 ->
-            IO.puts("A->3")
             {robot, obs}
         end
         # sending_coor(robot)

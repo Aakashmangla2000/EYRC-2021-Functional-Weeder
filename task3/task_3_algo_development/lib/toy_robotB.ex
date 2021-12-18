@@ -72,27 +72,28 @@ defmodule CLI.ToyRobotB do
     ###########################
     ## complete this funcion ##
     ###########################
+    parent = self()
+
     mp = %{"1" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5}
     mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e}
-    val = Enum.at(goal_locs,3)
+    val = Enum.at(goal_locs,0)
     goal_x = Enum.at(val,0)
     goal_x = Map.get(mp, goal_x)
     goal_y = Enum.at(val,1)
     goal_y = Map.get(mp2, goal_y)
 
-    parent = self()
 
     get_value(robot,goal_x, goal_y,cli_proc_name, parent)
     robot = rec_value()
 
-    # val = Enum.at(goal_locs,1)
-    # goal_x = Enum.at(val,0)
-    # goal_x = Map.get(mp, goal_x)
-    # goal_y = Enum.at(val,1)
-    # goal_y = Map.get(mp2, goal_y)
+    val = Enum.at(goal_locs,1)
+    goal_x = Enum.at(val,0)
+    goal_x = Map.get(mp, goal_x)
+    goal_y = Enum.at(val,1)
+    goal_y = Map.get(mp2, goal_y)
 
-    # get_value(robot,goal_x, goal_y,cli_proc_name, parent)
-    # robot = rec_value()
+    get_value(robot,goal_x, goal_y,cli_proc_name, parent)
+    robot = rec_value()
 
     {:ok, robot}
   end
@@ -116,13 +117,6 @@ defmodule CLI.ToyRobotB do
 
   # end
 
-  def wait_till_over() do
-    if (Process.whereis(:cli_robotB_state) != nil) do
-      Process.sleep(100)
-      wait_till_over()
-    end
-  end
-
   @spec get_value(any, any, any, any, any) :: true
   def get_value(robot,goal_x, goal_y,cli_proc_name, parent) do
     pid = spawn_link(fn ->
@@ -133,7 +127,7 @@ defmodule CLI.ToyRobotB do
       dir = [el]
       q = :queue.in({robot.x,robot.y,dir},q)
       visited = :queue.in({robot.x,robot.y},visited)
-      send_robot_status(robot,cli_proc_name)
+      # send_robot_status(robot,cli_proc_name)
 
       if (Process.whereis(:cli_robotB_state) == nil) do
       %CLI.Position{x: px, y: py, facing: pfacing} = robot
@@ -182,15 +176,22 @@ defmodule CLI.ToyRobotB do
       end
     end
 
+    def wait_till_over() do
+      if (Process.whereis(:cli_robotB_state) != nil) do
+        Process.sleep(100)
+        wait_till_over()
+      end
+    end
+
     def wait_until_received() do
-      if (Process.whereis(:cli_robotA_state) == nil and Process.whereis(:get_botB) == nil) do
+      if (Process.whereis(:cli_robotA_state) == nil or Process.whereis(:get_botB) != nil) do
         Process.sleep(100)
         wait_until_received()
       end
     end
 
-
   def receiving_coor() do
+    # IO.puts("B received")
     parent = self()
 
     if(Process.whereis(:client_toyrobotA) != nil) do
@@ -213,6 +214,8 @@ defmodule CLI.ToyRobotB do
   end
 
   def sending_coor(robot) do
+    # IO.puts("B sent")
+
     if(Process.whereis(:client_toyrobotA) != nil) do
     wait_till_over()
     %CLI.Position{x: px, y: py, facing: pfacing} = robot
@@ -500,13 +503,20 @@ defmodule CLI.ToyRobotB do
 
     #if reached destination
     len = if(x == goal_x and y == goal_y) do
-      # IO.puts("B Reached #{x} #{y}")
+      IO.puts("B Reached #{x} #{y}")
       0
     end
 
     #receiving coordinates from A
-    {ax,ay,_afacing} = receiving_coor()
+    {ax,ay,afacing} = receiving_coor()
 
+    # front = 0
+    # front =cond do
+    #   afacing == :north and robot.facing == :south -> front = 1
+    #   afacing == :south and robot.facing == :north -> front = 1
+    #   afacing == :east and robot.facing == :west -> front = 1
+    #   afacing == :west and robot.facing == :east -> front = 1
+    # end
 
     {q,visited,robot,len} = if(new_goal_x == ax and new_goal_y == ay) do
       IO.puts("B crash into A")
@@ -516,7 +526,7 @@ defmodule CLI.ToyRobotB do
       len = :queue.len(q)
       {q,visited,robot,len}
     else
-      # send_robot_status(robot,cli_proc_name)
+      obs2 = send_robot_status(robot,cli_proc_name)
       sending_coor(robot)
       #travelling to new goals
         robot = CLI.ToyRobotB.forGoal_x(robot,new_goal_x, cli_proc_name)
