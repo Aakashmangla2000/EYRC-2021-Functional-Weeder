@@ -76,48 +76,35 @@ defmodule CLI.ToyRobotA do
 
     mp = %{"1" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5}
     mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e}
-    IO.puts(Enum.count(goal_locs))
-    val = Enum.at(goal_locs,3)
-    goal_x = Enum.at(val,0)
-    goal_x = Map.get(mp, goal_x)
-    goal_y = Enum.at(val,1)
-    goal_y = Map.get(mp2, goal_y)
-
-
-    get_value(robot,goal_x, goal_y,cli_proc_name, parent)
-    robot = rec_value()
-
-    val = Enum.at(goal_locs,2)
-    goal_x = Enum.at(val,0)
-    goal_x = Map.get(mp, goal_x)
-    goal_y = Enum.at(val,1)
-    goal_y = Map.get(mp2, goal_y)
-
-    get_value(robot,goal_x, goal_y,cli_proc_name, parent)
-    robot = rec_value()
+    robot = if Enum.count(goal_locs) == 1 do
+      goal_div(robot, parent, goal_locs, cli_proc_name,1,mp,mp2)
+    else
+      x = div(Enum.count(goal_locs), 2)
+      {goala, goalb} = Enum.split(goal_locs,x)
+      count = Enum.count(goal_locs)
+      goal_div(robot, parent, goalb, cli_proc_name,count,mp,mp2)
+    end
 
     {:ok, robot}
   end
 
-  # def repeat_process(robot) do
+  def goal_div(robot, parent, goal_locs, cli_proc_name,count,mp,mp2) when count != 0 do
+    val = Enum.at(goal_locs,0)
+    goal_x = Enum.at(val,0)
+    goal_x = Map.get(mp, goal_x)
+    goal_y = Enum.at(val,1)
+    goal_y = Map.get(mp2, goal_y)
+    get_value(robot,goal_x, goal_y,cli_proc_name, parent)
+    robot = rec_value()
+    goal_locs = Enum.drop(goal_locs,1)
+    count = Enum.count(goal_locs)
+    goal_div(robot, parent, goal_locs, cli_proc_name, count,mp,mp2)
+  end
 
-  #   wait_until_received()
-  #   pid2 = spawn_link(fn ->
-  #     coor = send_robot_stat()
-  #     {x,y,facing} = coor
-  #     IO.puts(x)
-  #     IO.puts(y)
-  #     IO.puts(facing)
-  #     end)
-  #   Process.register(pid2, :get_botB)
+  def goal_div(robot, parent, goal_locs, cli_proc_name, count,mp,mp2) do
+   robot
+  end
 
-  #   #robot
-
-  #   wait_till_over()
-  #   %CLI.Position{x: px, y: py, facing: pfacing} = robot
-  #   pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
-  #   Process.register(pid, :cli_robotA_state)
-  # end
 
   def get_value(robot,goal_x, goal_y,cli_proc_name, parent) do
     pid = spawn_link(fn ->
@@ -507,7 +494,7 @@ defmodule CLI.ToyRobotA do
 
     #if reached destination
     len = if(x == goal_x and y == goal_y) do
-      IO.puts("A Reached #{x} #{y}")
+      # IO.puts("A Reached #{x} #{y}")
       0
     end
     #receiving coordinates from B
@@ -515,7 +502,7 @@ defmodule CLI.ToyRobotA do
 
 
     {q,visited,robot,len} = if(new_goal_x == bx and new_goal_y == by) do
-      IO.puts("A crash into B")
+      # IO.puts("A crash into B")
       send_robot_status(robot,cli_proc_name)
       sending_coor(robot)
       q = :queue.in({x,y,dirs},q)

@@ -73,30 +73,46 @@ defmodule CLI.ToyRobotB do
     ## complete this funcion ##
     ###########################
     parent = self()
-
+    require Integer
     mp = %{"1" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5}
     mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e}
+    robot = if Enum.count(goal_locs) == 1 do
+      robot
+    else
+      goal_locs = Enum.reverse(goal_locs)
+      cnt_check = Enum.count(goal_locs)
+      flag = if Integer.is_even(cnt_check) do
+        0
+      else
+        1
+      end
+      x = div(Enum.count(goal_locs), 2) + flag
+      {goala, goalb} = Enum.split(goal_locs,x)
+      count = Enum.count(goal_locs)
+      robot = goal_div(robot, parent, goalb, cli_proc_name,count,mp,mp2)
+
+    end
+
+    {:ok, robot}
+  end
+
+  def goal_div(robot, parent, goal_locs, cli_proc_name,count,mp,mp2) when count != 0 do
     val = Enum.at(goal_locs,0)
     goal_x = Enum.at(val,0)
     goal_x = Map.get(mp, goal_x)
     goal_y = Enum.at(val,1)
     goal_y = Map.get(mp2, goal_y)
-
-
     get_value(robot,goal_x, goal_y,cli_proc_name, parent)
     robot = rec_value()
-
-    val = Enum.at(goal_locs,1)
-    goal_x = Enum.at(val,0)
-    goal_x = Map.get(mp, goal_x)
-    goal_y = Enum.at(val,1)
-    goal_y = Map.get(mp2, goal_y)
-
-    get_value(robot,goal_x, goal_y,cli_proc_name, parent)
-    robot = rec_value()
-
-    {:ok, robot}
+    goal_locs = Enum.drop(goal_locs,1)
+    count = Enum.count(goal_locs)
+    goal_div(robot, parent, goal_locs, cli_proc_name, count,mp,mp2)
   end
+
+  def goal_div(robot, parent, goal_locs, cli_proc_name, count,mp,mp2) do
+   robot
+  end
+
 
   # def repeat_process(robot) do
 
@@ -503,7 +519,7 @@ defmodule CLI.ToyRobotB do
 
     #if reached destination
     len = if(x == goal_x and y == goal_y) do
-      IO.puts("B Reached #{x} #{y}")
+      # IO.puts("B Reached #{x} #{y}")
       0
     end
 
@@ -519,7 +535,7 @@ defmodule CLI.ToyRobotB do
     # end
 
     {q,visited,robot,len} = if(new_goal_x == ax and new_goal_y == ay) do
-      IO.puts("B crash into A")
+      # IO.puts("B crash into A")
       send_robot_status(robot,cli_proc_name)
       sending_coor(robot)
       q = :queue.in({x,y,dirs},q)
