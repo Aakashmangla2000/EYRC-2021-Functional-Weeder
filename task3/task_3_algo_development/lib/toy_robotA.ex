@@ -62,6 +62,87 @@ defmodule CLI.ToyRobotA do
     {:failure, "Invalid STOP position"}
   end
 
+  def listen_from_cli2(goal_locs) do
+    receive do
+      {:toyrobotB} ->
+        send(:get_locs_from_a, {:goal_locs, {goal_locs}})
+      end
+  end
+
+  def send_robot_stat2() do
+    send(:goal_locs_to_a, {:toyrobotA})
+    rec_botB2()
+  end
+
+  def rec_botB2() do
+    receive do
+      {:goal_locs, pos} -> pos
+    end
+  end
+
+  def wait_until_received2() do
+    # IO.puts("a waiting")
+    if (Process.whereis(:goal_locs_to_a) == nil) do
+      Process.sleep(100)
+      wait_until_received2()
+    end
+  end
+
+  def wait_till_over2() do
+    if (Process.whereis(:goal_locs_to_b) != nil) do
+      Process.sleep(100)
+      wait_till_over2()
+    end
+  end
+
+  def receiving_coor2(goal_locs) do
+    parent = self()
+    # if(Process.whereis(:client_toyrobotB) != nil) do
+    # wait_until_received2()
+    # IO.puts("aya")
+    if (Process.whereis(:goal_locs_to_a) == nil and Process.whereis(:client_toyrobotB) != nil) do
+      send(parent, goal_locs)
+    else
+      wait_until_received2()
+      pid2 = spawn_link(fn ->
+      goal_locs = send_robot_stat2()
+      send(parent, goal_locs)
+      end)
+    Process.register(pid2, :get_locs_from_b)
+    end
+
+
+    # else
+    #   send(parent,{0})
+    # end
+
+    # if(Process.whereis(:client_toyrobotB) != nil) do
+      receive do
+        {goal_locs} -> goal_locs
+      end
+    #   else
+    #     {0}
+    # end
+  end
+
+  def sending_coor2(goal_locs) do
+    # if(Process.whereis(:client_toyrobotB) == nil) do
+    #   wait_till_over2()
+    #   pid = spawn_link(fn -> listen_from_cli2(goal_locs) end)
+    #   Process.register(pid, :goal_locs_to_b)
+    # else
+    if (Process.whereis(:goal_locs_to_b) != nil) do
+      Process.unregister(:goal_locs_to_b)
+      pid = spawn_link(fn -> listen_from_cli2(goal_locs) end)
+      Process.register(pid, :goal_locs_to_b)
+    else
+      pid = spawn_link(fn -> listen_from_cli2(goal_locs) end)
+      Process.register(pid, :goal_locs_to_b)
+    end
+    # end
+  end
+
+
   @doc """
   Provide GOAL positions to the robot as given location of [(x1, y1),(x2, y2),..] and plan the path from START to these locations.
   Passing the CLI Server process name that will be used to send robot's current status after each action is taken.
@@ -76,28 +157,97 @@ defmodule CLI.ToyRobotA do
 
     mp = %{"1" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5}
     mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e}
+
+    # goal_locs2 = Enum.drop(goal_locs,1)
+    # pid = spawn_link(fn -> listen_from_cli2(goal_locs) end)
+    # Process.register(pid, :goal_locs_to_b)
+
+    # {goal_locs} = receiving_coor2()
+    # IO.puts(inspect(goal_locs))
+
+    # goal_locs2 = Enum.drop(goal_locs2,1)
+    # sending_coor2(goal_locs)
+    # IO.puts("done")
+
     robot = if Enum.count(goal_locs) == 1 do
       goal_div(robot, parent, goal_locs, cli_proc_name,1,mp,mp2)
     else
-      x = div(Enum.count(goal_locs), 2)
-      {goala, goalb} = Enum.split(goal_locs,x)
       count = Enum.count(goal_locs)
-      goal_div(robot, parent, goalb, cli_proc_name,count,mp,mp2)
+      goal_div(robot, parent, goal_locs, cli_proc_name,count,mp,mp2)
     end
 
     {:ok, robot}
   end
 
-  def goal_div(robot, parent, goal_locs, cli_proc_name,count,mp,mp2) when count != 0 do
-    val = Enum.at(goal_locs,0)
+  def goal_select(robot, parent, goal_locs, cli_proc_name,min, index, count,mp,mp2) when count > 0 do
+    mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5}
+    val = Enum.at(goal_locs,count)
     goal_x = Enum.at(val,0)
     goal_x = Map.get(mp, goal_x)
     goal_y = Enum.at(val,1)
     goal_y = Map.get(mp2, goal_y)
-    get_value(robot,goal_x, goal_y,cli_proc_name, parent)
-    robot = rec_value()
-    goal_locs = Enum.drop(goal_locs,1)
+    goal_y = Map.get(mp3, goal_y)
+    distance = abs(robot.x - goal_x) + abs(Map.get(mp3, robot.y) -  goal_y)
+    {index, min} = if(min >= distance) do
+      {count, distance}
+    else
+      {index,min}
+    end
+    count = count - 1
+    goal_select(robot, parent, goal_locs, cli_proc_name, min,index, count,mp,mp2)
+  end
+
+  def goal_select(robot, parent, goal_locs, cli_proc_name,min, index, count,mp,mp2) do
+    index
+  end
+
+  def goal_div(robot, parent, goal_locs, cli_proc_name,count,mp,mp2) when count > 0 do
+    mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5}
+
+    # IO.puts(count)
+    # IO.puts(inspect(goal_locs))
+    goal_locs = receiving_coor2(goal_locs)
+    # IO.puts(inspect(goal_locs))
     count = Enum.count(goal_locs)
+
+    {robot,goal_locs,count} = if(count == 0) do
+      {robot,goal_locs,count}
+    else
+      {:ok,val} = if (count > 1) do
+      val = Enum.at(goal_locs,0)
+      goal_x = Enum.at(val,0)
+      goal_x = Map.get(mp, goal_x)
+      goal_y = Enum.at(val,1)
+      goal_y = Map.get(mp2, goal_y)
+      goal_y = Map.get(mp3, goal_y)
+
+      min = abs(robot.x - goal_x) + abs(Map.get(mp3, robot.y) -  goal_y)
+      index = 0
+      index = goal_select(robot, parent, goal_locs, cli_proc_name,min, index, count-1,mp,mp2)
+      Enum.fetch(goal_locs,index)
+      else
+        {:ok,Enum.at(goal_locs,0)}
+      end
+
+      goal_x = Enum.at(val,0)
+      goal_x = Map.get(mp, goal_x)
+      goal_y = Enum.at(val,1)
+      goal_y = Map.get(mp2, goal_y)
+
+      goal_locs = Enum.filter(goal_locs, fn val ->
+        g_x = Enum.at(val,0)
+        g_x = Map.get(mp, g_x)
+        g_y = Enum.at(val,1)
+        g_y = Map.get(mp2, g_y)
+        g_x != goal_x or g_y != goal_y
+      end )
+      count = Enum.count(goal_locs)
+      sending_coor2(goal_locs)
+
+      get_value(robot,goal_x, goal_y,cli_proc_name, parent)
+      {rec_value(),goal_locs,count}
+    end
+
     goal_div(robot, parent, goal_locs, cli_proc_name, count,mp,mp2)
   end
 
@@ -125,6 +275,7 @@ defmodule CLI.ToyRobotA do
 
       robot = if(robot.x == goal_x and robot.y == goal_y) do
         send_robot_status(robot,cli_proc_name)
+        robot
       else
       CLI.ToyRobotA.rep( q,visited,robot,goal_x,goal_y,cli_proc_name,len)
       end
@@ -295,7 +446,6 @@ defmodule CLI.ToyRobotA do
     y = Map.get(mp2, y)
     # IO.puts("list is #{inspect(dir)}")
 
-# IO.puts(facing)
     cond do
       goal_x > x and goal_y > y ->
         if (goal_x - x) < (goal_y - y)  do
