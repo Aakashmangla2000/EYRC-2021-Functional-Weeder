@@ -13,3 +13,4 @@ task1/task1B/task_1b_go_to_goal_obs/toy_robot
 task2/task_2_remote_communication/task_2_phoenix_client/_build
 task2/task_2_remote_communication/task_2_phoenix_client/toy_robot
 task2/task_2_remote_communication/task_2_phoenix_server/task_2_output.txt
+task2/task_2_remote_communication/task_2_phoenix_client/deps
