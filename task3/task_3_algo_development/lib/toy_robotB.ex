@@ -152,6 +152,7 @@ defmodule CLI.ToyRobotB do
       end
 
       robot = if(robot.x == goal_x and robot.y == goal_y) do
+        send_robot_status(robot,cli_proc_name)
       else
       CLI.ToyRobotB.rep(q,visited,robot,goal_x,goal_y,cli_proc_name,len)
       end
@@ -519,7 +520,7 @@ defmodule CLI.ToyRobotB do
 
     #if reached destination
     len = if(x == goal_x and y == goal_y) do
-      # IO.puts("B Reached #{x} #{y}")
+      IO.puts("B Reached #{x} #{y}")
       0
     end
 
