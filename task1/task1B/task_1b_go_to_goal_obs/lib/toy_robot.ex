@@ -338,7 +338,7 @@ defmodule ToyRobot do
                   List.insert_at(dir,-1,1)
                  (Enum.member?(dir,3) or (x == 5)) == :false ->
                   List.insert_at(dir,-1,3)
-                  Enum.member?(dir,2) == :false ->
+                  (Enum.member?(dir,2)) or (y == 1) == :false ->
                     List.insert_at(dir,-1,2)
                  true ->
                   List.insert_at(dir,-1,4)
@@ -352,7 +352,7 @@ defmodule ToyRobot do
                   List.insert_at(dir,-1,1)
                  (Enum.member?(dir,3) or (x == 5)) == :false ->
                   List.insert_at(dir,-1,3)
-                 Enum.member?(dir,0) == :false ->
+                 (Enum.member?(dir,0)) or (y == 5) == :false ->
                   List.insert_at(dir,-1,0)
                  true ->
                   List.insert_at(dir,-1,4)
@@ -369,7 +369,7 @@ defmodule ToyRobot do
                   List.insert_at(dir,-1,2)
                  (Enum.member?(dir,0) or (y == 5)) == :false ->
                   List.insert_at(dir,-1,0)
-                 Enum.member?(dir, 1) == :false ->
+                 (Enum.member?(dir, 1)) or (x == 1) == :false ->
                   List.insert_at(dir,-1,1)
                  true ->
                   List.insert_at(dir,-1,4)
@@ -383,7 +383,7 @@ defmodule ToyRobot do
                   List.insert_at(dir,-1,2)
                  (Enum.member?(dir,0) or (y == 5)) == :false ->
                   List.insert_at(dir,-1,0)
-                 Enum.member?(dir,3) == :false ->
+                 (Enum.member?(dir,3)) or (x == 5) == :false ->
                   List.insert_at(dir,-1,3)
                  true ->
                   List.insert_at(dir,-1,4)
@@ -394,13 +394,13 @@ defmodule ToyRobot do
 
 
   def rep(q,visited,robot,goal_x,goal_y,cli_proc_name, len) when len != 0 do
-
+    # IO.puts("hello")
     #getting next block
     {{:value, value3}, q} = :queue.out_r(q)
     {x,y, dirs} = value3
     new_goal_x = x
     new_goal_y = y
-
+    IO.puts("#{x} #{y} #{List.last(dirs)}")
     #if reached destination
     len = if(x == goal_x and y == goal_y) do
       0
@@ -414,10 +414,10 @@ defmodule ToyRobot do
 
     #putting back with changed dir
     dir = List.last(dirs)
-    # IO.puts("#{robot.x} #{robot.y}")
-    # IO.puts("list is #{inspect(dirs)}")
+    # IO.puts("dir = #{dir}")
+    # IO.puts("before list is #{inspect(dirs)}")
     new_dir = dir_select(x,y,robot.facing,goal_x,goal_y,dirs)
-    # IO.puts("list is #{inspect(new_dir)}")
+    # IO.puts("after list is #{inspect(new_dir)}")
     # ls = List.insert_at(dirs,-1,new_dir)
     # ls = List.insert_at(dirs,-1,dir+1)
     q = :queue.in({x,y,new_dir},q)
@@ -515,14 +515,17 @@ defmodule ToyRobot do
 
       dir == 0 ->
         #up
+        # IO.puts("im in")
         check = if(y == :e or obs == true) do
           false
         else
           !(:queue.member({x,plus(y)}, visited))
         end
           struc4 = if check do
+            # IO.puts("inside")
               el = decide_dir(robot.facing, x,plus(y),goal_x,goal_y)
               dirs = [el]
+              # IO.puts("list is #{inspect(dirs)} #{x} #{plus(y)}")
               q = :queue.in({x,plus(y),dirs}, q)
               visited = :queue.in({x,plus(y)}, visited)
               {q,visited}
@@ -546,6 +549,7 @@ defmodule ToyRobot do
           struc1 = if check do
               el = decide_dir(robot.facing, x-1,y,goal_x,goal_y)
               dirs = [el]
+              # IO.puts("list is #{inspect(dirs)} #{x-1} #{y}")
               q = :queue.in({x-1,y,dirs}, q)
               visited = :queue.in({x-1,y}, visited)
               {q,visited}
@@ -569,6 +573,7 @@ defmodule ToyRobot do
         struc2 = if check do
             el = decide_dir(robot.facing, x,minus(y),goal_x,goal_y)
             dirs = [el]
+            # IO.puts("list is #{inspect(dirs)} #{x} #{minus(y)}")
             q = :queue.in({x,minus(y),dirs}, q)
             visited = :queue.in({x,minus(y)}, visited)
             {q,visited}
@@ -593,6 +598,7 @@ defmodule ToyRobot do
         struc3 = if check do
             el = decide_dir(robot.facing, x+1,y,goal_x,goal_y)
             dirs = [el]
+            # IO.puts("list is #{inspect(dirs)} #{x+1} #{y}")
             q = :queue.in({x+1,y,dirs}, q)
             visited = :queue.in({x+1,y}, visited)
             {q,visited}
