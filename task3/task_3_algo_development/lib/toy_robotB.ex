@@ -215,7 +215,7 @@ defmodule CLI.ToyRobotB do
     mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5}
 
     # goal_locs = receiving_coor2(goal_locs)
-    IO.puts("b #{inspect(goal_locs)}")
+    # IO.puts("before #{inspect(goal_locs)}")
     count = Enum.count(goal_locs)
 
     {robot,obs,goal_locs,count} = if(count == 0) do
@@ -255,6 +255,7 @@ defmodule CLI.ToyRobotB do
 
     get_value(goal_locs,obs, robot,goal_x, goal_y,cli_proc_name, parent,first)
     {robot,obs,goal_locs} = rec_value()
+    # IO.puts("b #{inspect(goal_locs)}")
     {robot,obs,goal_locs,count}
     end
     first = 1
@@ -718,7 +719,7 @@ defmodule CLI.ToyRobotB do
 
                 {robot, obs, ax, ay, afacing, goal_locs}
               robot.facing == :south ->
-                {_ax,_ay,_afacing, _goal_locs} = receiving_coor(goal_locs)
+                {_ax,_ay,_afacing, goal_locs} = receiving_coor(goal_locs)
                 robot = left(robot)
                 send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
@@ -752,7 +753,7 @@ defmodule CLI.ToyRobotB do
 
                 {robot, obs, ax, ay, afacing, goal_locs}
               robot.facing == :east ->
-                {_ax,_ay,_afacing, _goal_locs} = receiving_coor(goal_locs)
+                {_ax,_ay,_afacing, goal_locs} = receiving_coor(goal_locs)
                 robot = left(robot)
                 send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
@@ -785,7 +786,7 @@ defmodule CLI.ToyRobotB do
 
                 {robot, obs, ax, ay, afacing, goal_locs}
               robot.facing == :north ->
-                {_ax,_ay,_afacing, _goal_locs} = receiving_coor(goal_locs)
+                {_ax,_ay,_afacing, goal_locs} = receiving_coor(goal_locs)
                 robot = left(robot)
                 send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
@@ -818,7 +819,7 @@ defmodule CLI.ToyRobotB do
 
                 {robot, obs, ax, ay, afacing, goal_locs}
               robot.facing == :west ->
-                {_ax,_ay,_afacing, _goal_locs} = receiving_coor(goal_locs)
+                {_ax,_ay,_afacing, goal_locs} = receiving_coor(goal_locs)
                 robot = left(robot)
                 send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)

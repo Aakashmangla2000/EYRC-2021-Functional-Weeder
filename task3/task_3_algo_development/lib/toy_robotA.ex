@@ -201,7 +201,7 @@ def listen_from_cli2(goal_locs) do
     # IO.puts(count)
     # IO.puts(inspect(goal_locs))
     # goal_locs = receiving_coor2(goal_locs)
-    IO.puts(inspect(goal_locs))
+    # IO.puts(inspect(gsoal_locs))
     count = Enum.count(goal_locs)
 
     {robot,obs,goal_locs,count} = if(count == 0) do
