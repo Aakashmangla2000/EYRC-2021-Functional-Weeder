@@ -62,83 +62,6 @@ defmodule CLI.ToyRobotB do
     {:failure, "Invalid STOP position"}
   end
 
-  def listen_from_cli2(goal_locs) do
-    receive do
-      {:toyrobotA} ->
-        send(:get_locs_from_b, {:goal_locs, {goal_locs}})
-      end
-  end
-
-  def send_robot_stat2() do
-    send(:goal_locs_to_b, {:toyrobotB})
-    rec_botB2()
-  end
-
-  def rec_botB2() do
-    receive do
-      {:goal_locs, pos} -> pos
-    end
-  end
-
-  def wait_until_received2() do
-    # IO.puts("b waiting")
-    if (Process.whereis(:get_locs_from_b) != nil or Process.whereis(:goal_locs_to_b) == nil) do
-      Process.sleep(100)
-      wait_until_received2()
-    end
-  end
-
-  def wait_till_over2() do
-    if (Process.whereis(:get_locs_from_a) != nil) do
-      Process.sleep(100)
-      wait_till_over2()
-    end
-  end
-
-  def receiving_coor2(goal_locs) do
-    parent = self()
-    # IO.puts("b aya")
-    # if(Process.whereis(:client_toyrobotA) == nil) do
-    # wait_until_received2()
-    if (Process.whereis(:goal_locs_to_b) == nil and Process.whereis(:client_toyrobotA) != nil) do
-      send(parent, goal_locs)
-    else
-      wait_until_received2()
-      pid2 = spawn_link(fn ->
-      goal_locs = send_robot_stat2()
-      send(parent, goal_locs)
-      end)
-    Process.register(pid2, :get_locs_from_a)
-    end
-    # else
-    #   send(parent,{0})
-    # end
-
-    # if(Process.whereis(:client_toyrobotA) == nil) do
-    receive do
-        {goal_locs} -> goal_locs
-    end
-    #   else
-    #     {0}
-    # end
-  end
-
-  def sending_coor2(goal_locs) do
-    # if(Process.whereis(:client_toyrobotA) != nil) do
-    # wait_till_over2()
-    if (Process.whereis(:goal_locs_to_a) != nil) do
-      wait_till_over2()
-      Process.unregister(:goal_locs_to_a)
-      pid = spawn_link(fn -> listen_from_cli2(goal_locs) end)
-      Process.register(pid, :goal_locs_to_a)
-    else
-      wait_till_over2()
-      pid = spawn_link(fn -> listen_from_cli2(goal_locs) end)
-      Process.register(pid, :goal_locs_to_a)
-    end
-    # end
-  end
-
   @doc """
   Provide GOAL positions to the robot as given location of [(x1, y1),(x2, y2),..] and plan the path from START to these locations.
   Passing the CLI Server process name that will be used to send robot's current status after each action is taken.
@@ -155,26 +78,6 @@ defmodule CLI.ToyRobotB do
     mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e}
     first = 0
     obs = false
-
-    # pid = spawn_link(fn -> listen_from_cli2(goal_locs) end)
-    # Process.register(pid, :goal_locs_to_a)
-    # robot = if Enum.count(goal_locs) == 1 do
-    #   # get_value(goal_locs,obs, robot,robot.x, robot.y,cli_proc_name, parent,first)
-    #   robot
-    # else
-    #   goal_locs = Enum.reverse(goal_locs)
-    #   cnt_check = Enum.count(goal_locs)
-    #   flag = if Integer.is_even(cnt_check) do
-    #     0
-    #   else
-    #     1
-    #   end
-    #   x = div(Enum.count(goal_locs), 2) + flag
-    #   {_goala, goalb} = Enum.split(goal_locs,x)
-    #   count = Enum.count(goal_locs)
-    #   goal_div(obs, robot, parent, goalb, cli_proc_name,count,mp,mp2,first)
-
-    # end
 
     robot = if Enum.count(goal_locs) == 1 do
       robot
@@ -211,78 +114,84 @@ defmodule CLI.ToyRobotB do
     index
   end
 
-  def goal_div(obs, robot, parent, goal_locs, cli_proc_name,count,mp,mp2,first) when count > 0 do
+  def goal_div(obs, robot, _parent, goal_locs, cli_proc_name,count,mp,mp2,first) when count > 0 do
     mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5}
+    parent = self()
+    pid = spawn_link(fn ->
+      count = Enum.count(goal_locs)
+      # IO.puts(count)
+      {robot,obs,goal_locs,count} = if(count == 0) do
+        {robot,obs,goal_locs,count}
+      else
+        if (Process.whereis(:cli_robotB_state) == nil and first == 0) do
+          %CLI.Position{x: px, y: py, facing: pfacing} = robot
+          pid = spawn_link(fn -> listen_from_cli(px,py,pfacing,goal_locs) end)
+          Process.register(pid, :cli_robotB_state)
+        end
 
-    # goal_locs = receiving_coor2(goal_locs)
-    # IO.puts("before #{inspect(goal_locs)}")
-    count = Enum.count(goal_locs)
+        {ax,ay,afacing,goal_locs} = receiving_coor(goal_locs)
+        obs = send_robot_status(robot, cli_proc_name)
 
-    {robot,obs,goal_locs,count} = if(count == 0) do
-      {robot,obs,goal_locs,count}
-    else
-      {:ok,val} = if (count > 1) do
-      val = Enum.at(goal_locs,0)
-      goal_x = Enum.at(val,0)
-      goal_x = Map.get(mp, goal_x)
-      goal_y = Enum.at(val,1)
-      goal_y = Map.get(mp2, goal_y)
-      goal_y = Map.get(mp3, goal_y)
+        # IO.puts("b #{inspect(goal_locs)}")
+        all = {ax,ay,afacing}
+        count = Enum.count(goal_locs)
 
-      min = abs(robot.x - goal_x) + abs(Map.get(mp3, robot.y) -  goal_y)
-      index = 0
-      index = goal_select(robot, parent, goal_locs, cli_proc_name,min, index, count-1,mp,mp2)
-      Enum.fetch(goal_locs,index)
-    else
-      {:ok,Enum.at(goal_locs,0)}
-    end
+        {goal_locs,goal_x, goal_y} = if(count > 0) do
+          {:ok,val} = if (count > 1) do
+            val = Enum.at(goal_locs,0)
+            goal_x = Enum.at(val,0)
+            goal_x = Map.get(mp, goal_x)
+            goal_y = Enum.at(val,1)
+            goal_y = Map.get(mp2, goal_y)
+            goal_y = Map.get(mp3, goal_y)
 
-    goal_x = Enum.at(val,0)
-    goal_x = Map.get(mp, goal_x)
-    goal_y = Enum.at(val,1)
-    goal_y = Map.get(mp2, goal_y)
+            min = abs(robot.x - goal_x) + abs(Map.get(mp3, robot.y) -  goal_y)
+            index = 0
+            index = goal_select(robot, parent, goal_locs, cli_proc_name,min, index, count-1,mp,mp2)
+            Enum.fetch(goal_locs,index)
+          else
+            {:ok,Enum.at(goal_locs,0)}
+          end
 
-    goal_locs = Enum.filter(goal_locs, fn val ->
-      g_x = Enum.at(val,0)
-      g_x = Map.get(mp, g_x)
-      g_y = Enum.at(val,1)
-      g_y = Map.get(mp2, g_y)
-      g_x != goal_x or g_y != goal_y
-    end )
-    # IO.puts("b #{inspect(goal_locs)}")
-    count = Enum.count(goal_locs)
-    # sending_coor2(goal_locs)
+          goal_x = Enum.at(val,0)
+          goal_x = Map.get(mp, goal_x)
+          goal_y = Enum.at(val,1)
+          goal_y = Map.get(mp2, goal_y)
 
-    get_value(goal_locs,obs, robot,goal_x, goal_y,cli_proc_name, parent,first)
-    {robot,obs,goal_locs} = rec_value()
-    # IO.puts("b #{inspect(goal_locs)}")
-    {robot,obs,goal_locs,count}
-    end
+          goal_locs = Enum.filter(goal_locs, fn val ->
+            g_x = Enum.at(val,0)
+            g_x = Map.get(mp, g_x)
+            g_y = Enum.at(val,1)
+            g_y = Map.get(mp2, g_y)
+            g_x != goal_x or g_y != goal_y
+          end)
+          {goal_locs,goal_x, goal_y}
+        else
+          {goal_locs,robot.x, robot.y}
+        end
+
+        # IO.puts(inspect(goal_locs))
+        sending_coor(goal_locs, robot)
+        count = Enum.count(goal_locs)
+        {robot,obs,goal_locs} = get_value(all,goal_locs,obs, robot,goal_x, goal_y,cli_proc_name, parent,first)
+        {robot,obs,goal_locs,count}
+      end
+      # IO.puts("bb #{inspect(goal_locs)}")
+      count = Enum.count(goal_locs)
+      send(parent, {:flag_value, {robot,obs,goal_locs,count}})
+    end)
+    Process.register(pid, :client_toyrobotB)
     first = 1
+    {robot,obs,goal_locs,count} = rec_value()
     goal_div(obs, robot, parent, goal_locs, cli_proc_name,count,mp,mp2,first)
   end
-
-
-  # def goal_div(obs, robot, parent, goal_locs, cli_proc_name,count,mp,mp2,first) when count != 0 do
-  #   val = Enum.at(goal_locs,0)
-  #   goal_x = Enum.at(val,0)
-  #   goal_x = Map.get(mp, goal_x)
-  #   goal_y = Enum.at(val,1)
-  #   goal_y = Map.get(mp2, goal_y)
-  #   get_value(goal_locs,obs, robot,goal_x, goal_y,cli_proc_name, parent,first)
-  #   {robot,obs} = rec_value()
-  #   first = 1
-  #   goal_locs = Enum.drop(goal_locs,1)
-  #   count = Enum.count(goal_locs)
-  #   goal_div(obs, robot, parent, goal_locs, cli_proc_name, count,mp,mp2,first)
-  # end
 
   def goal_div(_obs, robot, _parent, _goal_locs, _cli_proc_name, _count,_mp,_mp2,_first) do
    robot
   end
 
-  def get_value(goal_locs,obs, robot,goal_x, goal_y,cli_proc_name, parent,first) do
-    pid = spawn_link(fn ->
+  def get_value(all,goal_locs,obs, robot,goal_x, goal_y,cli_proc_name, _parent,_first) do
+      {ax,ay,afacing} = all
       len = 1
       q = :queue.new()
       visited = :queue.new()
@@ -290,32 +199,13 @@ defmodule CLI.ToyRobotB do
       dir = [el]
       q = :queue.in({robot.x,robot.y,dir},q)
       visited = :queue.in({robot.x,robot.y},visited)
-      # send_robot_status(robot,cli_proc_name)
-
-      if (Process.whereis(:cli_robotB_state) == nil) do
-      %CLI.Position{x: px, y: py, facing: pfacing} = robot
-        pid = spawn_link(fn -> listen_from_cli(px,py,pfacing,goal_locs) end)
-        Process.register(pid, :cli_robotB_state)
-      end
-
-      obs = if(first == 0) do
-        {ax,ay,afacing,goal_locs} = receiving_coor(goal_locs)
-        obs = send_robot_status(robot, cli_proc_name)
-        sending_coor(goal_locs, robot)
-        {obs,ax,ay,afacing,goal_locs}
-      else
-        {obs,0,0,0,goal_locs}
-      end
 
       {robot,obs,goal_locs} = if(robot.x == goal_x and robot.y == goal_y) do
-        # send_robot_status(robot,cli_proc_name)
         {robot,obs,goal_locs}
       else
-      CLI.ToyRobotB.rep(goal_locs, obs,0,0,0,q,visited,robot,goal_x,goal_y,cli_proc_name,len)
+      CLI.ToyRobotB.rep(goal_locs, obs,ax,ay,afacing,q,visited,robot,goal_x,goal_y,cli_proc_name,len)
       end
-      send(parent, {:flag_value, {robot,obs,goal_locs}})
-    end)
-    Process.register(pid, :client_toyrobotB)
+      {robot,obs,goal_locs}
   end
 
   def rec_value() do
@@ -373,7 +263,6 @@ defmodule CLI.ToyRobotB do
 
     if(Process.whereis(:client_toyrobotA) != nil) do
     wait_until_received()
-    # IO.puts("B received")
     pid2 = spawn_link(fn ->
       coor = send_robot_stat()
       # {x,y,facing} = coor

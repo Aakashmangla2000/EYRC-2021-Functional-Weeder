@@ -62,90 +62,6 @@ defmodule CLI.ToyRobotA do
     {:failure, "Invalid STOP position"}
   end
 
-def listen_from_cli2(goal_locs) do
-    receive do
-      {:toyrobotB} ->
-        send(:get_locs_from_a, {:goal_locs, {goal_locs}})
-      end
-  end
-
-  def send_robot_stat2() do
-    send(:goal_locs_to_a, {:toyrobotA})
-    rec_botB2()
-  end
-
-  def rec_botB2() do
-    receive do
-      {:goal_locs, pos} -> pos
-    end
-  end
-
-  def wait_until_received2() do
-    # IO.puts("a waiting")
-    if (Process.whereis(:get_locs_from_a) != nil or Process.whereis(:goal_locs_to_a) == nil) do
-      Process.sleep(100)
-      wait_until_received2()
-    end
-  end
-
-  def wait_till_over2() do
-    if (Process.whereis(:get_locs_from_b) != nil) do
-      Process.sleep(100)
-      wait_till_over2()
-    end
-  end
-
-  def receiving_coor2(goal_locs) do
-    parent = self()
-    # if(Process.whereis(:client_toyrobotB) != nil) do
-    # wait_until_received2()
-    # IO.puts("aya")
-    if (Process.whereis(:goal_locs_to_a) == nil and Process.whereis(:client_toyrobotB) != nil) do
-      send(parent, goal_locs)
-    else
-      wait_until_received2()
-      pid2 = spawn_link(fn ->
-      goal_locs = send_robot_stat2()
-      send(parent, goal_locs)
-      end)
-    Process.register(pid2, :get_locs_from_b)
-    end
-
-
-    # else
-    #   send(parent,{0})
-    # end
-
-    # if(Process.whereis(:client_toyrobotB) != nil) do
-      receive do
-        {goal_locs} -> goal_locs
-      end
-    #   else
-    #     {0}
-    # end
-  end
-
-  def sending_coor2(goal_locs) do
-    # if(Process.whereis(:client_toyrobotB) == nil) do
-    #   wait_till_over2()
-    #   pid = spawn_link(fn -> listen_from_cli2(goal_locs) end)
-    #   Process.register(pid, :goal_locs_to_b)
-    # else
-    if (Process.whereis(:goal_locs_to_b) != nil) do
-      wait_till_over2()
-      Process.unregister(:goal_locs_to_b)
-      pid = spawn_link(fn -> listen_from_cli2(goal_locs) end)
-      Process.register(pid, :goal_locs_to_b)
-    else
-      wait_till_over2()
-      pid = spawn_link(fn -> listen_from_cli2(goal_locs) end)
-      Process.register(pid, :goal_locs_to_b)
-    end
-    # end
-  end
-
-
-
   @doc """
   Provide GOAL positions to the robot as given location of [(x1, y1),(x2, y2),..] and plan the path from START to these locations.
   Passing the CLI Server process name that will be used to send robot's current status after each action is taken.
@@ -174,6 +90,8 @@ def listen_from_cli2(goal_locs) do
   end
 
   def goal_select(robot, parent, goal_locs, cli_proc_name,min, index, count,mp,mp2) when count > 0 do
+    # IO.puts(inspect(goal_locs))
+    # IO.puts(count)
     mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5}
     val = Enum.at(goal_locs,count)
     goal_x = Enum.at(val,0)
@@ -195,78 +113,77 @@ def listen_from_cli2(goal_locs) do
     index
   end
 
-  def goal_div(obs, robot, parent, goal_locs, cli_proc_name,count,mp,mp2,first) when count > 0 do
+  def goal_div(obs, robot, _parent, goal_locs, cli_proc_name,count,mp,mp2,first) when count > 0 do
     mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5}
-
-    # IO.puts(count)
-    # IO.puts(inspect(goal_locs))
-    # goal_locs = receiving_coor2(goal_locs)
-    # IO.puts(inspect(gsoal_locs))
-    count = Enum.count(goal_locs)
-
-    {robot,obs,goal_locs,count} = if(count == 0) do
-      {robot,obs,goal_locs,count}
-    else
-      {:ok,val} = if (count > 1) do
-      val = Enum.at(goal_locs,0)
-      goal_x = Enum.at(val,0)
-      goal_x = Map.get(mp, goal_x)
-      goal_y = Enum.at(val,1)
-      goal_y = Map.get(mp2, goal_y)
-      goal_y = Map.get(mp3, goal_y)
-
-      min = abs(robot.x - goal_x) + abs(Map.get(mp3, robot.y) -  goal_y)
-      index = 0
-      index = goal_select(robot, parent, goal_locs, cli_proc_name,min, index, count-1,mp,mp2)
-      Enum.fetch(goal_locs,index)
-      else
-        {:ok,Enum.at(goal_locs,0)}
-      end
-
-      goal_x = Enum.at(val,0)
-      goal_x = Map.get(mp, goal_x)
-      goal_y = Enum.at(val,1)
-      goal_y = Map.get(mp2, goal_y)
-
-      goal_locs = Enum.filter(goal_locs, fn val ->
-        g_x = Enum.at(val,0)
-        g_x = Map.get(mp, g_x)
-        g_y = Enum.at(val,1)
-        g_y = Map.get(mp2, g_y)
-        g_x != goal_x or g_y != goal_y
-      end )
+    parent = self()
+    pid = spawn_link(fn ->
       count = Enum.count(goal_locs)
-      # sending_coor2(goal_locs)
+      {robot,obs,goal_locs,count} = if(count == 0) do
+        {robot,obs,goal_locs,count}
+      else
+        # IO.puts("aa #{inspect(goal_locs)}")
+        {bx,by,bfacing,goal_locs} = receiving_coor(goal_locs)
+        obs = send_robot_status(robot, cli_proc_name)
 
-      get_value(goal_locs, obs, robot,goal_x, goal_y,cli_proc_name, parent, first)
-      {robot,obs,goal_locs} = rec_value()
-      {robot,obs,goal_locs,count}
-    end
+        # IO.puts("a #{inspect(goal_locs)}")
+        all = {bx,by,bfacing}
+        count = Enum.count(goal_locs)
+        {goal_locs,goal_x, goal_y} = if(count > 0) do
+          {:ok,val} = if (count > 1) do
+            val = Enum.at(goal_locs,0)
+            goal_x = Enum.at(val,0)
+            goal_x = Map.get(mp, goal_x)
+            goal_y = Enum.at(val,1)
+            goal_y = Map.get(mp2, goal_y)
+            goal_y = Map.get(mp3, goal_y)
+
+            min = abs(robot.x - goal_x) + abs(Map.get(mp3, robot.y) -  goal_y)
+            index = 0
+            index = goal_select(robot, parent, goal_locs, cli_proc_name,min, index, count-1,mp,mp2)
+            Enum.fetch(goal_locs,index)
+          else
+            {:ok,Enum.at(goal_locs,0)}
+          end
+
+          goal_x = Enum.at(val,0)
+          goal_x = Map.get(mp, goal_x)
+          goal_y = Enum.at(val,1)
+          goal_y = Map.get(mp2, goal_y)
+
+          goal_locs = Enum.filter(goal_locs, fn val ->
+            g_x = Enum.at(val,0)
+            g_x = Map.get(mp, g_x)
+            g_y = Enum.at(val,1)
+            g_y = Map.get(mp2, g_y)
+            g_x != goal_x or g_y != goal_y
+          end )
+          {goal_locs,goal_x, goal_y}
+        else
+          {goal_locs,robot.x, robot.y}
+        end
+        sending_coor(goal_locs, robot)
+        count = Enum.count(goal_locs)
+        {robot,obs,goal_locs} = get_value(all,goal_locs, obs, robot,goal_x, goal_y,cli_proc_name, parent, first)
+        {robot,obs,goal_locs,count}
+      end
+      # IO.puts("a #{inspect(goal_locs)}")
+      count = Enum.count(goal_locs)
+      send(parent, {:flag_value, {robot,obs,goal_locs,count}})
+    end)
+    Process.register(pid, :client_toyrobotA)
+    {robot,obs,goal_locs,count} = rec_value()
+
     first = 1
     goal_div(obs, robot, parent, goal_locs, cli_proc_name,count,mp,mp2,first)
   end
-
-  # def goal_div(obs, robot, parent, goal_locs, cli_proc_name,count,mp,mp2,first) when count != 0 do
-  #   val = Enum.at(goal_locs,0)
-  #   goal_x = Enum.at(val,0)
-  #   goal_x = Map.get(mp, goal_x)
-  #   goal_y = Enum.at(val,1)
-  #   goal_y = Map.get(mp2, goal_y)
-  #   get_value(goal_locs, obs, robot,goal_x, goal_y,cli_proc_name, parent, first)
-  #   {robot,obs} = rec_value()
-  #   first = 1
-  #   goal_locs = Enum.drop(goal_locs,1)
-  #   count = Enum.count(goal_locs)
-  #   goal_div(obs, robot, parent, goal_locs, cli_proc_name, count,mp,mp2, first)
-  # end
 
   def goal_div(_obs, robot, _parent, _goal_locs, _cli_proc_name, _count,_mp,_mp2, _first) do
    robot
   end
 
 
-  def get_value(goal_locs, obs, robot,goal_x, goal_y,cli_proc_name, parent, first) do
-    pid = spawn_link(fn ->
+  def get_value(all,goal_locs, obs, robot,goal_x, goal_y,cli_proc_name, _parent, _first) do
+      {bx,by,bfacing} = all
       len = 1
       q = :queue.new()
       visited = :queue.new()
@@ -274,35 +191,13 @@ def listen_from_cli2(goal_locs) do
       dir = [el]
       q = :queue.in({robot.x,robot.y,dir},q)
       visited = :queue.in({robot.x,robot.y},visited)
-      # send_robot_status(robot,cli_proc_name)
-
-      # if (Process.whereis(:cli_robotA_state) == nil) do
-      # %CLI.Position{x: px, y: py, facing: pfacing} = robot
-      #   pid = spawn_link(fn -> listen_from_cli(px,py,pfacing) end)
-      #   Process.register(pid, :cli_robotA_state)
-      # end
-
-      bx = 0
-      by = 0
-
-      obs = if(first == 0) do
-        {bx,by,bfacing,goal_locs} = receiving_coor(goal_locs)
-        obs = send_robot_status(robot, cli_proc_name)
-        sending_coor(goal_locs, robot)
-        {obs,bx,by,bfacing,goal_locs}
-      else
-        {obs,0,0,0,goal_locs}
-      end
 
       {robot,obs,goal_locs} = if(robot.x == goal_x and robot.y == goal_y) do
-        # send_robot_status(robot,cli_proc_name)
         {robot,obs,goal_locs}
       else
-      CLI.ToyRobotA.rep(goal_locs, obs,bx,by,0, q,visited,robot,goal_x,goal_y,cli_proc_name,len)
+      CLI.ToyRobotA.rep(goal_locs, obs,bx,by,bfacing, q,visited,robot,goal_x,goal_y,cli_proc_name,len)
       end
-      send(parent, {:flag_value, {robot,obs,goal_locs}})
-    end)
-    Process.register(pid, :client_toyrobotA)
+      {robot,obs,goal_locs}
   end
 
   def rec_value() do
@@ -357,24 +252,31 @@ def listen_from_cli2(goal_locs) do
   def receiving_coor(goal_locs) do
     parent = self()
     if(Process.whereis(:client_toyrobotB) != nil) do
-    wait_until_received()
-    # IO.puts("A received")
-    pid2 = spawn_link(fn ->
+      wait_until_received()
+      # IO.puts("A received")
+      pid2 = spawn_link(fn ->
       coor = send_robot_stat()
       # {x,y,facing} = coor
       # IO.puts("Robot B: #{x} #{y} #{facing}")
+      # IO.puts("aaaa #{inspect(coor)}")
       send(parent, {coor})
       end)
-    Process.register(pid2, :get_botB)
+      Process.register(pid2, :get_botB)
     else
       send(parent,{0,0,0,goal_locs})
     end
 
-    if(Process.whereis(:client_toyrobotB) != nil) do
+    # x =  (Process.whereis(:client_toyrobotB))
+    # IO.puts("assa #{inspect(x)} #{Enum.count(goal_locs)}")
+    if(Process.whereis(:client_toyrobotB) != nil or Enum.count(goal_locs) > 0) do
       receive do
-        {coor} -> coor
+        {coor} ->
+          coor
+        after
+          1000 -> {0,0,0,goal_locs}
       end
       else
+        # IO.puts("sup")
         {0,0,0,goal_locs}
     end
   end
@@ -664,21 +566,13 @@ def listen_from_cli2(goal_locs) do
     {x,y, dirs} = value3
     new_goal_x = x
     new_goal_y = y
-    # IO.puts("obs #{obs}")
-    # IO.puts("#{x} #{y}")
+
     #if reached destination
     len = if(x == goal_x and y == goal_y) do
       IO.puts("A Reached #{x} #{y}")
       0
     end
 
-    # flag = if(x == robot.x and y == robot.y) do
-    #   IO.puts("a true")
-    #   1
-    # end
-
-    #receiving coordinates from B
-    # {bx,by,bfacing} = receiving_coor(goal_locs)
     first = 0
 
     first = if(new_goal_x == bx and new_goal_y == by) do
@@ -710,18 +604,8 @@ def listen_from_cli2(goal_locs) do
       len = :queue.len(q)
       {q,visited,robot,len,bx,by,bfacing,goal_locs,obs}
     true ->
-      # if(new_goal_x == robot.x and new_goal_y == robot.y) do
-      #   IO.puts("a same goals")
-      # end
-      # IO.puts("#{robot.x} #{robot.y} #{robot.facing}")
-      # if(Process.whereis(:client_toyrobotB) != nil) do
-      #   send_robot_status(robot,cli_proc_name)
-      # end
-      # sending_coor(goal_locs, robot)
-      # IO.puts("a #{new_goal_x} #{new_goal_y} #{List.last(dirs)}")
 
-
-      {q,robot, obs, bx, by, bfacing,dir,visited} = if(first == 0) do
+      {q,robot, obs, bx, by, bfacing, goal_locs,dir,visited} = if(first == 0) do
         #travelling to new goals
         {robot,bx,by,bfacing,goal_locs} = CLI.ToyRobotA.forGoal_x(bx,by,bfacing,goal_locs,robot,new_goal_x, cli_proc_name)
         {robot,obs,bx,by,bfacing,goal_locs} = CLI.ToyRobotA.goX(bx,by,bfacing,goal_locs,robot,new_goal_x,new_goal_y,cli_proc_name,obs)
@@ -735,7 +619,7 @@ def listen_from_cli2(goal_locs) do
 
         #setting robot's direction based on dir
         both = if(robot.x == goal_x and robot.y == goal_y) do
-          {robot, obs, bx, by, bfacing}
+          {robot, obs, bx, by, bfacing, goal_locs}
         else
           # {bx,by,bfacing} = receiving_coor(goal_locs)
         both = cond do
@@ -748,7 +632,7 @@ def listen_from_cli2(goal_locs) do
                 sending_coor(goal_locs, robot)
 
 
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :south ->
                 {_bx,_by,_bfacing,goal_locs} = receiving_coor(goal_locs)
                 robot = left(robot)
@@ -760,17 +644,17 @@ def listen_from_cli2(goal_locs) do
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
 
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :west ->
                 {bx,by,bfacing,goal_locs} = receiving_coor(goal_locs)
                 robot = right(robot)
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
 
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :north ->
                 # IO.puts("a khali")
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
             end
             both
           dir == 1 ->
@@ -781,7 +665,7 @@ def listen_from_cli2(goal_locs) do
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
 
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :east ->
                 {_bx,_by,_bfacing,goal_locs} = receiving_coor(goal_locs)
                 robot = left(robot)
@@ -793,17 +677,17 @@ def listen_from_cli2(goal_locs) do
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
 
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :south ->
                 {bx,by,bfacing,goal_locs} = receiving_coor(goal_locs)
                 robot = right(robot)
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
 
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :west ->
                 # IO.puts("a khali")
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
             end
             both
           dir == 2 ->
@@ -814,7 +698,7 @@ def listen_from_cli2(goal_locs) do
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
 
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :north ->
                 {_bx,_by,_bfacing,goal_locs} = receiving_coor(goal_locs)
                 robot = left(robot)
@@ -825,17 +709,17 @@ def listen_from_cli2(goal_locs) do
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
 
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :east ->
                 {bx,by,bfacing,goal_locs} = receiving_coor(goal_locs)
                 robot = right(robot)
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
 
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :south ->
                 # IO.puts("a khali")
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
             end
             both
           dir == 3 ->
@@ -846,7 +730,7 @@ def listen_from_cli2(goal_locs) do
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
 
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :west ->
                 {_bx,_by,_bfacing,goal_locs} = receiving_coor(goal_locs)
                 robot = left(robot)
@@ -859,27 +743,27 @@ def listen_from_cli2(goal_locs) do
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
 
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :north ->
                 {bx,by,bfacing,goal_locs} = receiving_coor(goal_locs)
                 robot = right(robot)
                 obs = send_robot_status(robot,cli_proc_name)
                 sending_coor(goal_locs, robot)
 
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :east ->
                 # IO.puts("a khali")
-                {robot, obs, bx, by, bfacing}
+                {robot, obs, bx, by, bfacing, goal_locs}
             end
             both
           dir > 3 ->
-            {robot, obs, bx, by, bfacing}
+            {robot, obs, bx, by, bfacing, goal_locs}
         end
         # sending_coor(goal_locs, robot)
         both
         end
-        {robot, obs, bx, by, bfacing} = both
-        {q,robot, obs, bx, by, bfacing,dir,visited}
+        {robot, obs, bx, by, bfacing, goal_locs} = both
+        {q,robot, obs, bx, by, bfacing, goal_locs,dir,visited}
       else
         {{:value, _val}, visited} = :queue.out_r(visited)
         {{:value, value3}, q} = :queue.out_r(q)
@@ -888,7 +772,7 @@ def listen_from_cli2(goal_locs) do
         # new_goal_y = y
         dir = List.last(dirs)
         obs = true
-        {q,robot, obs, bx, by, bfacing,dir,visited}
+        {q,robot, obs, bx, by, bfacing, goal_locs,dir,visited}
       end
         # struc = {q,visited}
         # IO.puts(obs)
