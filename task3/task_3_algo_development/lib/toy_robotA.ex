@@ -162,6 +162,7 @@ defmodule CLI.ToyRobotA do
         end
         sending_coor(goal_locs, robot)
         count = Enum.count(goal_locs)
+        # IO.puts("#{goal_y} #{goal_x}")
         {robot,obs,goal_locs} = get_value(all,goal_locs, obs, robot,goal_x, goal_y,cli_proc_name, parent, first)
         {robot,obs,goal_locs,count}
       end
@@ -194,7 +195,7 @@ defmodule CLI.ToyRobotA do
       {robot,obs,goal_locs} = if(robot.x == goal_x and robot.y == goal_y) do
         {robot,obs,goal_locs}
       else
-      CLI.ToyRobotA.rep(goal_locs, obs,bx,by,bfacing, q,visited,robot,goal_x,goal_y,cli_proc_name,len)
+      CLI.ToyRobotA.rep(0,goal_locs, obs,bx,by,bfacing, q,visited,robot,goal_x,goal_y,cli_proc_name,len)
       end
       {robot,obs,goal_locs}
   end
@@ -555,7 +556,7 @@ defmodule CLI.ToyRobotA do
   end
 
 
-  def rep(goal_locs, obs,bx,by,bfacing, q,visited,robot,goal_x,goal_y,cli_proc_name, len) when len != 0 do
+  def rep(first,goal_locs, obs,bx,by,bfacing, q,visited,robot,goal_x,goal_y,cli_proc_name, len) when len != 0 do
     #getting next block
     {{:value, value3}, q} = :queue.out_r(q)
     {x,y, dirs} = value3
@@ -563,12 +564,12 @@ defmodule CLI.ToyRobotA do
     new_goal_y = y
 
     #if reached destination
-    len = if(x == goal_x and y == goal_y) do
+    len = if(x == goal_x and y == goal_y and first == 0) do
       IO.puts("A Reached #{x} #{y}")
       0
     end
 
-    first = 0
+    # first = 0
 
     first = if(new_goal_x == bx and new_goal_y == by) do
       x = cond do
@@ -760,12 +761,22 @@ defmodule CLI.ToyRobotA do
         {robot, obs, bx, by, bfacing, goal_locs} = both
         {q,robot, obs, bx, by, bfacing, goal_locs,dir,visited}
       else
-        {{:value, _val}, visited} = :queue.out_r(visited)
-        {{:value, value3}, q} = :queue.out_r(q)
+        # IO.puts("aamne saamne #{:queue.len(q)} #{:queue.len(visited)}")
+        {visited,q} = if(:queue.len(visited) != 0) do
+            {{:value, _val}, visited} = :queue.out_r(visited)
+            # {{:value, _value4}, q} = :queue.out_r(q)
+            # q = :queue.in({x,y,dirs},q)
+            {visited,q}
+        else
+          # q = :queue.in({x,y,dirs},q)
+          {visited,q}
+        end
+
         {_x,_y, dirs} = value3
         # new_goal_x = x
         # new_goal_y = y
         dir = List.last(dirs)
+        # IO.puts(dir)
         obs = true
         {q,robot, obs, bx, by, bfacing, goal_locs,dir,visited}
       end
@@ -864,10 +875,11 @@ defmodule CLI.ToyRobotA do
     # IO.puts(obs)
     #sends coordinates to B
     # sending_coor(goal_locs, robot)
-    rep(goal_locs, obs,bx,by,bfacing, q,visited,robot,goal_x,goal_y,cli_proc_name, len)
+    first = 0
+    rep(first,goal_locs, obs,bx,by,bfacing, q,visited,robot,goal_x,goal_y,cli_proc_name, len)
   end
 
-  def rep(goal_locs, obs,_bx,_by,_bfacing, _q,_visited,robot,_goal_x,_goal_y,_cli_proc_name, _len) do
+  def rep(_first,goal_locs, obs,_bx,_by,_bfacing, _q,_visited,robot,_goal_x,_goal_y,_cli_proc_name, _len) do
     {robot,obs,goal_locs}
   end
 
