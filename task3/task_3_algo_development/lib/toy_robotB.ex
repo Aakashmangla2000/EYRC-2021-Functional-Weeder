@@ -170,13 +170,12 @@ defmodule CLI.ToyRobotB do
           {goal_locs,robot.x, robot.y}
         end
 
-        # IO.puts(inspect(goal_locs))
         sending_coor(goal_locs, robot)
         count = Enum.count(goal_locs)
         {robot,obs,goal_locs} = get_value(all,goal_locs,obs, robot,goal_x, goal_y,cli_proc_name, parent,first)
         {robot,obs,goal_locs,count}
       end
-      # IO.puts("bb #{inspect(goal_locs)}")
+      # IO.puts("b #{inspect(goal_locs)}")
       count = Enum.count(goal_locs)
       send(parent, {:flag_value, {robot,obs,goal_locs,count}})
     end)

@@ -121,7 +121,6 @@ defmodule CLI.ToyRobotA do
       {robot,obs,goal_locs,count} = if(count == 0) do
         {robot,obs,goal_locs,count}
       else
-        # IO.puts("aa #{inspect(goal_locs)}")
         {bx,by,bfacing,goal_locs} = receiving_coor(goal_locs)
         obs = send_robot_status(robot, cli_proc_name)
 
@@ -252,33 +251,29 @@ defmodule CLI.ToyRobotA do
   def receiving_coor(goal_locs) do
     parent = self()
     if(Process.whereis(:client_toyrobotB) != nil) do
-      wait_until_received()
-      # IO.puts("A received")
-      pid2 = spawn_link(fn ->
+    wait_until_received()
+    # IO.puts("A received")
+    pid2 = spawn_link(fn ->
       coor = send_robot_stat()
       # {x,y,facing} = coor
       # IO.puts("Robot B: #{x} #{y} #{facing}")
-      # IO.puts("aaaa #{inspect(coor)}")
       send(parent, {coor})
       end)
-      Process.register(pid2, :get_botB)
+    Process.register(pid2, :get_botB)
     else
       send(parent,{0,0,0,goal_locs})
     end
 
-    # x =  (Process.whereis(:client_toyrobotB))
-    # IO.puts("assa #{inspect(x)} #{Enum.count(goal_locs)}")
-    if(Process.whereis(:client_toyrobotB) != nil or Enum.count(goal_locs) > 0) do
+    # IO.puts(inspect(goal_locs))
+    # if(Process.whereis(:client_toyrobotB) != nil) do
       receive do
-        {coor} ->
-          coor
-        after
-          1000 -> {0,0,0,goal_locs}
+        {coor} -> coor
+      after
+        10 -> {0,0,0,goal_locs}
       end
-      else
-        # IO.puts("sup")
-        {0,0,0,goal_locs}
-    end
+    #   else
+    #     {0,0,0,goal_locs}
+    # end
   end
 
   def sending_coor(goal_locs, robot) do
