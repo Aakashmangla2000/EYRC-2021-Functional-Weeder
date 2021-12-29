@@ -31,10 +31,10 @@ defmodule LineFollower do
   @lf_sensor_data %{sensor0: 0, sensor1: 0, sensor2: 0, sensor3: 0, sensor4: 0, sensor5: 0}
   @lf_sensor_map %{0 => :sensor0, 1 => :sensor1, 2 => :sensor2, 3 => :sensor3, 4 => :sensor4, 5 => :sensor5}
 
+  @right [1, 0, 1, 0]
+  @left [0, 1, 0, 1]
   @forward [0, 1, 1, 0]
-  @backward [0, 1, 0, 1]
-  @left [0, 1, 1, 0]
-  @right [1, 0, 0, 1]
+  @backward [1, 0, 0, 1]
   @stop [0, 0, 0, 0]
 
   @duty_cycles [150, 70, 0]
