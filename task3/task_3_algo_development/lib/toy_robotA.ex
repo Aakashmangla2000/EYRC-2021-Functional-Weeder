@@ -265,16 +265,12 @@ defmodule CLI.ToyRobotA do
       send(parent,{0,0,0,goal_locs})
     end
 
-    # IO.puts(inspect(goal_locs))
-    # if(Process.whereis(:client_toyrobotB) != nil) do
       receive do
         {coor} -> coor
       after
         10 -> {0,0,0,goal_locs}
       end
-    #   else
-    #     {0,0,0,goal_locs}
-    # end
+
   end
 
   def sending_coor(goal_locs, robot) do
@@ -565,11 +561,10 @@ defmodule CLI.ToyRobotA do
 
     #if reached destination
     len = if(x == goal_x and y == goal_y and first == 0) do
-      IO.puts("A Reached #{x} #{y}")
+      # IO.puts("A Reached #{x} #{y}")
       0
     end
 
-    # first = 0
 
     first = if(new_goal_x == bx and new_goal_y == by) do
       x = cond do
@@ -588,7 +583,6 @@ defmodule CLI.ToyRobotA do
       0
     end
 
-    # IO.puts(first)
 
     {q,visited,robot,len,bx,by,bfacing,goal_locs,obs} = cond do
       new_goal_x == bx and new_goal_y == by and first == 0 ->
@@ -649,7 +643,6 @@ defmodule CLI.ToyRobotA do
 
                 {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :north ->
-                # IO.puts("a khali")
                 {robot, obs, bx, by, bfacing, goal_locs}
             end
             both
@@ -682,7 +675,6 @@ defmodule CLI.ToyRobotA do
 
                 {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :west ->
-                # IO.puts("a khali")
                 {robot, obs, bx, by, bfacing, goal_locs}
             end
             both
@@ -714,7 +706,6 @@ defmodule CLI.ToyRobotA do
 
                 {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :south ->
-                # IO.puts("a khali")
                 {robot, obs, bx, by, bfacing, goal_locs}
             end
             both
@@ -748,7 +739,6 @@ defmodule CLI.ToyRobotA do
 
                 {robot, obs, bx, by, bfacing, goal_locs}
               robot.facing == :east ->
-                # IO.puts("a khali")
                 {robot, obs, bx, by, bfacing, goal_locs}
             end
             both

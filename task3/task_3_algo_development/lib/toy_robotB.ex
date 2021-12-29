@@ -567,7 +567,7 @@ defmodule CLI.ToyRobotB do
 
     #if reached destination
     len = if(x == goal_x and y == goal_y) do
-      IO.puts("B Reached #{x} #{y}")
+      # IO.puts("B Reached #{x} #{y}")
       0
     end
 
@@ -626,7 +626,6 @@ defmodule CLI.ToyRobotB do
 
                 {robot, obs, ax, ay, afacing, goal_locs}
               robot.facing == :north ->
-                # IO.puts("b khali")
                 {robot, obs, ax, ay, afacing, goal_locs}
             end
             both
@@ -660,7 +659,6 @@ defmodule CLI.ToyRobotB do
 
                 {robot, obs, ax, ay, afacing, goal_locs}
               robot.facing == :west ->
-                # IO.puts("b khali")
                 {robot, obs, ax, ay, afacing, goal_locs}
             end
             both
@@ -693,7 +691,6 @@ defmodule CLI.ToyRobotB do
 
                 {robot, obs, ax, ay, afacing, goal_locs}
               robot.facing == :south ->
-                # IO.puts("b khali")
                 {robot, obs, ax, ay, afacing, goal_locs}
             end
             both
@@ -726,7 +723,6 @@ defmodule CLI.ToyRobotB do
 
                 {robot, obs, ax, ay, afacing, goal_locs}
               robot.facing == :east ->
-                # IO.puts("b khali")
                 {robot, obs, ax, ay, afacing, goal_locs}
             end
             both
@@ -734,7 +730,6 @@ defmodule CLI.ToyRobotB do
             {robot, obs, ax, ay, afacing, goal_locs}
         end
 
-        # sending_coor(goal_locs, robot)
         both
         end
         {robot, obs, ax, ay, afacing, goal_locs} = both
@@ -831,8 +826,6 @@ defmodule CLI.ToyRobotB do
     {q,visited,robot,len,ax,ay,afacing, goal_locs,obs}
     end
 
-    #sends coordinates to A
-    # sending_coor(goal_locs, robot)
     rep(goal_locs, obs,ax,ay,afacing, q,visited,robot,goal_x,goal_y,cli_proc_name, len)
   end
 
@@ -943,7 +936,6 @@ end
 def goX(_ax,_ay,_afacing, goal_locs,%CLI.Position{facing: _facing, x: x, y: _y} = robot, goal_x, goal_y, cli_proc_name,_ob) when x != goal_x do
   {ax,ay,afacing, goal_locs} = receiving_coor(goal_locs)
   robot = move(robot)
-  # IO.puts("hello")
   ob = send_robot_status(robot,cli_proc_name)
   sending_coor(goal_locs, robot)
 
