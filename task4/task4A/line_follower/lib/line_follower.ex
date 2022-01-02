@@ -89,7 +89,7 @@ defmodule LineFollower do
   Note: On executing above function Robot will move forward, backward, left, right
   for 500ms each and then stops
   """
-  def test_motion(stop) when stop == 0 do
+  def test_motion(nodes,stop) when stop == 0 do
     Logger.debug("Testing Motion of the Robot ")
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
@@ -99,51 +99,61 @@ defmodule LineFollower do
     {s1,s2,s3,s4,s5} = set_vals(vals)
     IO.puts("#{s1} #{s2} #{s3} #{s4} #{s5}")
     # Enum.each(motion_list, fn motion -> motor_action(motor_ref,motion) end)
-    {stop,motion_list} = cond do
+    {stop,motion_list,nodes} = cond do
       s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0 ->
-        {1,[@stop]}
+        {1,[@stop],nodes}
       s1 == 0 and s2 == 0 and s3 == 1 and s4 == 0 and s5 == 0 ->
         # motor_action(motor_ref,@forward)
-        {0,[@forward,@stop]}
+        {0,[@forward,@stop],nodes}
       s1 == 1 and s2 == 1 and s3 == 0 and s4 == 0 and s5 == 0 ->
         # motor_action(motor_ref,@right)
-        {0,[@right,@stop]}
+        {0,[@backward,@stop,@right,@stop],nodes}
       s1 == 1 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0 ->
         # motor_action(motor_ref,@right)
-        {0,[@right,@stop]}
+        {0,[@backward,@stop,@right,@stop],nodes}
       s1 == 0 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0 ->
         # motor_action(motor_ref,@right)
-        {0,[@right,@stop]}
+        {0,[@right,@stop],nodes}
       s1 == 0 and s2 == 1 and s3 == 0 and s4 == 0 and s5 == 0 ->
         # motor_action(motor_ref,@right)
-        {0,[@right,@stop]}
+        {0,[@backward,@stop,@right,@stop],nodes}
       s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0 ->
         # motor_action(motor_ref,@right)
-        {0,[@right,@stop]}
+        {0,[@backward,@stop,@right,@stop],nodes}
       s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1 ->
         # motor_action(motor_ref,@left)
-        {0,[@left,@stop]}
+        {0,[@backward,@stop,@left,@stop],nodes}
       s1 == 0 and s2 == 0 and s3 == 0 and s4 == 1 and s5 == 1 ->
         # motor_action(motor_ref,@left)
-        {0,[@left,@stop]}
+        {0,[@backward,@stop,@left,@stop],nodes}
       s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 1 ->
         # motor_action(motor_ref,@left)
-        {0,[@left,@stop]}
+        {0,[@backward,@stop,@left,@stop],nodes}
       s1 == 0 and s2 == 0 and s3 == 1 and  s4 == 1 and s5 == 0 ->
         # motor_action(motor_ref,@left)
-        {0,[@left,@stop]}
+        {0,[@left,@stop],nodes}
       s1 == 0 and s2 == 0 and s3 == 0 and s4 == 1 and s5 == 0 ->
         # motor_action(motor_ref,@left)
-        {0,[@left,@stop]}
+        {0,[@left,@stop],nodes}
+      s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1 ->
+        # motor_action(motor_ref,@left)
+        {0,[@forward,@stop],nodes+1}
+      s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0 ->
+        # motor_action(motor_ref,@left)
+        {0,[@forward,@stop],nodes}
+      s1 == 0 and s2 == 1 and s3 == 0 and s4 == 1 and s5 == 0 ->
+        # motor_action(motor_ref,@left)
+        {0,[@forward,@stop],nodes}
       true ->
         IO.puts("last")
-        {0,[@stop]}
+        {0,[@stop],nodes}
     end
     Enum.each(motion_list, fn motion -> motor_action(motor_ref,motion) end)
-    test_motion(stop)
+    IO.puts(nodes)
+    test_motion(nodes,stop)
   end
 
-  def test_motion(stop) do
+  def test_motion(nodes,stop) do
     Logger.debug("Testing Motion of the Robot ")
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
@@ -164,31 +174,31 @@ defmodule LineFollower do
     {s5, vals} = List.pop_at(vals,0)
 
     IO.puts("#{s1} #{s2} #{s3} #{s4} #{s5}")
-    s1 = if(s1 > 950) do
+    s1 = if(s1 > 900) do
       1
     else
       0
     end
 
-    s2 = if(s2 > 950) do
+    s2 = if(s2 > 900) do
       1
     else
       0
     end
 
-    s3 = if(s3 > 950) do
+    s3 = if(s3 > 900) do
       1
     else
       0
     end
 
-    s4 = if(s4 > 950) do
+    s4 = if(s4 > 900) do
       1
     else
       0
     end
 
-    s5 = if(s5 > 950) do
+    s5 = if(s5 > 900) do
       1
     else
       0
@@ -354,23 +364,24 @@ defmodule LineFollower do
 
     cond do
       motion == @right ->
-        IO.puts("chalgya")
-        pwm(80)
+        pwm(100)
+        Process.sleep(50)
       motion == @left ->
-        IO.puts("chalgya1")
-
-        pwm(80)
+        pwm(100)
+        Process.sleep(50)
       motion == @forward ->
-        IO.puts("chalgya2")
         pwm(150)
+        Process.sleep(100)
+      motion == @backward ->
+        pwm(100)
+        Process.sleep(50)
       true ->
-        IO.puts("chalgya3")
-        pwm(80)
-
+        pwm(150)
+        Process.sleep(50)
     end
 
     # pwm(80)
-    Process.sleep(30)
+
   end
 
   @doc """
