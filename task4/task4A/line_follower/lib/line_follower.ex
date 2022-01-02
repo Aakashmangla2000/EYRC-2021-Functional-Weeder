@@ -89,14 +89,112 @@ defmodule LineFollower do
   Note: On executing above function Robot will move forward, backward, left, right
   for 500ms each and then stops
   """
-  def test_motion do
+  def test_motion(stop) when stop == 0 do
     Logger.debug("Testing Motion of the Robot ")
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
-    motion_list = [@forward,@stop]
-    test_wlf_sensors()
+    # motion_list = [@forward,@stop]
+    vals = test_wlf_sensors()
+    {s1,s2,s3,s4,s5} = set_vals(vals)
+    IO.puts("#{s1} #{s2} #{s3} #{s4} #{s5}")
+    # Enum.each(motion_list, fn motion -> motor_action(motor_ref,motion) end)
+    {stop,motion_list} = cond do
+      s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0 ->
+        {1,[@stop]}
+      s1 == 0 and s2 == 0 and s3 == 1 and s4 == 0 and s5 == 0 ->
+        # motor_action(motor_ref,@forward)
+        {0,[@forward,@stop]}
+      s1 == 1 and s2 == 1 and s3 == 0 and s4 == 0 and s5 == 0 ->
+        # motor_action(motor_ref,@right)
+        {0,[@right,@stop]}
+      s1 == 1 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0 ->
+        # motor_action(motor_ref,@right)
+        {0,[@right,@stop]}
+      s1 == 0 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0 ->
+        # motor_action(motor_ref,@right)
+        {0,[@right,@stop]}
+      s1 == 0 and s2 == 1 and s3 == 0 and s4 == 0 and s5 == 0 ->
+        # motor_action(motor_ref,@right)
+        {0,[@right,@stop]}
+      s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0 ->
+        # motor_action(motor_ref,@right)
+        {0,[@right,@stop]}
+      s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1 ->
+        # motor_action(motor_ref,@left)
+        {0,[@left,@stop]}
+      s1 == 0 and s2 == 0 and s3 == 0 and s4 == 1 and s5 == 1 ->
+        # motor_action(motor_ref,@left)
+        {0,[@left,@stop]}
+      s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 1 ->
+        # motor_action(motor_ref,@left)
+        {0,[@left,@stop]}
+      s1 == 0 and s2 == 0 and s3 == 1 and  s4 == 1 and s5 == 0 ->
+        # motor_action(motor_ref,@left)
+        {0,[@left,@stop]}
+      s1 == 0 and s2 == 0 and s3 == 0 and s4 == 1 and s5 == 0 ->
+        # motor_action(motor_ref,@left)
+        {0,[@left,@stop]}
+      true ->
+        IO.puts("last")
+        {0,[@stop]}
+    end
     Enum.each(motion_list, fn motion -> motor_action(motor_ref,motion) end)
+    test_motion(stop)
+  end
+
+  def test_motion(stop) do
+    Logger.debug("Testing Motion of the Robot ")
+    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+    pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+    Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
+    # motion_list = [@stop]
+    # vals = test_wlf_sensors()
+    # {s1,s2,s3,s4,s5} = set_vals(vals)
+    # IO.puts("#{s1} #{s2} #{s3} #{s4} #{s5}")
+    motor_action(motor_ref,@stop)
+    # Enum.each(motion_list, fn motion -> motor_action(motor_ref,motion) end)
+  end
+
+  def set_vals(vals) do
+    {s1, vals} = List.pop_at(vals,0)
+    {s2, vals} = List.pop_at(vals,0)
+    {s3, vals} = List.pop_at(vals,0)
+    {s4, vals} = List.pop_at(vals,0)
+    {s5, vals} = List.pop_at(vals,0)
+
+    IO.puts("#{s1} #{s2} #{s3} #{s4} #{s5}")
+    s1 = if(s1 > 950) do
+      1
+    else
+      0
+    end
+
+    s2 = if(s2 > 950) do
+      1
+    else
+      0
+    end
+
+    s3 = if(s3 > 950) do
+      1
+    else
+      0
+    end
+
+    s4 = if(s4 > 950) do
+      1
+    else
+      0
+    end
+
+    s5 = if(s5 > 950) do
+      1
+    else
+      0
+    end
+
+    {s1,s2,s3,s4,s5}
   end
 
 
@@ -185,15 +283,17 @@ defmodule LineFollower do
   defp get_lfa_readings(sensor_list, sensor_ref) do
     append_sensor_list = sensor_list ++ [5]
     temp_sensor_list = [5 | append_sensor_list]
-    IO.inspect(append_sensor_list
+    vals = append_sensor_list
         |> Enum.with_index
         |> Enum.map(fn {sens_num, sens_idx} ->
               analog_read(sens_num, sensor_ref, Enum.fetch(temp_sensor_list, sens_idx))
-              end))
+              end)
+    # IO.inspect(IEx.Info.info(vals))
     Enum.each(0..5, fn n -> provide_clock(sensor_ref) end)
     GPIO.write(sensor_ref[:cs], 1)
     Process.sleep(250)
     # get_lfa_readings(sensor_list, sensor_ref)
+    vals
   end
 
   @doc """
@@ -251,7 +351,7 @@ defmodule LineFollower do
   """
   defp motor_action(motor_ref,motion) do
     motor_ref |> Enum.zip(motion) |> Enum.each(fn {{_, ref_no}, value} -> GPIO.write(ref_no, value) end)
-    Process.sleep(500)
+    Process.sleep(30)
   end
 
   @doc """
