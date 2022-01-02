@@ -351,6 +351,25 @@ defmodule LineFollower do
   """
   defp motor_action(motor_ref,motion) do
     motor_ref |> Enum.zip(motion) |> Enum.each(fn {{_, ref_no}, value} -> GPIO.write(ref_no, value) end)
+
+    cond do
+      motion == @right ->
+        IO.puts("chalgya")
+        pwm(80)
+      motion == @left ->
+        IO.puts("chalgya1")
+
+        pwm(80)
+      motion == @forward ->
+        IO.puts("chalgya2")
+        pwm(150)
+      true ->
+        IO.puts("chalgya3")
+        pwm(80)
+
+    end
+
+    # pwm(80)
     Process.sleep(30)
   end
 
