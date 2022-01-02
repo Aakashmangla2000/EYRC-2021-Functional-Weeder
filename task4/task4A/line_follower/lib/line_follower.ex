@@ -31,10 +31,10 @@ defmodule LineFollower do
   @lf_sensor_data %{sensor0: 0, sensor1: 0, sensor2: 0, sensor3: 0, sensor4: 0, sensor5: 0}
   @lf_sensor_map %{0 => :sensor0, 1 => :sensor1, 2 => :sensor2, 3 => :sensor3, 4 => :sensor4, 5 => :sensor5}
 
-  @right [1, 0, 1, 0]
-  @left [0, 1, 0, 1]
-  @forward [0, 1, 1, 0]
-  @backward [1, 0, 0, 1]
+  @left [1, 0, 1, 0]
+  @right [0, 1, 0, 1]
+  @backward [0, 1, 1, 0]
+  @forward [1, 0, 0, 1]
   @stop [0, 0, 0, 0]
 
   @duty_cycles [150, 70, 0]
@@ -94,7 +94,8 @@ defmodule LineFollower do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
-    motion_list = [@forward,@stop,@backward,@stop,@left,@stop,@right,@stop]
+    motion_list = [@forward,@stop]
+    test_wlf_sensors()
     Enum.each(motion_list, fn motion -> motor_action(motor_ref,motion) end)
   end
 
@@ -192,7 +193,7 @@ defmodule LineFollower do
     Enum.each(0..5, fn n -> provide_clock(sensor_ref) end)
     GPIO.write(sensor_ref[:cs], 1)
     Process.sleep(250)
-    get_lfa_readings(sensor_list, sensor_ref)
+    # get_lfa_readings(sensor_list, sensor_ref)
   end
 
   @doc """
