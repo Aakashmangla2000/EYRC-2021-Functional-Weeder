@@ -33,8 +33,8 @@ defmodule LineFollower do
 
   @left [1, 0, 1, 0]
   @right [0, 1, 0, 1]
-  @backward [0, 1, 1, 0]
-  @forward [1, 0, 0, 1]
+  @forward [0, 1, 1, 0]
+  @backward [1, 0, 0, 1]
   @stop [0, 0, 0, 0]
 
   @duty_cycles [150, 70, 0]
@@ -54,7 +54,7 @@ defmodule LineFollower do
     sensor_ref = Enum.map(@sensor_pins, fn {atom, pin_no} -> configure_sensor({atom, pin_no}) end)
     sensor_ref = Enum.map(sensor_ref, fn{_atom, ref_id} -> ref_id end)
     sensor_ref = Enum.zip(@ref_atoms, sensor_ref)
-    get_lfa_readings([1,2,3,4,5], sensor_ref)
+    get_lfa_readings([0,1,2,3,4], sensor_ref)
   end
 
 
@@ -113,7 +113,7 @@ defmodule LineFollower do
         {0,[@backward,@stop,@right,@stop],nodes}
       s1 == 0 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0 ->
         # motor_action(motor_ref,@right)
-        {0,[@right,@stop],nodes}
+        {0,[@backward,@stop,@right,@stop],nodes}
       s1 == 0 and s2 == 1 and s3 == 0 and s4 == 0 and s5 == 0 ->
         # motor_action(motor_ref,@right)
         {0,[@backward,@stop,@right,@stop],nodes}
@@ -131,22 +131,34 @@ defmodule LineFollower do
         {0,[@backward,@stop,@left,@stop],nodes}
       s1 == 0 and s2 == 0 and s3 == 1 and  s4 == 1 and s5 == 0 ->
         # motor_action(motor_ref,@left)
-        {0,[@left,@stop],nodes}
+        {0,[@backward,@stop,@left,@stop],nodes}
       s1 == 0 and s2 == 0 and s3 == 0 and s4 == 1 and s5 == 0 ->
         # motor_action(motor_ref,@left)
-        {0,[@left,@stop],nodes}
+        {0,[@backward,@stop,@left,@stop],nodes}
       s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1 ->
         # motor_action(motor_ref,@left)
-        {0,[@forward,@stop],nodes+1}
+        {0,[@forward,@stop],nodes}
       s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0 ->
         # motor_action(motor_ref,@left)
         {0,[@forward,@stop],nodes}
       s1 == 0 and s2 == 1 and s3 == 0 and s4 == 1 and s5 == 0 ->
         # motor_action(motor_ref,@left)
         {0,[@forward,@stop],nodes}
+      s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1 ->
+        # motor_action(motor_ref,@left)
+        {0,[@forward,@stop],nodes+1}
+      s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1 ->
+        # motor_action(motor_ref,@left)
+        {0,[@backward,@stop],nodes}
+      s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0 ->
+        # motor_action(motor_ref,@left)
+        {0,[@backward,@stop],nodes}
+      s1 == 1 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 1 ->
+        # motor_action(motor_ref,@left)
+        {0,[@backward,@stop],nodes}
       true ->
         IO.puts("last")
-        {0,[@stop],nodes}
+        {0,[@forward,@stop],nodes}
     end
     Enum.each(motion_list, fn motion -> motor_action(motor_ref,motion) end)
     IO.puts(nodes)
@@ -167,6 +179,7 @@ defmodule LineFollower do
   end
 
   def set_vals(vals) do
+    {s0, vals} = List.pop_at(vals,0)
     {s1, vals} = List.pop_at(vals,0)
     {s2, vals} = List.pop_at(vals,0)
     {s3, vals} = List.pop_at(vals,0)
@@ -364,20 +377,20 @@ defmodule LineFollower do
 
     cond do
       motion == @right ->
-        pwm(100)
-        Process.sleep(50)
+        pwm(110)
+        Process.sleep(80)
       motion == @left ->
-        pwm(100)
-        Process.sleep(50)
+        pwm(110)
+        Process.sleep(80)
       motion == @forward ->
         pwm(150)
-        Process.sleep(100)
+        Process.sleep(150)
       motion == @backward ->
         pwm(100)
         Process.sleep(50)
       true ->
         pwm(150)
-        Process.sleep(50)
+        Process.sleep(100)
     end
 
     # pwm(80)
