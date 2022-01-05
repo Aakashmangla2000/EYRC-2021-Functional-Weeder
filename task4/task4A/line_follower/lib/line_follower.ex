@@ -31,8 +31,8 @@ defmodule LineFollower do
   @lf_sensor_data %{sensor0: 0, sensor1: 0, sensor2: 0, sensor3: 0, sensor4: 0, sensor5: 0}
   @lf_sensor_map %{0 => :sensor0, 1 => :sensor1, 2 => :sensor2, 3 => :sensor3, 4 => :sensor4, 5 => :sensor5}
 
-  @left [1, 0, 1, 0]
-  @right [0, 1, 0, 1]
+  @left [1, 0, 0, 0]
+  @right [0, 0, 0, 1]
   @forward [0, 1, 1, 0]
   @backward [1, 0, 0, 1]
   @stop [0, 0, 0, 0]
@@ -77,6 +77,230 @@ defmodule LineFollower do
     ir_values = Enum.map(ir_ref,fn {_, ref_no} -> GPIO.read(ref_no) end)
   end
 
+  def calibrate_400(cal_min,cal_max,val) when val < 400 do
+    {min,max} = calibrate()
+
+    {maxs1,maxs2,maxs3,maxs4,maxs5} = max
+    {mins1,mins2,mins3,mins4,mins5} = min
+
+    if(maxs1 < s1) do
+      maxs1 = s1
+    end
+    if(mins1 > s1) do
+      mins1 = s1
+    end
+
+    if(maxs2 < s2) do
+      maxs2 = s2
+    end
+    if(mins2 > s2) do
+      mins2 = s2
+    end
+
+    if(maxs3 < s3) do
+      maxs3 = s3
+    end
+    if(mins3 > s3) do
+      mins3 = s3
+    end
+
+    if(maxs4 < s4) do
+      maxs4 = s4
+    end
+    if(mins4 > s4) do
+      mins4 = s4
+    end
+
+    if(maxs5 < s5) do
+      maxs5 = s5
+    end
+    if(mins5 > s5) do
+      mins5 = s5
+    end
+
+    max = {maxs1,maxs2,maxs3,maxs4,maxs5}
+    min = {mins1,mins2,mins3,mins4,mins5}
+
+    calibrate_400(min,max,val+1)
+  end
+
+  def calibrate_400(cal_min,cal_max,val) do
+    {cal_min,cal_max}
+  end
+
+  def calibrate do
+    max = {0,0,0,0,0}
+    min = {0,0,0,0,0}
+
+    {max,min} = run_ten_times(max,min,0)
+    {maxs1,maxs2,maxs3,maxs4,maxs5} = max
+    {mins1,mins2,mins3,mins4,mins5} = min
+    {min,max}
+  end
+
+  def run_ten_times(max,min,val) when val < 10 do
+    vals = test_wlf_sensors()
+    {maxs1,maxs2,maxs3,maxs4,maxs5} = max
+    {mins1,mins2,mins3,mins4,mins5} = min
+    {s0, vals} = List.pop_at(vals,0)
+    {s1, vals} = List.pop_at(vals,0)
+    {s2, vals} = List.pop_at(vals,0)
+    {s3, vals} = List.pop_at(vals,0)
+    {s4, vals} = List.pop_at(vals,0)
+    {s5, vals} = List.pop_at(vals,0)
+
+    if(maxs1 < s1) do
+      maxs1 = s1
+    end
+    if(mins1 > s1) do
+      mins1 = s1
+    end
+
+    if(maxs2 < s2) do
+      maxs2 = s2
+    end
+    if(mins2 > s2) do
+      mins2 = s2
+    end
+
+    if(maxs3 < s3) do
+      maxs3 = s3
+    end
+    if(mins3 > s3) do
+      mins3 = s3
+    end
+
+    if(maxs4 < s4) do
+      maxs4 = s4
+    end
+    if(mins4 > s4) do
+      mins4 = s4
+    end
+
+    if(maxs5 < s5) do
+      maxs5 = s5
+    end
+    if(mins5 > s5) do
+      mins5 = s5
+    end
+
+
+    max = {maxs1,maxs2,maxs3,maxs4,maxs5}
+    min = {mins1,mins2,mins3,mins4,mins5}
+    run_ten_times(max,min,val+1)
+  end
+
+  def run_ten_times(max,min,val) do
+    {max,min}
+  end
+
+  def pid() do
+    Logger.debug("PID")
+    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+    pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+    Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
+
+    maximum = 35;
+    integral = 0;
+    last_proportional = 0
+    max = {0,0,0,0,0}
+    min = {0,0,0,0,0}
+    {cal_min,cal_max} = calibrate_400(mix,max,0)
+    last_value = 0
+
+    forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
+  end
+
+  def forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) do
+    sensor_vals = read_calibrated(cal_min,cal_max)
+    position = read_line(sensor_vals,last_value,0,0,0)
+
+    proportional = position - 2000
+
+		# Compute the derivative (change) and integral (sum) of the position.
+		derivative = proportional - last_proportional
+		integral += proportional
+
+		# Remember the last position.
+		last_proportional = proportional
+
+		power_difference = proportional/25 + derivative/100 #+ integral/1000;
+
+		power_difference = if (power_difference > maximum) do
+			maximum
+		power_difference = if (power_difference < (0 - maximum)):
+      0	- maximum
+		if (power_difference < 0) do
+			pwmb(maximum + power_difference)
+			pwma(maximum);
+		else
+			pwmb(maximum);
+			pwma(maximum - power_difference)
+    end
+    forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
+  end
+
+  def read_calibrated(cal_min,cal_max) do
+    vals = test_wlf_sensors()
+    {s0, vals} = List.pop_at(vals,0)
+    sens_vals(cal_min,cal_max,0,0,vals)
+  end
+
+  def sens_vals(cal_min,cal_max,denominator,value,sensor_vals) when val < 5 do
+    denominator = Enum.at(cal_max,val) - Enum.at(cal_min,val)
+
+    value = if(denominator != 0) do
+      ((Enum.at(sensor_vals,val) - Enum.at(cal_min,val))* 1000) / denominator
+    end
+
+    value = if(value < 0) do
+      0
+    end
+    value = if(value > 1000) do
+      1000
+    end
+    sensor_vals = List.replace_at(sensor_vals,val,value)
+    sens_vals(cal_min,cal_max,denominator,value,sensor_vals)
+  end
+
+  def sens_vals(cal_min,cal_max,denominator,value,sensor_vals) do
+    sensor_vals
+  end
+
+  def read_line(sensor_vals,last_value,avg,sum,on_line) do
+    {avg,sum,on_line} = set_on_line(0,sensor_vals,avg,sum,on_line)
+
+    if(on_line != 1) do
+      if(last_value < (5 - 1)*1000/2) do
+        0
+      else
+        (5 - 1)*1000
+      end
+    else
+      avg/sum
+    end
+  end
+
+  def set_on_line(val,sensor_vals,avg,sum,on_line) when val < 5 do
+    value = Enum.at(sensor_vals,0)
+    value = 1000-value
+    on_line = if(value > 200) do
+      1
+    end
+
+    # only average in values that are above a noise threshold
+    {avg,sum} = if(value > 50) do
+      avg += value * (i * 1000);  # this is for the weighted total,
+      sum += value;
+      {avg,sum}
+    end
+    set_on_line(val+1,sensor_vals,avg,sum,on_line)
+  end
+
+  def set_on_line(val,sensor_vals,avg,sum,on_line) do
+    {avg,sum,on_line}
+  end
+
 
   @doc """
   Tests motion of the Robot
@@ -95,6 +319,7 @@ defmodule LineFollower do
     pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
     # motion_list = [@forward,@stop]
+    # {cal_min,cal_max} = calibrate_400(min,max,0)
     vals = test_wlf_sensors()
     {s1,s2,s3,s4,s5} = set_vals(vals)
     IO.puts("#{s1} #{s2} #{s3} #{s4} #{s5}")
@@ -413,5 +638,13 @@ defmodule LineFollower do
   """
   defp pwm(duty) do
     Enum.each(@pwm_pins, fn {_atom, pin_no} -> Pigpiox.Pwm.gpio_pwm(pin_no, duty) end)
+  end
+
+  def pwma(duty) do
+    Pigpiox.Pwm.gpio_pwm(6, duty)
+  end
+
+  def pwmb(duty) do
+    Pigpiox.Pwm.gpio_pwm(26, duty)
   end
 end
