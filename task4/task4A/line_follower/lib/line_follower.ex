@@ -219,7 +219,7 @@ defmodule LineFollower do
 
 		# Compute the derivative (change) and integral (sum) of the position.
 		derivative = proportional - last_proportional
-		integral += proportional
+		integral = integral + proportional
 
 		# Remember the last position.
 		last_proportional = proportional
@@ -292,8 +292,8 @@ defmodule LineFollower do
 
     # only average in values that are above a noise threshold
     {avg,sum} = if(value > 50) do
-      avg += value * (i * 1000);  # this is for the weighted total,
-      sum += value;
+      avg = avg + value * (i * 1000);  # this is for the weighted total,
+      sum = sum + value;
       {avg,sum}
     end
     set_on_line(val+1,sensor_vals,avg,sum,on_line)
