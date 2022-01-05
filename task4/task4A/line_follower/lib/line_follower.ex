@@ -228,13 +228,15 @@ defmodule LineFollower do
 
 		power_difference = if (power_difference > maximum) do
 			maximum
-		power_difference = if (power_difference < (0 - maximum)):
+    end
+		power_difference = if (power_difference < (0 - maximum)) do
       0	- maximum
+    end
 		if (power_difference < 0) do
 			pwmb(maximum + power_difference)
-			pwma(maximum);
+			pwma(maximum)
 		else
-			pwmb(maximum);
+			pwmb(maximum)
 			pwma(maximum - power_difference)
     end
     forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
