@@ -50,7 +50,7 @@ defmodule LineFollower do
       [0, 449, 356, 312, 321, 267]  // on black surface
   """
   def test_wlf_sensors do
-    Logger.debug("Testing white line sensors connected ")
+    # Logger.debug("Testing white line sensors connected ")
     sensor_ref = Enum.map(@sensor_pins, fn {atom, pin_no} -> configure_sensor({atom, pin_no}) end)
     sensor_ref = Enum.map(sensor_ref, fn{_atom, ref_id} -> ref_id end)
     sensor_ref = Enum.zip(@ref_atoms, sensor_ref)
@@ -77,51 +77,55 @@ defmodule LineFollower do
     ir_values = Enum.map(ir_ref,fn {_, ref_no} -> GPIO.read(ref_no) end)
   end
 
-  def calibrate_400(cal_min,cal_max,val) when val < 400 do
+  def calibrate_400(cal_min,cal_max,val) when val < 10 do
+    IO.puts("Calibrating #{val} time")
     {min,max} = calibrate()
 
     {maxs1,maxs2,maxs3,maxs4,maxs5} = max
     {mins1,mins2,mins3,mins4,mins5} = min
 
-    if(maxs1 < s1) do
-      maxs1 = s1
+    {cal_maxs1,cal_maxs2,cal_maxs3,cal_maxs4,cal_maxs5} = cal_max
+    {cal_mins1,cal_mins2,cal_mins3,cal_mins4,cal_mins5} = cal_min
+
+    if(maxs1 < cal_maxs1) do
+      cal_maxs1 = maxs1
     end
-    if(mins1 > s1) do
-      mins1 = s1
+    if(mins1 > cal_mins1) do
+      cal_mins1 = mins1
     end
 
-    if(maxs2 < s2) do
-      maxs2 = s2
+    if(maxs2 < cal_maxs2) do
+      cal_maxs2 = maxs2
     end
-    if(mins2 > s2) do
-      mins2 = s2
-    end
-
-    if(maxs3 < s3) do
-      maxs3 = s3
-    end
-    if(mins3 > s3) do
-      mins3 = s3
+    if(mins2 > cal_mins2) do
+      cal_mins2 = mins2
     end
 
-    if(maxs4 < s4) do
-      maxs4 = s4
+    if(maxs3 < cal_maxs3) do
+      cal_maxs3 = maxs3
     end
-    if(mins4 > s4) do
-      mins4 = s4
-    end
-
-    if(maxs5 < s5) do
-      maxs5 = s5
-    end
-    if(mins5 > s5) do
-      mins5 = s5
+    if(mins3 > cal_mins3) do
+      cal_mins3 = mins3
     end
 
-    max = {maxs1,maxs2,maxs3,maxs4,maxs5}
-    min = {mins1,mins2,mins3,mins4,mins5}
+    if(maxs4 < cal_maxs4) do
+      cal_maxs4 = maxs4
+    end
+    if(mins4 > cal_mins4) do
+      cal_mins4 = mins4
+    end
 
-    calibrate_400(min,max,val+1)
+    if(maxs5 < cal_maxs5) do
+      cal_maxs5 = maxs5
+    end
+    if(mins5 > cal_mins5) do
+      cal_mins5 = mins5
+    end
+
+    cal_max = {cal_maxs1,cal_maxs2,cal_maxs3,cal_maxs4,cal_maxs5}
+    cal_min = {cal_mins1,cal_mins2,cal_mins3,cal_mins4,cal_mins5}
+
+    calibrate_400(cal_min,cal_max,val+1)
   end
 
   def calibrate_400(cal_min,cal_max,val) do
@@ -139,6 +143,7 @@ defmodule LineFollower do
   end
 
   def run_ten_times(max,min,val) when val < 10 do
+    # IO.puts("Running #{val}th time")
     vals = test_wlf_sensors()
     {maxs1,maxs2,maxs3,maxs4,maxs5} = max
     {mins1,mins2,mins3,mins4,mins5} = min
@@ -205,15 +210,27 @@ defmodule LineFollower do
     last_proportional = 0
     max = {0,0,0,0,0}
     min = {0,0,0,0,0}
-    {cal_min,cal_max} = calibrate_400(mix,max,0)
+    {cal_min,cal_max} = calibrate_400(min,max,0)
+
+    {cal_maxs1,cal_maxs2,cal_maxs3,cal_maxs4,cal_maxs5} = cal_max
+    {cal_mins1,cal_mins2,cal_mins3,cal_mins4,cal_mins5} = cal_min
+
     last_value = 0
 
-    forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
+    cal_max = [cal_maxs1,cal_maxs2,cal_maxs3,cal_maxs4,cal_maxs5]
+    cal_min = [cal_mins1,cal_mins2,cal_mins3,cal_mins4,cal_mins5]
+
+    motor_action(motor_ref,@forward)
+    pwm(35)
+    forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,0)
   end
 
   def forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) do
+    IO.puts("Going Forward")
     sensor_vals = read_calibrated(cal_min,cal_max)
+    IO.puts("1")
     position = read_line(sensor_vals,last_value,0,0,0)
+    IO.puts("2")
 
     proportional = position - 2000
 
@@ -233,9 +250,11 @@ defmodule LineFollower do
       0	- maximum
     end
 		if (power_difference < 0) do
+      IO.puts("b #{maximum + power_difference} a #{maximum}")
 			pwmb(maximum + power_difference)
 			pwma(maximum)
 		else
+      IO.puts("b #{maximum} a #{maximum - power_difference}")
 			pwmb(maximum)
 			pwma(maximum - power_difference)
     end
@@ -245,10 +264,10 @@ defmodule LineFollower do
   def read_calibrated(cal_min,cal_max) do
     vals = test_wlf_sensors()
     {s0, vals} = List.pop_at(vals,0)
-    sens_vals(cal_min,cal_max,0,0,vals)
+    sens_vals(0,cal_min,cal_max,0,0,vals)
   end
 
-  def sens_vals(cal_min,cal_max,denominator,value,sensor_vals) when val < 5 do
+  def sens_vals(val,cal_min,cal_max,denominator,value,sensor_vals) when val < 5 do
     denominator = Enum.at(cal_max,val) - Enum.at(cal_min,val)
 
     value = if(denominator != 0) do
@@ -262,10 +281,10 @@ defmodule LineFollower do
       1000
     end
     sensor_vals = List.replace_at(sensor_vals,val,value)
-    sens_vals(cal_min,cal_max,denominator,value,sensor_vals)
+    sens_vals(val,cal_min,cal_max,denominator,value,sensor_vals)
   end
 
-  def sens_vals(cal_min,cal_max,denominator,value,sensor_vals) do
+  def sens_vals(val,cal_min,cal_max,denominator,value,sensor_vals) do
     sensor_vals
   end
 
@@ -292,7 +311,7 @@ defmodule LineFollower do
 
     # only average in values that are above a noise threshold
     {avg,sum} = if(value > 50) do
-      avg = avg + value * (i * 1000);  # this is for the weighted total,
+      avg = avg + value * (val * 1000);  # this is for the weighted total,
       sum = sum + value;
       {avg,sum}
     end
