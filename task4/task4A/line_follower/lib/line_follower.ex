@@ -5,6 +5,8 @@ defmodule LineFollower do
 
   require Logger
   use Bitwise
+  alias Integer
+  alias Decimal
   alias Circuits.GPIO
 
   @doc """
@@ -81,8 +83,8 @@ defmodule LineFollower do
     IO.puts("Calibrating #{val} time")
     {min,max} = calibrate()
 
-    IO.puts("max in calibrate #{inspect(max)}")
-    IO.puts("min in calibrate #{inspect(min)}")
+    # IO.puts("max in calibrate #{inspect(max)}")
+    # IO.puts("min in calibrate #{inspect(min)}")
 
     {maxs1,maxs2,maxs3,maxs4,maxs5} = max
     {mins1,mins2,mins3,mins4,mins5} = min
@@ -153,8 +155,8 @@ defmodule LineFollower do
     cal_max = {cal_maxs1,cal_maxs2,cal_maxs3,cal_maxs4,cal_maxs5}
     cal_min = {cal_mins1,cal_mins2,cal_mins3,cal_mins4,cal_mins5}
 
-    IO.puts("cal max in calibrate #{inspect(cal_max)}")
-    IO.puts("cal min in calibrate #{inspect(cal_min)}")
+    # IO.puts("cal max in calibrate #{inspect(cal_max)}")
+    # IO.puts("cal min in calibrate #{inspect(cal_min)}")
 
     calibrate_400(cal_min,cal_max,val+1)
   end
@@ -271,6 +273,7 @@ defmodule LineFollower do
     last_proportional = 0
     max = {1023,1023,1023,1023,1023}
     min = {0,0,0,0,0}
+    motor_action(motor_ref,@stop)
     {cal_min,cal_max} = calibrate_400(min,max,0)
 
     {cal_maxs1,cal_maxs2,cal_maxs3,cal_maxs4,cal_maxs5} = cal_max
@@ -290,7 +293,8 @@ defmodule LineFollower do
   def forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) do
     IO.puts("Going Forward")
     sensor_vals = read_calibrated(cal_min,cal_max)
-    # IO.puts("1")
+    IO.puts("after calibration sensor vals #{inspect(sensor_vals)}")
+
     position = read_line(sensor_vals,last_value,0,0,0)
     # IO.puts("2")
 
@@ -304,13 +308,21 @@ defmodule LineFollower do
 		last_proportional = proportional
 
 		power_difference = proportional/25 + derivative/100 #+ integral/1000;
+    power_difference = Kernel.round(power_difference)
 
 		power_difference = if (power_difference > maximum) do
 			maximum
+    else
+      power_difference
     end
+
 		power_difference = if (power_difference < (0 - maximum)) do
       0	- maximum
+    else
+      power_difference
     end
+    IO.puts("power #{inspect(power_difference)}")
+
 		if (power_difference < 0) do
       IO.puts("b #{maximum + power_difference} a #{maximum}")
 			pwmb(maximum + power_difference)
@@ -337,19 +349,28 @@ defmodule LineFollower do
     IO.inspect(cal_min)
 
     denominator = Enum.at(cal_max,val) - Enum.at(cal_min,val)
+    IO.puts("denominator #{inspect(denominator)}")
+
 
     value = if(denominator != 0) do
-      ((Enum.at(sensor_vals,val) - Enum.at(cal_min,val))* 1000) / denominator
-
+      Integer.floor_div(((Enum.at(sensor_vals,val) - Enum.at(cal_min,val))* 1000), denominator)
     end
 
-    value = if(value < 0) do
+    IO.puts("value before #{inspect(value)}")
+
+    value = if(value < 0 or value == 0) do
       0
+    else
+      value
     end
-    value = if(value > 1000) do
+    value = if(value > 1000 or value == 1000) do
       1000
+    else
+      value
     end
+    IO.puts("value after #{inspect(value)}")
     sensor_vals = List.replace_at(sensor_vals,val,value)
+    IO.puts("sensor-vals in sensvals #{inspect(sensor_vals)}")
     sens_vals(val+1,cal_min,cal_max,denominator,value,sensor_vals)
   end
 
@@ -372,7 +393,9 @@ defmodule LineFollower do
   end
 
   def set_on_line(val,sensor_vals,avg,sum,on_line) when val < 5 do
+    # IO.puts("Sensor value #{inspect(sensor_vals)}")
     value = Enum.at(sensor_vals,0)
+    # IO.puts("set-on-line-value #{inspect(value)}")
     value = 1000-value
     on_line = if(value > 200) do
       1
@@ -381,7 +404,7 @@ defmodule LineFollower do
     end
 
     # only average in values that are above a noise threshold
-    IO.puts("value #{inspect(value)}")
+    # IO.puts("value #{inspect(value)}")
     {avg,sum} = if(value > 50) do
       avg = avg + value * (val * 1000)  # this is for the weighted total,
       sum = sum + value
