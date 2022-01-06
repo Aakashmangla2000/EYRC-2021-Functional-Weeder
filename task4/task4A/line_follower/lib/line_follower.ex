@@ -81,49 +81,80 @@ defmodule LineFollower do
     IO.puts("Calibrating #{val} time")
     {min,max} = calibrate()
 
+    IO.puts("max in calibrate #{inspect(max)}")
+    IO.puts("min in calibrate #{inspect(min)}")
+
     {maxs1,maxs2,maxs3,maxs4,maxs5} = max
     {mins1,mins2,mins3,mins4,mins5} = min
 
     {cal_maxs1,cal_maxs2,cal_maxs3,cal_maxs4,cal_maxs5} = cal_max
     {cal_mins1,cal_mins2,cal_mins3,cal_mins4,cal_mins5} = cal_min
 
-    if(maxs1 < cal_maxs1) do
-      cal_maxs1 = maxs1
-    end
-    if(mins1 > cal_mins1) do
-      cal_mins1 = mins1
-    end
-
-    if(maxs2 < cal_maxs2) do
-      cal_maxs2 = maxs2
-    end
-    if(mins2 > cal_mins2) do
-      cal_mins2 = mins2
+    cal_maxs1 = if(maxs1 < cal_maxs1) do
+      maxs1
+    else
+      cal_maxs1
     end
 
-    if(maxs3 < cal_maxs3) do
-      cal_maxs3 = maxs3
-    end
-    if(mins3 > cal_mins3) do
-      cal_mins3 = mins3
-    end
-
-    if(maxs4 < cal_maxs4) do
-      cal_maxs4 = maxs4
-    end
-    if(mins4 > cal_mins4) do
-      cal_mins4 = mins4
+    cal_mins1 = if(mins1 > cal_mins1) do
+      mins1
+    else
+      cal_mins1
     end
 
-    if(maxs5 < cal_maxs5) do
-      cal_maxs5 = maxs5
+    cal_maxs2 = if(maxs2 < cal_maxs2) do
+      maxs2
+    else
+      cal_maxs2
     end
-    if(mins5 > cal_mins5) do
-      cal_mins5 = mins5
+
+    cal_mins2 = if(mins2 > cal_mins2) do
+      mins2
+    else
+      cal_mins2
+    end
+
+    cal_maxs3 = if(maxs3 < cal_maxs3) do
+      maxs3
+    else
+      cal_maxs3
+    end
+
+    cal_mins3 = if(mins3 > cal_mins3) do
+      mins3
+    else
+      cal_mins3
+    end
+
+    cal_maxs4 = if(maxs4 < cal_maxs4) do
+      maxs4
+    else
+      cal_maxs4
+    end
+
+    cal_mins4 = if(mins4 > cal_mins4) do
+      mins4
+    else
+      cal_mins4
+    end
+
+    cal_maxs5 = if(maxs5 < cal_maxs5) do
+      maxs5
+    else
+      cal_maxs5
+    end
+
+    cal_mins5 = if(mins5 > cal_mins5) do
+      mins5
+    else
+      cal_mins5
     end
 
     cal_max = {cal_maxs1,cal_maxs2,cal_maxs3,cal_maxs4,cal_maxs5}
     cal_min = {cal_mins1,cal_mins2,cal_mins3,cal_mins4,cal_mins5}
+
+    IO.puts("cal max in calibrate #{inspect(cal_max)}")
+    IO.puts("cal min in calibrate #{inspect(cal_min)}")
 
     calibrate_400(cal_min,cal_max,val+1)
   end
@@ -135,6 +166,7 @@ defmodule LineFollower do
   def calibrate do
     max = {0,0,0,0,0}
     min = {0,0,0,0,0}
+    IO.puts("in calibrate")
 
     {max,min} = run_ten_times(max,min,0)
     {maxs1,maxs2,maxs3,maxs4,maxs5} = max
@@ -145,8 +177,11 @@ defmodule LineFollower do
   def run_ten_times(max,min,val) when val < 10 do
     # IO.puts("Running #{val}th time")
     vals = test_wlf_sensors()
+    # IO.puts("sensor vals#{inspect(vals)}")
+
     {maxs1,maxs2,maxs3,maxs4,maxs5} = max
     {mins1,mins2,mins3,mins4,mins5} = min
+    # IO.puts("max old #{inspect(max)}")
     {s0, vals} = List.pop_at(vals,0)
     {s1, vals} = List.pop_at(vals,0)
     {s2, vals} = List.pop_at(vals,0)
@@ -154,44 +189,70 @@ defmodule LineFollower do
     {s4, vals} = List.pop_at(vals,0)
     {s5, vals} = List.pop_at(vals,0)
 
-    if(maxs1 < s1) do
-      maxs1 = s1
-    end
-    if(mins1 > s1) do
-      mins1 = s1
-    end
-
-    if(maxs2 < s2) do
-      maxs2 = s2
-    end
-    if(mins2 > s2) do
-      mins2 = s2
+    maxs1 = if(maxs1 < s1) do
+      s1
+    else
+      maxs1
     end
 
-    if(maxs3 < s3) do
-      maxs3 = s3
-    end
-    if(mins3 > s3) do
-      mins3 = s3
-    end
-
-    if(maxs4 < s4) do
-      maxs4 = s4
-    end
-    if(mins4 > s4) do
-      mins4 = s4
+    mins1 = if(mins1 > s1) do
+      s1
+    else
+      mins1
     end
 
-    if(maxs5 < s5) do
-      maxs5 = s5
+    maxs2 = if(maxs2 < s2) do
+      s2
+    else
+      maxs2
     end
-    if(mins5 > s5) do
-      mins5 = s5
+
+    mins2 = if(mins2 > s2) do
+      s2
+    else
+      mins2
+    end
+
+    maxs3 = if(maxs3 < s3) do
+     s3
+    else
+      maxs3
+    end
+
+    mins3 = if(mins3 > s3) do
+      s3
+    else
+      mins3
+    end
+
+    maxs4 = if(maxs4 < s4) do
+      s4
+    else
+      maxs4
+    end
+
+    mins4 = if(mins4 > s4) do
+      s4
+    else
+      mins4
+    end
+
+    maxs5 = if(maxs5 < s5) do
+      s5
+    else
+      maxs5
+    end
+
+    mins5 = if(mins5 > s5) do
+      s5
+    else
+      mins5
     end
 
 
     max = {maxs1,maxs2,maxs3,maxs4,maxs5}
     min = {mins1,mins2,mins3,mins4,mins5}
+    # IO.puts("max new #{inspect(max)}")
     run_ten_times(max,min,val+1)
   end
 
@@ -208,7 +269,7 @@ defmodule LineFollower do
     maximum = 35;
     integral = 0;
     last_proportional = 0
-    max = {0,0,0,0,0}
+    max = {1023,1023,1023,1023,1023}
     min = {0,0,0,0,0}
     {cal_min,cal_max} = calibrate_400(min,max,0)
 
@@ -220,8 +281,9 @@ defmodule LineFollower do
     cal_max = [cal_maxs1,cal_maxs2,cal_maxs3,cal_maxs4,cal_maxs5]
     cal_min = [cal_mins1,cal_mins2,cal_mins3,cal_mins4,cal_mins5]
 
+    # Process.sleep(0.5)
     motor_action(motor_ref,@forward)
-    pwm(35)
+    pwm(30)
     forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,0)
   end
 
@@ -262,16 +324,23 @@ defmodule LineFollower do
   end
 
   def read_calibrated(cal_min,cal_max) do
+    IO.puts("in read cali")
     vals = test_wlf_sensors()
+    IO.inspect(vals)
     {s0, vals} = List.pop_at(vals,0)
     sens_vals(0,cal_min,cal_max,0,0,vals)
   end
 
   def sens_vals(val,cal_min,cal_max,denominator,value,sensor_vals) when val < 5 do
+    IO.puts("in sens vals")
+    IO.inspect(cal_max)
+    IO.inspect(cal_min)
+
     denominator = Enum.at(cal_max,val) - Enum.at(cal_min,val)
 
     value = if(denominator != 0) do
       ((Enum.at(sensor_vals,val) - Enum.at(cal_min,val))* 1000) / denominator
+
     end
 
     value = if(value < 0) do
@@ -281,7 +350,7 @@ defmodule LineFollower do
       1000
     end
     sensor_vals = List.replace_at(sensor_vals,val,value)
-    sens_vals(val,cal_min,cal_max,denominator,value,sensor_vals)
+    sens_vals(val+1,cal_min,cal_max,denominator,value,sensor_vals)
   end
 
   def sens_vals(val,cal_min,cal_max,denominator,value,sensor_vals) do
@@ -307,12 +376,17 @@ defmodule LineFollower do
     value = 1000-value
     on_line = if(value > 200) do
       1
+    else
+      on_line
     end
 
     # only average in values that are above a noise threshold
+    IO.inspect(value)
     {avg,sum} = if(value > 50) do
-      avg = avg + value * (val * 1000);  # this is for the weighted total,
-      sum = sum + value;
+      avg = avg + value * (val * 1000)  # this is for the weighted total,
+      sum = sum + value
+      {avg,sum}
+    else
       {avg,sum}
     end
     set_on_line(val+1,sensor_vals,avg,sum,on_line)
@@ -621,23 +695,24 @@ defmodule LineFollower do
   defp motor_action(motor_ref,motion) do
     motor_ref |> Enum.zip(motion) |> Enum.each(fn {{_, ref_no}, value} -> GPIO.write(ref_no, value) end)
 
-    cond do
-      motion == @right ->
-        pwm(110)
-        Process.sleep(80)
-      motion == @left ->
-        pwm(110)
-        Process.sleep(80)
-      motion == @forward ->
-        pwm(150)
-        Process.sleep(150)
-      motion == @backward ->
-        pwm(100)
-        Process.sleep(50)
-      true ->
-        pwm(150)
-        Process.sleep(100)
-    end
+
+    # cond do
+    #   motion == @right ->
+    #     pwm(110)
+    #     Process.sleep(80)
+    #   motion == @left ->
+    #     pwm(110)
+    #     Process.sleep(80)
+    #   motion == @forward ->
+    #     pwm(150)
+    #     Process.sleep(150)
+    #   motion == @backward ->
+    #     pwm(100)
+    #     Process.sleep(50)
+    #   true ->
+    #     pwm(150)
+    #     Process.sleep(100)
+    # end
 
     # pwm(80)
 
