@@ -213,7 +213,7 @@ defmodule LineFollower do
       mins2
     end
 
-    maxs3 = if(maxs3 < s3 or val == 0 do
+    maxs3 = if(maxs3 < s3 or val == 0) do
      s3
     else
       maxs3
@@ -290,9 +290,9 @@ defmodule LineFollower do
   def forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) do
     IO.puts("Going Forward")
     sensor_vals = read_calibrated(cal_min,cal_max)
-    IO.puts("1")
+    # IO.puts("1")
     position = read_line(sensor_vals,last_value,0,0,0)
-    IO.puts("2")
+    # IO.puts("2")
 
     proportional = position - 2000
 
@@ -381,7 +381,7 @@ defmodule LineFollower do
     end
 
     # only average in values that are above a noise threshold
-    IO.inspect(value)
+    IO.puts("value #{inspect(value)}")
     {avg,sum} = if(value > 50) do
       avg = avg + value * (val * 1000)  # this is for the weighted total,
       sum = sum + value
