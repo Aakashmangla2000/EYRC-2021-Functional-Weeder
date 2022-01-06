@@ -293,10 +293,11 @@ defmodule LineFollower do
   def forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) do
     IO.puts("Going Forward")
     sensor_vals = read_calibrated(cal_min,cal_max)
-    IO.puts("after calibration sensor vals #{inspect(sensor_vals)}")
+    # IO.puts("after calibration sensor vals #{inspect(sensor_vals)}")
 
     position = read_line(sensor_vals,last_value,0,0,0)
-    # IO.puts("2")
+    IO.puts("position #{inspect(position)}")
+
 
     proportional = position - 2000
 
@@ -338,39 +339,39 @@ defmodule LineFollower do
   def read_calibrated(cal_min,cal_max) do
     IO.puts("in read cali")
     vals = test_wlf_sensors()
-    IO.inspect(vals)
+    # IO.inspect(vals)
     {s0, vals} = List.pop_at(vals,0)
     sens_vals(0,cal_min,cal_max,0,0,vals)
   end
 
   def sens_vals(val,cal_min,cal_max,denominator,value,sensor_vals) when val < 5 do
     IO.puts("in sens vals")
-    IO.inspect(cal_max)
-    IO.inspect(cal_min)
+    # IO.inspect(cal_max)
+    # IO.inspect(cal_min)
 
     denominator = Enum.at(cal_max,val) - Enum.at(cal_min,val)
-    IO.puts("denominator #{inspect(denominator)}")
+    # IO.puts("denominator #{inspect(denominator)}")
 
 
     value = if(denominator != 0) do
-      Integer.floor_div(((Enum.at(sensor_vals,val) - Enum.at(cal_min,val))* 1000), denominator)
+      Kernel.div(((Enum.at(sensor_vals,val) - Enum.at(cal_min,val))* 1000), denominator)
     end
 
     IO.puts("value before #{inspect(value)}")
 
-    value = if(value < 0 or value == 0) do
+    value = if(value < 0) do
       0
     else
       value
     end
-    value = if(value > 1000 or value == 1000) do
+    value = if(value > 1000) do
       1000
     else
       value
     end
-    IO.puts("value after #{inspect(value)}")
+    # IO.puts("value after #{inspect(value)}")
     sensor_vals = List.replace_at(sensor_vals,val,value)
-    IO.puts("sensor-vals in sensvals #{inspect(sensor_vals)}")
+    # IO.puts("sensor-vals in sensvals #{inspect(sensor_vals)}")
     sens_vals(val+1,cal_min,cal_max,denominator,value,sensor_vals)
   end
 
@@ -382,20 +383,20 @@ defmodule LineFollower do
     {avg,sum,on_line} = set_on_line(0,sensor_vals,avg,sum,on_line)
 
     if(on_line != 1) do
-      if(last_value < (5 - 1)*1000/2) do
+      if(last_value < ((5 - 1)*1000)/2) do
         0
       else
         (5 - 1)*1000
       end
     else
-      avg/sum
+      Kernel.div(avg, sum)
     end
   end
 
   def set_on_line(val,sensor_vals,avg,sum,on_line) when val < 5 do
-    # IO.puts("Sensor value #{inspect(sensor_vals)}")
-    value = Enum.at(sensor_vals,0)
-    # IO.puts("set-on-line-value #{inspect(value)}")
+    IO.puts("Sensor value #{inspect(sensor_vals)}")
+    value = Enum.at(sensor_vals,val)
+    IO.puts("set-on-line-value #{inspect(value)}")
     value = 1000-value
     on_line = if(value > 200) do
       1
