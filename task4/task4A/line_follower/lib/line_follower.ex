@@ -189,61 +189,61 @@ defmodule LineFollower do
     {s4, vals} = List.pop_at(vals,0)
     {s5, vals} = List.pop_at(vals,0)
 
-    maxs1 = if(maxs1 < s1) do
+    maxs1 = if(maxs1 < s1) or val == 0 do
       s1
     else
       maxs1
     end
 
-    mins1 = if(mins1 > s1) do
+    mins1 = if(mins1 > s1) or val == 0 do
       s1
     else
       mins1
     end
 
-    maxs2 = if(maxs2 < s2) do
+    maxs2 = if(maxs2 < s2) or val == 0 do
       s2
     else
       maxs2
     end
 
-    mins2 = if(mins2 > s2) do
+    mins2 = if(mins2 > s2) or val == 0 do
       s2
     else
       mins2
     end
 
-    maxs3 = if(maxs3 < s3) do
+    maxs3 = if(maxs3 < s3) or val == 0 do
      s3
     else
       maxs3
     end
 
-    mins3 = if(mins3 > s3) do
+    mins3 = if(mins3 > s3) or val == 0 do
       s3
     else
       mins3
     end
 
-    maxs4 = if(maxs4 < s4) do
+    maxs4 = if(maxs4 < s4) or val == 0 do
       s4
     else
       maxs4
     end
 
-    mins4 = if(mins4 > s4) do
+    mins4 = if(mins4 > s4) or val == 0 do
       s4
     else
       mins4
     end
 
-    maxs5 = if(maxs5 < s5) do
+    maxs5 = if(maxs5 < s5) or val == 0 do
       s5
     else
       maxs5
     end
 
-    mins5 = if(mins5 > s5) do
+    mins5 = if(mins5 > s5) or val == 0 do
       s5
     else
       mins5
