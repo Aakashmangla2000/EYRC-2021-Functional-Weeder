@@ -274,6 +274,7 @@ defmodule LineFollower do
     max = {1023,1023,1023,1023,1023}
     min = {0,0,0,0,0}
     motor_action(motor_ref,@stop)
+    pwm(70)
     {cal_min,cal_max} = calibrate_400(min,max,0)
 
     {cal_maxs1,cal_maxs2,cal_maxs3,cal_maxs4,cal_maxs5} = cal_max
@@ -294,7 +295,7 @@ defmodule LineFollower do
   end
 
   def forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) do
-    IO.puts("Going Forward")
+    # IO.puts("Going Forward")
     sensor_vals = read_calibrated(cal_min,cal_max)
     # IO.puts("after calibration sensor vals #{inspect(sensor_vals)}")
 
@@ -311,7 +312,7 @@ defmodule LineFollower do
 		# Remember the last position.
 		last_proportional = proportional
 
-		power_difference = proportional/25 + derivative/100 #+ integral/1000;
+		power_difference = proportional/30 + derivative/110 #+ integral/1000;
     power_difference = Kernel.round(power_difference)
 
 		power_difference = if (power_difference > maximum) do
@@ -328,19 +329,19 @@ defmodule LineFollower do
     IO.puts("power #{inspect(power_difference)}")
 
 		if (power_difference < 0) do
-      IO.puts("b #{maximum + power_difference} a #{maximum}")
-			pwmb(maximum + power_difference)
-			pwma(maximum)
+      IO.puts("r #{maximum + power_difference} l #{maximum}")
+			pwmr(maximum + power_difference)
+			pwml(maximum)
 		else
-      IO.puts("b #{maximum} a #{maximum - power_difference}")
-			pwmb(maximum)
-			pwma(maximum - power_difference)
+      IO.puts("r #{maximum} l #{maximum - power_difference}")
+			pwmr(maximum)
+			pwml(maximum - power_difference)
     end
     forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
   end
 
   def read_calibrated(cal_min,cal_max) do
-    IO.puts("in read cali")
+    # IO.puts("in read cali")
     vals = test_wlf_sensors()
     # IO.inspect(vals)
     {s0, vals} = List.pop_at(vals,0)
@@ -348,7 +349,7 @@ defmodule LineFollower do
   end
 
   def sens_vals(val,cal_min,cal_max,denominator,value,sensor_vals) when val < 5 do
-    IO.puts("in sens vals")
+    # IO.puts("in sens vals")
     # IO.inspect(cal_max)
     # IO.inspect(cal_min)
 
@@ -776,11 +777,11 @@ defmodule LineFollower do
     Enum.each(@pwm_pins, fn {_atom, pin_no} -> Pigpiox.Pwm.gpio_pwm(pin_no, duty) end)
   end
 
-  def pwma(duty) do
+  def pwml(duty) do
     Pigpiox.Pwm.gpio_pwm(6, duty)
   end
 
-  def pwmb(duty) do
+  def pwmr(duty) do
     Pigpiox.Pwm.gpio_pwm(26, duty)
   end
 end
