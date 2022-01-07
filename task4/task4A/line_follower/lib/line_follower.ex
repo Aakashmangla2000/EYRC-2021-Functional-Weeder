@@ -348,14 +348,17 @@ end
   end
 
   def forward(stop,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) when stop == 0 do
-    # IO.puts("Going Forward")
-    sensor_vals = read_calibrated(cal_min,cal_max)
+    IO.puts("Going Forward")
+
+    #Simple ReadLine
+    sensor_vals = test_wlf_sensors()
+    position = read_line2(sensor_vals)
+
+    #Complicated ReadLine
+    # sensor_vals = read_calibrated(cal_min,cal_max)
     # IO.puts("after calibration sensor vals #{inspect(sensor_vals)}")
+    # position = read_line(sensor_vals,last_value,0,0,0)
 
-    # sensor_vals = test_wlf_sensors()
-    # position = read_line2(sensor_vals)
-
-    position = read_line(sensor_vals,last_value,0,0,0)
     IO.puts("position #{inspect(position)}")
 
     proportional = position - 2000
