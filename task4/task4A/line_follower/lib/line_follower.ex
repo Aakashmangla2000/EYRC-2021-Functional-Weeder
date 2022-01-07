@@ -268,7 +268,7 @@ defmodule LineFollower do
     pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
 
-    maximum = 35;
+    maximum = 70;
     integral = 0;
     last_proportional = 0
     max = {1023,1023,1023,1023,1023}
@@ -284,9 +284,12 @@ defmodule LineFollower do
     cal_max = [cal_maxs1,cal_maxs2,cal_maxs3,cal_maxs4,cal_maxs5]
     cal_min = [cal_mins1,cal_mins2,cal_mins3,cal_mins4,cal_mins5]
 
-    # Process.sleep(0.5)
+    IO.puts("cal max in calibrate #{inspect(cal_max)}")
+    IO.puts("cal min in calibrate #{inspect(cal_min)}")
+
+
     motor_action(motor_ref,@forward)
-    pwm(30)
+    # pwm(30)
     forward(cal_min,cal_max,last_value,maximum,integral,last_proportional,0)
   end
 
@@ -350,11 +353,13 @@ defmodule LineFollower do
     # IO.inspect(cal_min)
 
     denominator = Enum.at(cal_max,val) - Enum.at(cal_min,val)
-    # IO.puts("denominator #{inspect(denominator)}")
+    IO.puts("denominator #{inspect(denominator)}")
 
 
     value = if(denominator != 0) do
       Kernel.div(((Enum.at(sensor_vals,val) - Enum.at(cal_min,val))* 1000), denominator)
+    else
+      value
     end
 
     IO.puts("value before #{inspect(value)}")
@@ -369,7 +374,7 @@ defmodule LineFollower do
     else
       value
     end
-    # IO.puts("value after #{inspect(value)}")
+    IO.puts("value after #{inspect(value)}")
     sensor_vals = List.replace_at(sensor_vals,val,value)
     # IO.puts("sensor-vals in sensvals #{inspect(sensor_vals)}")
     sens_vals(val+1,cal_min,cal_max,denominator,value,sensor_vals)
@@ -382,7 +387,7 @@ defmodule LineFollower do
   def read_line(sensor_vals,last_value,avg,sum,on_line) do
     {avg,sum,on_line} = set_on_line(0,sensor_vals,avg,sum,on_line)
 
-    if(on_line != 1) do
+    x = if(on_line != 1) do
       if(last_value < ((5 - 1)*1000)/2) do
         0
       else
@@ -391,12 +396,14 @@ defmodule LineFollower do
     else
       Kernel.div(avg, sum)
     end
+    x
+
   end
 
   def set_on_line(val,sensor_vals,avg,sum,on_line) when val < 5 do
-    IO.puts("Sensor value #{inspect(sensor_vals)}")
+    # IO.puts("Sensor value #{inspect(sensor_vals)}")
     value = Enum.at(sensor_vals,val)
-    IO.puts("set-on-line-value #{inspect(value)}")
+    # IO.puts("set-on-line-value #{inspect(value)}")
     value = 1000-value
     on_line = if(value > 200) do
       1
@@ -648,14 +655,23 @@ defmodule LineFollower do
   surface or void)
   """
   defp get_lfa_readings(sensor_list, sensor_ref) do
+
+    # IO.puts("sensor list #{inspect(sensor_list)}")
+
     append_sensor_list = sensor_list ++ [5]
+
+    # IO.puts("append sensor list #{inspect(append_sensor_list)}")
+
     temp_sensor_list = [5 | append_sensor_list]
+
+    # IO.puts("temp sensor list #{inspect(temp_sensor_list)}")
     vals = append_sensor_list
         |> Enum.with_index
         |> Enum.map(fn {sens_num, sens_idx} ->
               analog_read(sens_num, sensor_ref, Enum.fetch(temp_sensor_list, sens_idx))
               end)
     # IO.inspect(IEx.Info.info(vals))
+    # IO.puts("value #{inspect(vals)}")
     Enum.each(0..5, fn n -> provide_clock(sensor_ref) end)
     GPIO.write(sensor_ref[:cs], 1)
     Process.sleep(250)
