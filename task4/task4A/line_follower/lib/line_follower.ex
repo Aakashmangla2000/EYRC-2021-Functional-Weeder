@@ -284,8 +284,8 @@ defmodule LineFollower do
     cal_max = [cal_maxs1,cal_maxs2,cal_maxs3,cal_maxs4,cal_maxs5]
     cal_min = [cal_mins1,cal_mins2,cal_mins3,cal_mins4,cal_mins5]
 
-    IO.puts("cal max in calibrate #{inspect(cal_max)}")
-    IO.puts("cal min in calibrate #{inspect(cal_min)}")
+    # IO.puts("cal max in calibrate #{inspect(cal_max)}")
+    # IO.puts("cal min in calibrate #{inspect(cal_min)}")
 
 
     motor_action(motor_ref,@forward)
@@ -353,7 +353,7 @@ defmodule LineFollower do
     # IO.inspect(cal_min)
 
     denominator = Enum.at(cal_max,val) - Enum.at(cal_min,val)
-    IO.puts("denominator #{inspect(denominator)}")
+    # IO.puts("denominator #{inspect(denominator)}")
 
 
     value = if(denominator != 0) do
@@ -362,7 +362,7 @@ defmodule LineFollower do
       value
     end
 
-    IO.puts("value before #{inspect(value)}")
+    # IO.puts("value before #{inspect(value)}")
 
     value = if(value < 0) do
       0
@@ -374,7 +374,7 @@ defmodule LineFollower do
     else
       value
     end
-    IO.puts("value after #{inspect(value)}")
+    # IO.puts("value after #{inspect(value)}")
     sensor_vals = List.replace_at(sensor_vals,val,value)
     # IO.puts("sensor-vals in sensvals #{inspect(sensor_vals)}")
     sens_vals(val+1,cal_min,cal_max,denominator,value,sensor_vals)
