@@ -295,7 +295,11 @@ defmodule LineFollower do
     # pwm(30)
     # sensor_vals = test_wlf_sensors()
     Process.sleep(5)
-    forward(0,0,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,0)
+    count = 1
+    nodes = 1
+    stop = 0
+    proportional = 0
+    forward(count,nodes,stop,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
   end
 
   def set_motors(motor_ref,r,l) do
@@ -350,13 +354,13 @@ end
     end
   end
 
-  def forward(nodes,stop,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) when stop == 0 do
+  def forward(count,nodes,stop,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) when stop == 0 do
     # IO.puts("Going Forward")
-
+    count = count + 1
     #Simple ReadLine
     sensor_vals = test_wlf_sensors()
     position = read_line2(sensor_vals)
-    IO.inspect(sensor_vals)
+    # IO.inspect(sensor_vals)
 
     #Complicated ReadLine
     # sensor_vals = read_calibrated(cal_min,cal_max)
@@ -374,7 +378,7 @@ end
 		# Remember the last position.
 		last_proportional = proportional
 
-		power_difference = proportional*0.035 + derivative*0.01 #+ integral*0.001;
+		power_difference = proportional*0.025 + derivative*0.03 #+ integral*0.001;
     power_difference = Kernel.round(power_difference)
     # IO.puts("Power Difference: #{power_difference}")
 		power_difference = if (power_difference > maximum) do
@@ -406,27 +410,29 @@ end
     sensor_vals = test_wlf_sensors()
     {s1,s2,s3,s4,s5} = set_vals(sensor_vals)
 
-    nodes = if((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0)) do
+    {nodes,count} = if(count == 16 or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0)) do
+        nodes = nodes + 1
+        count = 1
         IO.puts(nodes)
         motor_action(motor_ref,@stop)
         Process.sleep(2000)
         motor_action(motor_ref,@forward)
         # motor_action(motor_ref,@right)
-        # forward(nodes,1,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
-        (nodes + 1)
+        # forward(count,nodes,1,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
+        {nodes,count}
     else
-      nodes
+      {nodes,count}
     end
 
-    if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
+    if((s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) or nodes == 6) do
       # motor_action(motor_ref,@stop)
-      forward(nodes,1,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
+      forward(count,nodes,1,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
     else
-      forward(nodes,0,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
+      forward(count,nodes,0,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
     end
   end
 
-  def forward(nodes,stop,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) do
+  def forward(count,nodes,stop,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) do
     motor_action(motor_ref,@stop)
   end
 
