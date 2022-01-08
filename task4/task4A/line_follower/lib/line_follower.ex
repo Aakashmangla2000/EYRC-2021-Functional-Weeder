@@ -295,11 +295,11 @@ defmodule LineFollower do
     # pwm(30)
     # sensor_vals = test_wlf_sensors()
     Process.sleep(5)
-    forward(0,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,0)
+    forward(0,0,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,0)
   end
 
   def set_motors(motor_ref,r,l) do
-    IO.puts("left:#{l} right:#{r}")
+    # IO.puts("left:#{l} right:#{r}")
     pwml(l)
     pwmr(r)
     # cond do
@@ -350,19 +350,20 @@ end
     end
   end
 
-  def forward(stop,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) when stop == 0 do
+  def forward(nodes,stop,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) when stop == 0 do
     # IO.puts("Going Forward")
 
     #Simple ReadLine
     sensor_vals = test_wlf_sensors()
     position = read_line2(sensor_vals)
+    IO.inspect(sensor_vals)
 
     #Complicated ReadLine
     # sensor_vals = read_calibrated(cal_min,cal_max)
     # # IO.puts("after calibration sensor vals #{inspect(sensor_vals)}")
     # {position, last_value} = read_line(sensor_vals,last_value,0,0,0)
 
-    IO.puts("position #{inspect(position)}")
+    # IO.puts("position #{inspect(position)}")
 
     proportional = position - 2000
 
@@ -373,9 +374,9 @@ end
 		# Remember the last position.
 		last_proportional = proportional
 
-		power_difference = proportional*0.04 + derivative*0 + integral*0;
+		power_difference = proportional*0.035 + derivative*0.01 #+ integral*0.001;
     power_difference = Kernel.round(power_difference)
-    IO.puts("Power Difference: #{power_difference}")
+    # IO.puts("Power Difference: #{power_difference}")
 		power_difference = if (power_difference > maximum) do
 			maximum
     else
@@ -388,7 +389,7 @@ end
     else
       power_difference
     end
-    IO.puts("power #{inspect(power_difference)}")
+    # IO.puts("power #{inspect(power_difference)}")
 
 		if (power_difference < 0) do
       # IO.puts("r #{maximum + power_difference} l #{maximum}")
@@ -405,16 +406,28 @@ end
     sensor_vals = test_wlf_sensors()
     {s1,s2,s3,s4,s5} = set_vals(sensor_vals)
 
+    nodes = if((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0)) do
+        IO.puts(nodes)
+        motor_action(motor_ref,@stop)
+        Process.sleep(2000)
+        motor_action(motor_ref,@forward)
+        # motor_action(motor_ref,@right)
+        # forward(nodes,1,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
+        (nodes + 1)
+    else
+      nodes
+    end
+
     if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
       # motor_action(motor_ref,@stop)
-      forward(0,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
+      forward(nodes,1,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
     else
-      forward(0,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
+      forward(nodes,0,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional)
     end
   end
 
-  def forward(stop,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) do
-
+  def forward(nodes,stop,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) do
+    motor_action(motor_ref,@stop)
   end
 
   def read_calibrated(cal_min,cal_max) do
