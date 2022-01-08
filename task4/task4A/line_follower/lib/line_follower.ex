@@ -291,10 +291,10 @@ defmodule LineFollower do
     IO.puts("cal min in calibrate #{inspect(cal_min)}")
 
 
-    motor_action(motor_ref,@forward)
+    # motor_action(motor_ref,@forward)
     # pwm(30)
-    sensor_vals = test_wlf_sensors()
-    Process.sleep(500)
+    # sensor_vals = test_wlf_sensors()
+    # Process.sleep(500)
     forward(0,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,0)
   end
 
@@ -348,7 +348,7 @@ end
   end
 
   def forward(stop,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,proportional) when stop == 0 do
-    IO.puts("Going Forward")
+    # IO.puts("Going Forward")
 
     #Simple ReadLine
     sensor_vals = test_wlf_sensors()
@@ -356,8 +356,8 @@ end
 
     #Complicated ReadLine
     # sensor_vals = read_calibrated(cal_min,cal_max)
-    # IO.puts("after calibration sensor vals #{inspect(sensor_vals)}")
-    # position = read_line(sensor_vals,last_value,0,0,0)
+    # # IO.puts("after calibration sensor vals #{inspect(sensor_vals)}")
+    # {position, last_value} = read_line(sensor_vals,last_value,0,0,0)
 
     IO.puts("position #{inspect(position)}")
 
@@ -384,15 +384,15 @@ end
     else
       power_difference
     end
-    IO.puts("power #{inspect(power_difference)}")
+    # IO.puts("power #{inspect(power_difference)}")
 
 		if (power_difference < 0) do
-      IO.puts("r #{maximum + power_difference} l #{maximum}")
+      # IO.puts("r #{maximum + power_difference} l #{maximum}")
 			pwmr(maximum + power_difference)
 			pwml(maximum)
       # set_motors(motor_ref,maximum,maximum + power_difference)
 		else
-      IO.puts("r #{maximum} l #{maximum - power_difference}")
+      # IO.puts("r #{maximum} l #{maximum - power_difference}")
 			pwmr(maximum)
 			pwml(maximum - power_difference)
       # set_motors(motor_ref,maximum - power_difference,maximum)
@@ -416,7 +416,7 @@ end
   def read_calibrated(cal_min,cal_max) do
     # IO.puts("in read cali")
     vals = test_wlf_sensors()
-    # IO.inspect(vals)
+    IO.puts("sensor value recieved #{inspect(vals)}")
     {s0, vals} = List.pop_at(vals,0)
     sens_vals(0,cal_min,cal_max,0,0,vals)
   end
@@ -436,7 +436,9 @@ end
       value
     end
 
-    # IO.puts("value before #{inspect(value)}")
+    value = Enum.at(sensor_vals,val)
+
+    # IO.puts("value of sensor #{inspect(value)}")
 
     value = if(value < 0) do
       0
@@ -461,29 +463,30 @@ end
   def read_line(sensor_vals,last_value,avg,sum,on_line) do
     {avg,sum,on_line} = set_on_line(0,sensor_vals,avg,sum,on_line)
 
-    x = if(on_line != 1) do
+    {position, last_value} = if(on_line != 1) do
       if(last_value < ((5 - 1)*1000)/2) do
-        0
+        {0, last_value}
       else
-        (5 - 1)*1000
+        {(5 - 1)*1000, last_value}
       end
     else
-      Kernel.div(avg, sum)
+      {Kernel.div(avg, sum), Kernel.div(avg, sum)}
     end
-    x
+    {position, last_value}
 
   end
 
   def set_on_line(val,sensor_vals,avg,sum,on_line) when val < 5 do
-    # IO.puts("Sensor value #{inspect(sensor_vals)}")
+    IO.puts("Sensor value #{inspect(sensor_vals)}")
     value = Enum.at(sensor_vals,val)
-    # IO.puts("set-on-line-value #{inspect(value)}")
+    # IO.puts("set-on-line-value before #{inspect(value)}")
     value = 1000-value
     on_line = if(value > 200) do
       1
     else
       on_line
     end
+    IO.puts("set-on-line-value after #{inspect(value)}")
 
     # only average in values that are above a noise threshold
     # IO.puts("value #{inspect(value)}")
