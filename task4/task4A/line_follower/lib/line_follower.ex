@@ -64,14 +64,29 @@ defmodule LineFollower do
     nodes = 1
     stop = 0
     proportional = 0
-
+    x = 1
+    y = 1
     forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional,proportional)
+    right(motor_ref)
+  end
+
+  def right(motor_ref) do
+    motor_action(motor_ref,@right)
+  end
+
+  def left(motor_ref) do
+    motor_action(motor_ref,@left)
+  end
+
+  def twice(motor_ref) do
+    motor_action(motor_ref,@right)
+    motor_action(motor_ref,@right)
   end
 
   def set_motors(motor_ref,r,l) do
     pwml(l)
     pwmr(r)
-end
+  end
 
   def loop(j,i,sensor_vals) when j < 5 do
     sensor_vals = List.replace_at(sensor_vals,j,1000*i*Enum.at(sensor_vals,j))
@@ -151,7 +166,7 @@ end
       {nodes,count}
     end
 
-    if((s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) or nodes == 6) do
+    if((s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) or nodes == 2) do
       forward(count,nodes,1,motor_ref,maximum,integral,last_proportional,proportional)
     else
       forward(count,nodes,0,motor_ref,maximum,integral,last_proportional,proportional)
@@ -161,6 +176,18 @@ end
   def forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional,proportional) do
     motor_action(motor_ref,@stop)
   end
+
+    def set_vals(vals) do
+    {s0, vals} = List.pop_at(vals,0)
+    # List.replace_at(vals,1,value+100)
+    Enum.map(vals, fn x -> if(x > 900) do
+        1
+      else
+        0
+      end
+    end)
+  end
+
 
   @doc """
   Tests motion of the Robot
@@ -182,17 +209,6 @@ end
     motion_list = [@forward,@stop]
     Enum.each(motion_list, fn motion -> motor_action(motor_ref,motion) end)
   end
-
-  def set_vals(vals) do
-    {s0, vals} = List.pop_at(vals,0)
-    Enum.map(vals, fn x -> if(x > 900) do
-        1
-      else
-        0
-      end
-    end)
-  end
-
 
   @doc """
   Controls speed of the Robot
