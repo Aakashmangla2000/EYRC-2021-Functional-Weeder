@@ -291,10 +291,10 @@ defmodule LineFollower do
     IO.puts("cal min in calibrate #{inspect(cal_min)}")
 
 
-    # motor_action(motor_ref,@forward)
+    motor_action(motor_ref,@forward)
     # pwm(30)
     # sensor_vals = test_wlf_sensors()
-    # Process.sleep(500)
+    Process.sleep(500)
     forward(0,motor_ref,cal_min,cal_max,last_value,maximum,integral,last_proportional,0)
   end
 
@@ -351,13 +351,13 @@ end
     # IO.puts("Going Forward")
 
     #Simple ReadLine
-    sensor_vals = test_wlf_sensors()
-    position = read_line2(sensor_vals)
+    # sensor_vals = test_wlf_sensors()
+    # position = read_line2(sensor_vals)
 
     #Complicated ReadLine
-    # sensor_vals = read_calibrated(cal_min,cal_max)
-    # # IO.puts("after calibration sensor vals #{inspect(sensor_vals)}")
-    # {position, last_value} = read_line(sensor_vals,last_value,0,0,0)
+    sensor_vals = read_calibrated(cal_min,cal_max)
+    # IO.puts("after calibration sensor vals #{inspect(sensor_vals)}")
+    {position, last_value} = read_line(sensor_vals,last_value,0,0,0)
 
     IO.puts("position #{inspect(position)}")
 
