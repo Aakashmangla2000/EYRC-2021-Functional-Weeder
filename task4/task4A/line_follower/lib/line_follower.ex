@@ -10,11 +10,8 @@ defmodule LineFollower do
   alias Circuits.GPIO
 
   @sensor_pins [cs: 5, clock: 25, address: 24, dataout: 23]
-  @ir_pins [dr: 16, dl: 19]
   @motor_pins [lf: 12, lb: 13, rf: 20, rb: 21]
   @pwm_pins [enl: 6, enr: 26]
-  @servo_a_pin 27
-  @servo_b_pin 22
 
   @ref_atoms [:cs, :clock, :address, :dataout]
   @lf_sensor_data %{sensor0: 0, sensor1: 0, sensor2: 0, sensor3: 0, sensor4: 0, sensor5: 0}
@@ -66,24 +63,29 @@ defmodule LineFollower do
     proportional = 0
     x = 1
     y = 1
-    forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional,proportional)
+    forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
     right(motor_ref)
   end
 
   def right(motor_ref) do
+    pwm(150)
     motor_action(motor_ref,@right)
+    motor_action(motor_ref,@stop)
   end
 
   def left(motor_ref) do
+    pwm(150)
     motor_action(motor_ref,@left)
+    motor_action(motor_ref,@stop)
   end
 
   def twice(motor_ref) do
+    pwm(200)
     motor_action(motor_ref,@right)
-    motor_action(motor_ref,@right)
+    motor_action(motor_ref,@stop)
   end
 
-  def set_motors(motor_ref,r,l) do
+  def set_motors(_motor_ref,r,l) do
     pwml(l)
     pwmr(r)
   end
@@ -93,7 +95,7 @@ defmodule LineFollower do
     loop(j+1,i-1,sensor_vals)
   end
 
-  def loop(j,i,sensor_vals) do
+  def loop(_j,_i,sensor_vals) do
     sensor_vals
   end
 
@@ -110,7 +112,7 @@ defmodule LineFollower do
     end
   end
 
-  def forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional,proportional) when stop == 0 do
+  def forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional) when stop == 0 do
     # IO.puts("Going Forward")
     count = count + 1
 
@@ -167,18 +169,18 @@ defmodule LineFollower do
     end
 
     if((s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) or nodes == 2) do
-      forward(count,nodes,1,motor_ref,maximum,integral,last_proportional,proportional)
+      forward(count,nodes,1,motor_ref,maximum,integral,last_proportional)
     else
-      forward(count,nodes,0,motor_ref,maximum,integral,last_proportional,proportional)
+      forward(count,nodes,0,motor_ref,maximum,integral,last_proportional)
     end
   end
 
-  def forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional,proportional) do
+  def forward(_count,_nodes,_stop,motor_ref,_maximum,_integral,_last_proportional) do
     motor_action(motor_ref,@stop)
   end
 
     def set_vals(vals) do
-    {s0, vals} = List.pop_at(vals,0)
+    {_s0, vals} = List.pop_at(vals,0)
     # List.replace_at(vals,1,value+100)
     Enum.map(vals, fn x -> if(x > 900) do
         1
