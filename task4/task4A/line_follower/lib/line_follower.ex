@@ -268,7 +268,7 @@ defmodule LineFollower do
     pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
 
-    maximum = 150;
+    maximum = 130;
     integral = 0;
     last_proportional = 0
     max = {1023,1023,1023,1023,1023}
@@ -373,7 +373,7 @@ end
 		# Remember the last position.
 		last_proportional = proportional
 
-		power_difference = proportional*0.03 + derivative*0 + integral*0;
+		power_difference = proportional*0.04 + derivative*0 + integral*0;
     power_difference = Kernel.round(power_difference)
     IO.puts("Power Difference: #{power_difference}")
 		power_difference = if (power_difference > maximum) do
