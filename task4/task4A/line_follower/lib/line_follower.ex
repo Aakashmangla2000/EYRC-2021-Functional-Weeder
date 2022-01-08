@@ -64,28 +64,43 @@ defmodule LineFollower do
     x = 1
     y = 1
     forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    twice(motor_ref)
+    # pwm(70)
+    # motor_action(motor_ref,@forward)
+    # forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
+    # right(motor_ref)
+    # pwm(70)
+    # motor_action(motor_ref,@forward)
+    # forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
+    # pwm(70)
+    # motor_action(motor_ref,@forward)
+    # forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
   end
 
   def right(motor_ref) do
-    Process.sleep(300)
+    pwm(150)
+    Process.sleep(230)
     motor_action(motor_ref,@left)
-    Process.sleep(300)
+    Process.sleep(230)
     motor_action(motor_ref,@stop)
+    Process.sleep(500)
   end
 
   def left(motor_ref) do
-    Process.sleep(300)
+    pwm(150)
+    Process.sleep(230)
     motor_action(motor_ref,@right)
-    Process.sleep(300)
+    Process.sleep(230)
     motor_action(motor_ref,@stop)
+    Process.sleep(500)
   end
 
   def twice(motor_ref) do
-    Process.sleep(300)
+    pwm(150)
+    Process.sleep(230)
     motor_action(motor_ref,@left)
-    Process.sleep(600)
+    Process.sleep(500)
     motor_action(motor_ref,@stop)
+    Process.sleep(500)
   end
 
   def set_motors(_motor_ref,r,l) do
@@ -116,7 +131,7 @@ defmodule LineFollower do
   end
 
   def forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional) when stop == 0 do
-    # IO.puts("Going Forward")
+    IO.puts("#{count}")
     count = count + 1
 
     #Simple ReadLine
@@ -159,12 +174,16 @@ defmodule LineFollower do
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
 
-    {nodes,count} = if(count == 16 or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0)) do
+    {nodes,count} = if(count >= 11 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0))) do
         nodes = nodes + 1
         count = 1
         IO.puts(nodes)
+        if(count < 10) do
+        motor_action(motor_ref,@forward)
+        Process.sleep(300)
+        end
         motor_action(motor_ref,@stop)
-        Process.sleep(2000)
+        Process.sleep(1000)
         motor_action(motor_ref,@forward)
         {nodes,count}
     else
