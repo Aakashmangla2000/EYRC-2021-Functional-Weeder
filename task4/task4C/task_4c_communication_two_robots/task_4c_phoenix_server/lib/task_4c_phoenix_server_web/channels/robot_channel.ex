@@ -40,6 +40,11 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     ###########################
     ## complete this funcion ##
     ###########################
+    mp = %{"a" => 0, "b" => 1, "c" => 2, "d" => 3, "e" => 4}
+    msg2 =  %{ "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"]}
+
+    Phoenix.PubSub.subscribe(Task2PhoenixServer.PubSub, "robot:update")
+    Phoenix.PubSub.broadcast(Task2PhoenixServer.PubSub, "robot:update", msg2)
 
     {:reply, {:ok, is_obs_ahead}, socket}
   end
