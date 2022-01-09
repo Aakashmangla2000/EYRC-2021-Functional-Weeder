@@ -1,0 +1,5 @@
+robot_A => 1, a, north
+robot_A => 1, a, north
+robot_A => 1, a, north
+robot_A => 1, a, north
+robot_A => 1, a, north

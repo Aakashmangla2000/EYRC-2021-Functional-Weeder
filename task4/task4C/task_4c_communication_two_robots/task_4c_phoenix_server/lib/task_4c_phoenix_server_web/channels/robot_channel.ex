@@ -40,11 +40,28 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     ###########################
     ## complete this funcion ##
     ###########################
-    mp = %{"a" => 0, "b" => 1, "c" => 2, "d" => 3, "e" => 4}
-    msg2 =  %{ "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"]}
+    IO.puts("message #{inspect(message)} #{is_obs_ahead} #{inspect(socket)}")
+    mp = %{"a" => 0, "b" => 1, "c" => 2, "d" => 3, "e" => 4, "f" => 5}
 
-    Phoenix.PubSub.subscribe(Task2PhoenixServer.PubSub, "robot:update")
-    Phoenix.PubSub.broadcast(Task2PhoenixServer.PubSub, "robot:update", msg2)
+    msg2 = if(is_obs_ahead == false) do
+      %{"client" => message["client"], "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"]}
+    else
+      facing = message["face"]
+      {x,y} = cond do
+        facing == "north" ->
+          {(message["x"]-1)*150,(Map.get(mp, message["y"])*150)+75}
+        facing == "south" ->
+          {(message["x"]-1)*150,(Map.get(mp, message["y"])*150)-75}
+        facing == "east" ->
+          {((message["x"]-1)*150)+75,(Map.get(mp, message["y"])*150)}
+        facing == "west" ->
+          {((message["x"]-1)*150)-75,(Map.get(mp, message["y"])*150)}
+      end
+      %{"client" => "obs", "x" => x, "y" => y}
+    end
+
+    Phoenix.PubSub.subscribe(Task4CPhoenixServer.PubSub, "robot:update")
+    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", msg2)
 
     {:reply, {:ok, is_obs_ahead}, socket}
   end

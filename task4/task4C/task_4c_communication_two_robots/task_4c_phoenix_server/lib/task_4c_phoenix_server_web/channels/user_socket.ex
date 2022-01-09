@@ -1,4 +1,4 @@
-defmodule Task4cPhoenixServerWeb.UserSocket do
+defmodule Task4CPhoenixServerWeb.UserSocket do
   use Phoenix.Socket
 
   # A Socket handler
@@ -12,6 +12,9 @@ defmodule Task4cPhoenixServerWeb.UserSocket do
   #
   # channel "room:*", Task4cPhoenixServerWeb.RoomChannel
   #
+  channel "robot:status", Task4CPhoenixServerWeb.RobotChannel
+  channel "robot:update", Task4CPhoenixServerWeb.RobotChannel
+  channel "timer:start", Task4CPhoenixServerWeb.RobotChannel
   # To create a channel file, use the mix task:
   #
   #     mix phx.gen.channel Room

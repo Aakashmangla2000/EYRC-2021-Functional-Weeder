@@ -231,6 +231,48 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
     ## complete this funcion ##
     ###########################
 
+    # :ok = Phoenix.PubSub.subscribe(Task4CPhoenixServerWeb.PubSub, "robot:update")
+    IO.puts("data #{inspect(data)}")
+
+    socket =  if(data["client"] == "obs") do
+      assign(socket, :obstacle_pos, {data["x"],data["y"]})
+    else
+      if(data["client"] == "robot_A") do
+        facing = data["face"]
+        socket = cond do
+          facing == "north" ->
+            assign(socket, :img_robotA, "robot_facing_north.png")
+          facing == "south" ->
+            assign(socket, :img_robotA, "robot_facing_south.png")
+          facing == "east" ->
+            assign(socket, :img_robotA, "robot_facing_east.png")
+          facing == "west" ->
+            assign(socket, :img_robotA, "robot_facing_west.png")
+          true ->
+            assign(socket, :img_robotA, "robot_facing_west.png")
+        end
+        socket = assign(socket, :bottom_robotA,data["bottom"])
+        assign(socket, :left_robotA,data["left"])
+
+      else
+        facing = data["face"]
+        socket = cond do
+          facing == "north" ->
+            assign(socket, :img_robotB, "robot_facing_north.png")
+          facing == "south" ->
+            assign(socket, :img_robotB, "robot_facing_south.png")
+          facing == "east" ->
+            assign(socket, :img_robotB, "robot_facing_east.png")
+          facing == "west" ->
+            assign(socket, :img_robotB, "robot_facing_west.png")
+          true ->
+            assign(socket, :img_robotB, "robot_facing_west.png")
+        end
+        socket = assign(socket, :bottom_robotB,data["bottom"])
+        assign(socket, :left_robotB,data["left"])
+      end
+    end
+
     {:noreply, socket}
 
   end
