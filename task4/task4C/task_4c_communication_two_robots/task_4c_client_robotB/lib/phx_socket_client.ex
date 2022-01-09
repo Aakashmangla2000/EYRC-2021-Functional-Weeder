@@ -22,6 +22,21 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
     ## complete this funcion ##
     ###########################
 
+    url = Application.get_env(:task_4c_client_robotb, :phoenix_server_url)
+    socket_opts = [
+      url: url
+    ]
+    {:ok, socket} = PhoenixClient.Socket.start_link(socket_opts)
+    wait_until_connected(socket)
+    PhoenixClient.Channel.join(socket,"robot:status")
+
+  end
+
+   def wait_until_connected(socket) do
+    if !PhoenixClient.Socket.connected?(socket) do
+      Process.sleep(100)
+      wait_until_connected(socket)
+    end
   end
 
   @doc """
@@ -41,6 +56,9 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
     ## complete this funcion ##
     ###########################
 
+    tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_B","x" => x, "y" => y, "face" => facing},1000)
+    {:ok, is_obs_ahead} = tup
+    is_obs_ahead
   end
 
   ######################################################

@@ -232,10 +232,10 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
     ###########################
 
     # :ok = Phoenix.PubSub.subscribe(Task4CPhoenixServerWeb.PubSub, "robot:update")
-    IO.puts("data #{inspect(data)}")
+    IO.puts("data #{inspect(data)} socket #{inspect(socket)}")
 
     socket =  if(data["client"] == "obs") do
-      assign(socket, :obstacle_pos, {data["x"],data["y"]})
+      assign(socket, :obstacle_pos,MapSet.new([{data["x"],data["y"]}]))
     else
       if(data["client"] == "robot_A") do
         facing = data["face"]

@@ -63,7 +63,13 @@ defmodule Task4CClientRobotB do
     ###########################
     ## complete this funcion ##
     ###########################
-
+    {:ok, _response, channel} = Task4CClientRobotB.PhoenixSocketClient.connect_server()
+    {:ok, robot} = start(6, :f, :south)
+    goal_locs = []
+    x = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+    # x = 1
+    IO.puts(x)
+    # stop(robot, goal_locs,channel)
   end
 
   @doc """
