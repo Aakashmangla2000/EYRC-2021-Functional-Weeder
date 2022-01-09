@@ -63,14 +63,20 @@ defmodule Task4CClientRobotA do
     ###########################
     ## complete this funcion ##
     ###########################
-
+    {:ok, _response, channel} = Task4CClientRobotA.PhoenixSocketClient.connect_server()
+    {:ok, robot} = start(1, :a, :north)
+    goal_locs = []
+    x = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
+    # x = 1
+    IO.puts(x)
+    # stop(robot, goal_locs,channel)
   end
 
   @doc """
   Provide GOAL positions to the robot as given location of [(x1, y1),(x2, y2),..] and plan the path from START to these locations.
   Make a call to ToyRobot.PhoenixSocketClient.send_robot_status/2 to get the indication of obstacle presence ahead of the robot.
   """
-  def stop(robot, goal_locs) do
+  def stop(robot, goal_locs,channel) do
 
     ###########################
     ## complete this funcion ##
