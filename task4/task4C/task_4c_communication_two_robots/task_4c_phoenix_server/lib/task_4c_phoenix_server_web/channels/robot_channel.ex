@@ -80,7 +80,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     end
 
     msg2 = if(is_obs_ahead == false) do
-      %{"client" => message["client"], "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"]}
+      %{"client" => message["client"], "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"],  "obs" => is_obs_ahead, "x" => 0, "y" => 0}
     else
       facing = message["face"]
       {x,y} = cond do
@@ -93,7 +93,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
         facing == "west" ->
           {((message["x"]-1)*150)-75,(Map.get(mp, message["y"])*150)}
       end
-      %{"client" => "obs", "x" => x, "y" => y}
+      %{"client" => message["client"], "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"], "obs" => is_obs_ahead, "x" => x, "y" => y}
     end
     _msg3 = if(is_obs_ahead == false) do
       %{client: message["client"], x: message["x"], y: Map.get(mp, message["y"]), face: message["face"]}
