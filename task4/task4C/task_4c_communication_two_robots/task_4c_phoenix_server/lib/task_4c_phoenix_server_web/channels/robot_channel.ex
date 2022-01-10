@@ -49,6 +49,8 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
       x
     end)
 
+    File.close("Plant_Positions.csv")
+
     {_,y} = List.pop_at(y,0)
     sow = Enum.map(y,fn [a,_b] ->
       a
@@ -73,6 +75,8 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
         {ax,ay,afacing,goal_locs}
       end
     else
+      IO.puts(is_obs_ahead)
+      {0,0,0,[]}
     end
 
     msg2 = if(is_obs_ahead == false) do

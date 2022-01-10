@@ -64,7 +64,7 @@ defmodule Task4CClientRobotB do
     ## complete this funcion ##
     ###########################
     {:ok, _response, channel} = Task4CClientRobotB.PhoenixSocketClient.connect_server()
-    {:ok, robot} = start(3, :c, :south)
+    {:ok, robot} = start(5, :e, :south)
     # Process.sleep(2000)
     [ax,ay,afacing,goal_locs,_obs] = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
     # Process.sleep(2000)
@@ -72,7 +72,7 @@ defmodule Task4CClientRobotB do
     # Process.sleep(2000)
     # x = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
     # x = 1
-    IO.puts("#{ax} #{ay} #{afacing} #{inspect(goal_locs)}")
+    # IO.puts("#{ax} #{ay} #{afacing} #{inspect(goal_locs)}")
     stop(robot, goal_locs,channel)
   end
 
@@ -87,16 +87,17 @@ defmodule Task4CClientRobotB do
     ###########################
     parent = self()
     require Integer
-    mp = %{"1" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5}
-    mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e}
+    mp = %{"1" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5, "6" => 6}
+    mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e, "f" => :f}
     first = 0
-    obs = false
+    # obs = false
 
     # robot = if Enum.count(goal_locs) == 1 do
     #   robot
     # else
-      count = Enum.count(goal_locs)
-      goal_div(obs, robot, parent, goal_locs, channel,count,mp,mp2,first)
+    [_ax,_ay,_afacing,_goal_locs,obs] = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+    count = Enum.count(goal_locs)
+    goal_div(obs, robot, parent, goal_locs, channel,count,mp,mp2,first)
     # end
 
     {:ok, robot}
@@ -111,15 +112,11 @@ defmodule Task4CClientRobotB do
 
 
   def goal_select(robot, parent, goal_locs, channel,min, index, count,mp,mp2) when count > 0 do
-    mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5}
+    mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5, :f => 6}
     val = Enum.at(goal_locs,count)
-    # IO.puts("andar #{count} #{inspect(val)}")
-  # IO.puts(inspect(goal_locs))
-    goal_x = Enum.at(val,0)
-    goal_x = Map.get(mp, goal_x)
-    goal_y = Enum.at(val,1)
-    goal_y = Map.get(mp2, goal_y)
-    goal_y = Map.get(mp3, goal_y)
+    ls = nearby(val)
+    min2 = abs(robot.x - Enum.at(Enum.at(ls,0),0)) + abs(Map.get(mp3, robot.y) -  Enum.at(Enum.at(ls,0),1))
+    {_,[goal_x, goal_y]} = min(robot,ls,1,min2,0)
     distance = abs(robot.x - goal_x) + abs(Map.get(mp3, robot.y) -  goal_y)
 
     {index,min} = if(min >= distance) do
@@ -135,8 +132,41 @@ defmodule Task4CClientRobotB do
     index
   end
 
+  def nearby(goal) do
+    # mp = %{1 => :a, 2 => :b, 3 => :c, 4 => :d, 5 => :e, 6 => :f}
+    goal = String.to_integer(goal)
+    x = rem(goal,5)
+    x = if(x == 0) do
+      5
+    else
+      x
+    end
+    y = if(x == 5) do
+      div(goal,5)
+    else
+      div(goal,5) + 1
+    end
+    # IO.puts("#{x} #{y}")
+    [[x,y],[x+1,y],[x,y+1],[x+1,y+1]]
+  end
+
+  def min(robot,ls,count,min,index) when count < 4 do
+    mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5, :f => 6}
+    distance = abs(robot.x - Enum.at(Enum.at(ls,count),0)) + abs(Map.get(mp3, robot.y) -  Enum.at(Enum.at(ls,count),1))
+    {index,min} = if(min >= distance) do
+      {count, distance}
+    else
+      {index,min}
+    end
+    min(robot,ls,count+1,min,index)
+  end
+
+  def min(_robot,ls,_count,_min,index) do
+    Enum.fetch(ls,index)
+  end
+
   def goal_div(obs, robot, _parent, goal_locs, channel,count,mp,mp2,first) when count > 0 do
-    mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5}
+    mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5, :f => 6}
     parent = self()
     pid = spawn_link(fn ->
       count = Enum.count(goal_locs)
@@ -144,47 +174,35 @@ defmodule Task4CClientRobotB do
       {robot,obs,goal_locs,_count} = if(count == 0) do
         {robot,obs,goal_locs,count}
       else
-        [ax,ay,afacing,goal_locs,obs] = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+        [ax,ay,afacing,_goal_locs,obs] = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
 
         # IO.puts("b #{inspect(goal_locs)}")
         all = {ax,ay,afacing}
         count = Enum.count(goal_locs)
-
+        index = 0
         {goal_locs,goal_x, goal_y} = if(count > 0) do
-          {:ok,val} = if (count > 1) do
+          {val,index} = if (count > 1) do
             val = Enum.at(goal_locs,0)
-            goal_x = Enum.at(val,0)
-            goal_x = Map.get(mp, goal_x)
-            goal_y = Enum.at(val,1)
-            goal_y = Map.get(mp2, goal_y)
-            goal_y = Map.get(mp3, goal_y)
-
+            ls = nearby(val)
+            min = abs(robot.x - Enum.at(Enum.at(ls,0),0)) + abs(Map.get(mp3, robot.y) -  Enum.at(Enum.at(ls,0),1))
+            {_,[goal_x, goal_y]} = min(robot,ls,1,min,0)
             min = abs(robot.x - goal_x) + abs(Map.get(mp3, robot.y) -  goal_y)
             index = 0
             index = goal_select(robot, parent, goal_locs, channel,min, index, count-1,mp,mp2)
-            Enum.fetch(goal_locs,index)
+            {Enum.at(goal_locs,index),index}
           else
-            {:ok,Enum.at(goal_locs,0)}
+            {Enum.at(goal_locs,0),index}
           end
-
-          goal_x = Enum.at(val,0)
-          goal_x = Map.get(mp, goal_x)
-          goal_y = Enum.at(val,1)
-          goal_y = Map.get(mp2, goal_y)
-
-          goal_locs = Enum.filter(goal_locs, fn val ->
-            g_x = Enum.at(val,0)
-            g_x = Map.get(mp, g_x)
-            g_y = Enum.at(val,1)
-            g_y = Map.get(mp2, g_y)
-            g_x != goal_x or g_y != goal_y
-          end)
-          {goal_locs,goal_x, goal_y}
+            {_,goal_locs} = List.pop_at(goal_locs,index)
+            mp4 = %{1 => :a, 2 => :b, 3 => :c, 4 => :d, 5 => :e, 6 => :f}
+            ls = nearby(val)
+            min = abs(robot.x - Enum.at(Enum.at(ls,0),0)) + abs(Map.get(mp3, robot.y) -  Enum.at(Enum.at(ls,0),1))
+            {_,[goal_x, goal_y]} = min(robot,ls,1,min,0)
+          {goal_locs,goal_x, Map.get(mp4,goal_y)}
         else
           {goal_locs,robot.x, robot.y}
         end
-
-
+        # IO.inspect(goal_locs)
         count = Enum.count(goal_locs)
         {robot,obs,goal_locs} = get_value(all,goal_locs,obs, robot,goal_x, goal_y,channel, parent,first)
         {robot,obs,goal_locs,count}
@@ -204,6 +222,7 @@ defmodule Task4CClientRobotB do
   end
 
   def get_value(all,goal_locs,obs, robot,goal_x, goal_y,channel, _parent,_first) do
+    IO.puts("#{goal_x} #{goal_y}")
       {ax,ay,afacing} = all
       len = 1
       q = :queue.new()

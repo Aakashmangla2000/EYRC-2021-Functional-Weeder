@@ -55,7 +55,7 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
     ###########################
     ## complete this funcion ##
     ###########################
-
+    Process.sleep(500)
     tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_B","x" => x, "y" => y, "face" => facing},1000)
     {:ok, is_obs_ahead} = tup
     is_obs_ahead
