@@ -228,33 +228,33 @@ defmodule CLI.ToyRobotB do
       end
   end
 
-    def send_robot_stat() do
-      send(:cli_robotA_state, {:toyrobotB})
-      rec_botA()
-    end
+  def send_robot_stat() do
+    send(:cli_robotA_state, {:toyrobotB})
+    rec_botA()
+  end
 
-    def rec_botA() do
-      receive do
-        {:positions, pos} -> pos
-      end
+  def rec_botA() do
+    receive do
+      {:positions, pos} -> pos
     end
+  end
 
-    def wait_till_over() do
-      if (Process.whereis(:cli_robotB_state) != nil) do
-        # IO.puts("waiting4")
-        Process.sleep(100)
-        wait_till_over()
-      end
+  def wait_till_over() do
+    if (Process.whereis(:cli_robotB_state) != nil) do
+      # IO.puts("waiting4")
+      Process.sleep(100)
+      wait_till_over()
     end
+  end
 
-    def wait_until_received() do
-      if (Process.whereis(:cli_robotA_state) != nil and Process.whereis(:get_botB) == nil) do
-        else
-          # IO.puts("waiting3")
-        Process.sleep(100)
-        wait_until_received()
-      end
+  def wait_until_received() do
+    if (Process.whereis(:cli_robotA_state) != nil and Process.whereis(:get_botB) == nil) do
+      else
+        # IO.puts("waiting3")
+      Process.sleep(100)
+      wait_until_received()
     end
+  end
 
   def receiving_coor(goal_locs) do
 

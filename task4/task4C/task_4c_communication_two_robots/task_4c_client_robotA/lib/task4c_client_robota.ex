@@ -66,10 +66,15 @@ defmodule Task4CClientRobotA do
     {:ok, _response, channel} = Task4CClientRobotA.PhoenixSocketClient.connect_server()
     {:ok, robot} = start(1, :a, :north)
     goal_locs = []
-    x = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
+    # Process.sleep(2000)
+    [x,y,facing,goal_locs,is_obs_ahead] = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
+    # Process.sleep(2000)
+    # x = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
+    # Process.sleep(2000)
+    # x = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
     # x = 1
-    IO.puts(x)
-    # stop(robot, goal_locs,channel)
+    IO.puts("#{x} #{y} #{facing} #{inspect(goal_locs)}")
+    stop(robot, goal_locs,channel)
   end
 
   @doc """
