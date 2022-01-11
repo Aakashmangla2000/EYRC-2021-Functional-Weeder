@@ -177,14 +177,10 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
     socket = assign(socket, :robotA_start, data["robotA_start"])
     socket = assign(socket, :robotB_start, data["robotB_start"])
     Task4CPhoenixServerWeb.Endpoint.broadcast("timer:start", "start_timer", %{})
-    # Task4CPhoenixServerWeb.Endpoint.subscribe("robot:update")
-    # Task4CPhoenixServerWeb.Endpoint.unsubscribe("robot:update")
-    # Task4CPhoenixServerWeb.Endpoint.subscribe("robot:update")
-    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{robotA_start: data["robotA_start"],robotB_start: data["robotB_start"]})
-    # Task4CPhoenixServerWeb.Endpoint.broadcast("robot:status", "start_pos", %{robotA_start: data["robotA_start"],robotB_start: data["robotB_start"]})
     #################################
     ## edit the function if needed ##
     #################################
+    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{robotA_start: data["robotA_start"],robotB_start: data["robotB_start"]})
 
     {:noreply, socket}
 
