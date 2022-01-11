@@ -64,4 +64,10 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
   ## You may create extra helper functions as needed. ##
   ######################################################
 
+  def get_start(channel) do
+    tup = PhoenixClient.Channel.push(channel,"start_pos",%{"client" => "robot_A"},1000)
+    {:ok, start} = tup
+    start
+  end
+
 end

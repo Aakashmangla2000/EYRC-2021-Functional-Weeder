@@ -174,11 +174,14 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
   the PLAY button on the dashboard.
   """
   def handle_event("start_clock", data, socket) do
-
     socket = assign(socket, :robotA_start, data["robotA_start"])
     socket = assign(socket, :robotB_start, data["robotB_start"])
     Task4CPhoenixServerWeb.Endpoint.broadcast("timer:start", "start_timer", %{})
-
+    # Task4CPhoenixServerWeb.Endpoint.subscribe("robot:update")
+    # Task4CPhoenixServerWeb.Endpoint.unsubscribe("robot:update")
+    # Task4CPhoenixServerWeb.Endpoint.subscribe("robot:update")
+    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{robotA_start: data["robotA_start"],robotB_start: data["robotB_start"]})
+    # Task4CPhoenixServerWeb.Endpoint.broadcast("robot:status", "start_pos", %{robotA_start: data["robotA_start"],robotB_start: data["robotB_start"]})
     #################################
     ## edit the function if needed ##
     #################################
@@ -256,6 +259,7 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
           assign(socket, :img_robotA, "robot_facing_west.png")
       end
       socket = assign(socket, :bottom_robotA,data["bottom"])
+      socket = assign(socket, :robotA_goals,data["sow"])
       assign(socket, :left_robotA,data["left"])
 
     else
@@ -273,6 +277,7 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
           assign(socket, :img_robotB, "robot_facing_west.png")
       end
       socket = assign(socket, :bottom_robotB,data["bottom"])
+      socket = assign(socket, :robotB_goals,data["weed"])
       assign(socket, :left_robotB,data["left"])
     end
 

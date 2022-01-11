@@ -971,8 +971,6 @@ def forGoal_y(bx,by,bfacing,goal_locs,robot,_goal_y, _cli_proc_name) do
   {robot,bx,by,bfacing,goal_locs}
 end
 
-
-
 def goX(_bx,_by,_bfacing,goal_locs,%CLI.Position{facing: _facing, x: x, y: _y} = robot, goal_x, goal_y, cli_proc_name, _ob) when x != goal_x do
   robot = move(robot)
   {bx,by,bfacing,goal_locs} = receiving_coor(goal_locs)

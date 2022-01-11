@@ -64,7 +64,9 @@ defmodule Task4CClientRobotA do
     ## complete this funcion ##
     ###########################
     {:ok, _response, channel} = Task4CClientRobotA.PhoenixSocketClient.connect_server()
-    {:ok, robot} = start(1, :a, :north)
+    start = repss(channel,0)
+    {x,y,facing} = change_start(start)
+    {:ok, robot} = start(x,y,facing)
     # Process.sleep(2000)
     [_bx,_by,_bfacing,goal_locs,_obs] = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
     # Process.sleep(2000)
@@ -72,8 +74,34 @@ defmodule Task4CClientRobotA do
     # Process.sleep(2000)
     # x = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
     # x = 1
+
     # IO.puts("#{bx} #{by} #{bfacing} #{inspect(goal_locs)}")
     stop(robot, goal_locs,channel)
+  end
+
+  def change_start(str) do
+    [str] = str
+    str = String.replace(str, " ", "")
+    pattern = :binary.compile_pattern([" ", ","])
+    ls = String.split(str, pattern)
+
+    {x, ls} = List.pop_at(ls,0)
+    x = String.to_integer(x)
+    {y, ls} = List.pop_at(ls,0)
+    y = String.to_atom(y)
+    {facing, _ls} = List.pop_at(ls,0)
+    facing = String.to_atom(facing)
+    IO.puts("#{x} #{inspect(y)} #{inspect(facing)}")
+    {x,y,facing}
+  end
+
+  def repss(channel,start) do
+    if(start == 0) do
+      start = Task4CClientRobotA.PhoenixSocketClient.get_start(channel)
+      repss(channel,start)
+    else
+      start
+    end
   end
 
   @doc """
@@ -167,7 +195,7 @@ defmodule Task4CClientRobotA do
       else
         [bx,by,bfacing,_goal_locs,_obs] = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
 
-        IO.puts("a #{inspect(goal_locs)}")
+        # IO.puts("a #{inspect(goal_locs)}")
         all = {bx,by,bfacing}
         count = Enum.count(goal_locs)
         index = 0
@@ -194,11 +222,11 @@ defmodule Task4CClientRobotA do
           {goal_locs,robot.x, robot.y}
         end
         count = Enum.count(goal_locs)
-        IO.puts("#{goal_x} #{goal_y}")
+        # IO.puts("#{goal_x} #{goal_y}")
         {robot,obs,_goal_locs} = get_value(all,goal_locs,obs, robot,goal_x, goal_y,channel, parent,first)
         {robot,obs,goal_locs,count}
       end
-      IO.puts("b #{inspect(goal_locs)}")
+      # IO.puts("b #{inspect(goal_locs)}")
       count = Enum.count(goal_locs)
       send(parent, {:flag_value, {robot,obs,goal_locs,count}})
     end)

@@ -64,7 +64,9 @@ defmodule Task4CClientRobotB do
     ## complete this funcion ##
     ###########################
     {:ok, _response, channel} = Task4CClientRobotB.PhoenixSocketClient.connect_server()
-    {:ok, robot} = start(1, :f, :south)
+    start = repss(channel,0)
+    {x,y,facing} = change_start(start)
+    {:ok, robot} = start(x,y,facing)
     # Process.sleep(2000)
     [_ax,_ay,_afacing,goal_locs,_obs] = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
     # Process.sleep(2000)
@@ -74,6 +76,31 @@ defmodule Task4CClientRobotB do
     # x = 1
     # IO.puts("#{ax} #{ay} #{afacing} #{inspect(goal_locs)}")
     stop(robot, goal_locs,channel)
+  end
+
+  def repss(channel,start) do
+    if(start == 0) do
+      start = Task4CClientRobotB.PhoenixSocketClient.get_start(channel)
+      repss(channel,start)
+    else
+      start
+    end
+  end
+
+  def change_start(str) do
+    [str] = str
+    str = String.replace(str, " ", "")
+    pattern = :binary.compile_pattern([" ", ","])
+    ls = String.split(str, pattern)
+
+    {x, ls} = List.pop_at(ls,0)
+    x = String.to_integer(x)
+    {y, ls} = List.pop_at(ls,0)
+    y = String.to_atom(y)
+    {facing, _ls} = List.pop_at(ls,0)
+    facing = String.to_atom(facing)
+    IO.puts("#{x} #{inspect(y)} #{inspect(facing)}")
+    {x,y,facing}
   end
 
   @doc """
