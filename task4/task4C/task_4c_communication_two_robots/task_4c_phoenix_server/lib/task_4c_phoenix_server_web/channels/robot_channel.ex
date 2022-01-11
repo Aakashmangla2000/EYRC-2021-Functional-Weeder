@@ -56,31 +56,18 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
       b
     end)
 
-    # if (Process.whereis(:cli_robotB_state) == nil) do
-    #   pid = spawn_link(fn -> listen_from_cli_b(message["x"],message["y"],message["facing"],weed) end)
-    #   Process.register(pid, :cli_robotB_state)
-    # end
-    {x,y,facing,goal_locs} = if(message["client"] == "robot_A") do
-      {0,0,0,sow}
-    else
-      {0,0,0,weed}
+    if (Process.whereis(:cli_robot_states) == nil) do
+      pid = spawn_link(fn -> listen_from_cli(0,0,0,0,0,0,sow,weed) end)
+      Process.register(pid, :cli_robot_states)
     end
 
-    # if(is_obs_ahead == false) do
-    #   if(message["client"] == "robot_A") do
-    #     {bx,by,bfacing,goal_locs} = receiving_coor_a(sow)
-    #     robot = %{x: message["x"],y: message["y"],facing: message["face"]}
-    #     sending_coor_a(goal_locs, robot)
-    #     {bx,by,bfacing,goal_locs}
-    #   else
-    #     {ax,ay,afacing,goal_locs} = receiving_coor_b(weed)
-    #     robot = %{x: message["x"],y: message["y"],facing: message["face"]}
-    #     sending_coor_b(goal_locs, robot)
-    #     {ax,ay,afacing,goal_locs}
-    #   end
-    # else
-    #   {0,0,0,[]}
-    # end
+    {ax,ay,afacing,bx,by,bfacing,sow,weed} = receiving_coors()
+    robots = if(message["client"] == "robot_A") do
+      %{ax: message["x"], ay: message["y"], afacing: message["face"], bx: bx, by: by, bfacing: bfacing}
+    else
+      %{ax: ax, ay: ay, afacing: afacing, bx: message["x"], by: message["y"], bfacing: message["face"]}
+    end
+    sending_coors(sow,weed,robots)
 
     msg2 = if(is_obs_ahead == false) do
       %{"client" => message["client"], "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"],  "obs" => is_obs_ahead, "x" => 0, "y" => 0, "sow" => sow, "weed" => weed}
@@ -105,7 +92,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     end
     Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", msg2)
 
-    rep = [x,y,facing,goal_locs,is_obs_ahead]
+    rep = [ax,ay,afacing,bx,by,bfacing,sow,weed,is_obs_ahead]
     # IO.inspect(rep)
     {:reply, {:ok, rep}, socket}
   end
@@ -114,7 +101,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
 
     socket = if(message["client"] == "robot_A") do
       if(Process.whereis(:cli_robotA_start) != nil) do
-        data = receiving_coor_a_start()
+        data = receiving_coors_start()
         assign(socket, :robotA_start, data)
       else
         assign(socket, :robotA_start, 0)
@@ -235,7 +222,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     end
   end
 
-  def receiving_coor_a_start() do
+  def receiving_coors_start() do
     parent = self()
     pid2 = spawn_link(fn ->
       coor = send_robot_stat_a_start()
@@ -254,151 +241,58 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
       end
   end
 
-    def send_robot_stat_b() do
-    send(:cli_robotA_state, {:toyrobotB})
-    rec_botA()
+  def listen_from_cli(ax,ay,afacing,bx,by,bfacing,sow,weed) do
+    receive do
+      {:toyrobots} ->
+        send(:get_bots, {:positions, {ax,ay,afacing,bx,by,bfacing,sow,weed}})
+      end
   end
 
-  def rec_botA() do
+  def send_robot_stats() do
+    send(:cli_robot_states, {:toyrobots})
+    rec_bots()
+  end
+
+  def rec_bots() do
     receive do
       {:positions, pos} -> pos
     end
   end
 
-  def wait_till_over_b() do
-    if (Process.whereis(:cli_robotB_state) != nil) do
-      # IO.puts("waiting4")
-      Process.sleep(100)
-      wait_till_over_b()
-    end
-  end
-
-  def wait_until_received_b() do
-    if (Process.whereis(:cli_robotA_state) != nil and Process.whereis(:get_botB) == nil) do
+  def wait_until_received() do
+    if (Process.whereis(:cli_robot_states) != nil and Process.whereis(:get_bots) == nil) do
       else
-        # IO.puts("waiting3")
       Process.sleep(100)
-      wait_until_received_b()
+      wait_until_received()
     end
   end
 
-  def receiving_coor_b(goal_locs) do
+  def wait_till_over() do
+    if (Process.whereis(:cli_robot_states) != nil) do
+      Process.sleep(100)
+      wait_till_over()
+    end
+  end
 
+  def receiving_coors() do
+    wait_until_received()
     parent = self()
-
-    # if(Process.whereis(:client_toyrobotA) != nil) do
-    # wait_until_received_b()
     pid2 = spawn_link(fn ->
-      coor = send_robot_stat_b()
-      # {x,y,facing} = coor
-      # IO.puts("Robot A: #{x} #{y} #{facing}")
+      coor = send_robot_stats()
       send(parent, {coor})
-    end)
-    Process.register(pid2, :get_botA)
-  # end
-  # if (Process.whereis(:client_toyrobotA) != nil) do
+      end)
+    Process.register(pid2, :get_bots)
+
     receive do
       {coor} -> coor
     end
-  # else
-  #   {0,0,0,goal_locs}
-  # end
   end
 
-  def sending_coor_b(goal_locs, robot) do
-
-    # if(Process.whereis(:client_toyrobotA) != nil) do
-    # wait_till_over_b()
-    # IO.puts("B sent")
-    %{x: px, y: py, facing: pfacing} = robot
-    pid = spawn_link(fn -> listen_from_cli_b(px,py,pfacing,goal_locs) end)
-    Process.register(pid, :cli_robotB_state)
-    # end
-  end
-
-  def listen_from_cli_b(px,py,pfacing,goal_locs) do
-    receive do
-      {:toyrobotA} ->
-        send(:get_botB, {:positions, {px,py,pfacing,goal_locs}})
-      end
-  end
-
-
-  def listen_from_cli_a(px,py,pfacing,goal_locs) do
-    receive do
-      {:toyrobotB} ->
-        send(:get_botA, {:positions, {px,py,pfacing,goal_locs}})
-      end
-  end
-
-  def send_robot_stat_a() do
-    send(:cli_robotB_state, {:toyrobotA})
-    rec_botB()
-  end
-
-  def rec_botB() do
-    receive do
-      {:positions, pos} -> pos
-    end
-  end
-
-  def wait_until_received_a() do
-    if (Process.whereis(:cli_robotB_state) != nil and Process.whereis(:get_botA) == nil) do
-      else
-      # IO.puts("waiting1")
-      Process.sleep(100)
-      wait_until_received_a()
-    end
-  end
-
-  def wait_till_over_a() do
-    if (Process.whereis(:cli_robotA_state) != nil) do
-      # IO.puts("waiting2")
-      Process.sleep(100)
-      wait_till_over_a()
-    end
-  end
-
-  def receiving_coor_a(goal_locs) do
-    IO.puts("sup")
-    parent = self()
-    # if(Process.whereis(:client_toyrobotB) != nil) do
-    # wait_until_received_a()
-    IO.puts("A received")
-    pid2 = spawn_link(fn ->
-      coor = send_robot_stat_a()
-      # {x,y,facing} = coor
-      # IO.puts("Robot B: #{x} #{y} #{facing}")
-      send(parent, {coor})
-      end)
-    Process.register(pid2, :get_botB)
-    # else
-    #   send(parent,{0,0,0,goal_locs})
-    # end
-
-      receive do
-        {coor} -> coor
-      # after
-      #   10 -> {0,0,0,goal_locs}
-      end
-
-  end
-
-  def sending_coor_a(goal_locs, robot) do
-    IO.puts("ok")
-    # if(Process.whereis(:client_toyrobotB) != nil) do
-    # wait_till_over_a()
-    IO.puts("A sent")
-    %{x: px, y: py, facing: pfacing} = robot
-    pid = spawn_link(fn -> listen_from_cli_a(px,py,pfacing,goal_locs) end)
-    Process.register(pid, :cli_robotA_state)
-    # end
-  end
-
-  def rec_value() do
-    receive do
-      {:flag_value, flag} -> flag
-    end
+  def sending_coors(sow,weed,robots) do
+    wait_till_over()
+    %{ax: ax, ay: ay, afacing: afacing, bx: bx, by: by, bfacing: bfacing} = robots
+    pid = spawn_link(fn -> listen_from_cli(ax,ay,afacing,bx,by,bfacing,sow,weed) end)
+    Process.register(pid, :cli_robot_states)
   end
 
 end

@@ -91,7 +91,7 @@ defmodule Task4CClientRobotA do
     y = String.to_atom(y)
     {facing, _ls} = List.pop_at(ls,0)
     facing = String.to_atom(facing)
-    IO.puts("#{x} #{inspect(y)} #{inspect(facing)}")
+    # IO.puts("#{x} #{inspect(y)} #{inspect(facing)}")
     {x,y,facing}
   end
 
@@ -688,7 +688,7 @@ defmodule Task4CClientRobotA do
         {robot, obs, bx, by, bfacing, goal_locs} = both
         {q,robot, obs, bx, by, bfacing, goal_locs,dir,visited}
       else
-        IO.puts("aamne saamne #{:queue.len(q)} #{:queue.len(visited)}")
+        # IO.puts("aamne saamne #{:queue.len(q)} #{:queue.len(visited)}")
         {visited,q} = if(:queue.len(visited) != 0) do
             {{:value, _val}, visited} = :queue.out_r(visited)
             # {{:value, _value4}, q} = :queue.out_r(q)
@@ -708,7 +708,7 @@ defmodule Task4CClientRobotA do
         {q,robot, obs, bx, by, bfacing, goal_locs,dir,visited}
       end
         # struc = {q,visited}
-        IO.puts(obs)
+        # IO.puts(obs)
         {q, visited} = cond do
 
           dir == 0 ->

@@ -15,13 +15,13 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
     Task4CPhoenixServerWeb.Endpoint.subscribe("robot:update")
     :ok = Phoenix.PubSub.subscribe(Task4CPhoenixServer.PubSub, "timer:update")
 
-    socket = assign(socket, :img_robotA, "robot_facing_north.png")
+    socket = assign(socket, :img_robotA, "robot_facing_north_a.png")
     socket = assign(socket, :bottom_robotA, 0)
     socket = assign(socket, :left_robotA, 0)
     socket = assign(socket, :robotA_start, "")
     socket = assign(socket, :robotA_goals, [])
 
-    socket = assign(socket, :img_robotB, "robot_facing_south.png")
+    socket = assign(socket, :img_robotB, "robot_facing_south_b.png")
     socket = assign(socket, :bottom_robotB, 750)
     socket = assign(socket, :left_robotB, 750)
     socket = assign(socket, :robotB_start, "")
@@ -244,15 +244,15 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
       facing = data["face"]
       socket = cond do
         facing == "north" ->
-          assign(socket, :img_robotA, "robot_facing_north.png")
+          assign(socket, :img_robotA, "robot_facing_north_a.png")
         facing == "south" ->
-          assign(socket, :img_robotA, "robot_facing_south.png")
+          assign(socket, :img_robotA, "robot_facing_south_a.png")
         facing == "east" ->
-          assign(socket, :img_robotA, "robot_facing_east.png")
+          assign(socket, :img_robotA, "robot_facing_east_a.png")
         facing == "west" ->
-          assign(socket, :img_robotA, "robot_facing_west.png")
+          assign(socket, :img_robotA, "robot_facing_west_a.png")
         true ->
-          assign(socket, :img_robotA, "robot_facing_west.png")
+          assign(socket, :img_robotA, "robot_facing_west_a.png")
       end
       socket = assign(socket, :bottom_robotA,data["bottom"])
       socket = assign(socket, :robotA_goals,data["sow"])
@@ -262,15 +262,15 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
       facing = data["face"]
       socket = cond do
         facing == "north" ->
-          assign(socket, :img_robotB, "robot_facing_north.png")
+          assign(socket, :img_robotB, "robot_facing_north_b.png")
         facing == "south" ->
-          assign(socket, :img_robotB, "robot_facing_south.png")
+          assign(socket, :img_robotB, "robot_facing_south_b.png")
         facing == "east" ->
-          assign(socket, :img_robotB, "robot_facing_east.png")
+          assign(socket, :img_robotB, "robot_facing_east_b.png")
         facing == "west" ->
-          assign(socket, :img_robotB, "robot_facing_west.png")
+          assign(socket, :img_robotB, "robot_facing_west_b.png")
         true ->
-          assign(socket, :img_robotB, "robot_facing_west.png")
+          assign(socket, :img_robotB, "robot_facing_west_b.png")
       end
       socket = assign(socket, :bottom_robotB,data["bottom"])
       socket = assign(socket, :robotB_goals,data["weed"])

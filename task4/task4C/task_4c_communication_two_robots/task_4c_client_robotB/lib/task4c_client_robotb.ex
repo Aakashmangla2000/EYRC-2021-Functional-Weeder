@@ -99,7 +99,7 @@ defmodule Task4CClientRobotB do
     y = String.to_atom(y)
     {facing, _ls} = List.pop_at(ls,0)
     facing = String.to_atom(facing)
-    IO.puts("#{x} #{inspect(y)} #{inspect(facing)}")
+    # IO.puts("#{x} #{inspect(y)} #{inspect(facing)}")
     {x,y,facing}
   end
 
@@ -244,7 +244,7 @@ defmodule Task4CClientRobotB do
   end
 
   def get_value(all,goal_locs,obs, robot,goal_x, goal_y,channel, _parent,_first) do
-    IO.puts("#{goal_x} #{goal_y}")
+    # IO.puts("#{goal_x} #{goal_y}")
       {ax,ay,afacing} = all
       len = 1
       q = :queue.new()
