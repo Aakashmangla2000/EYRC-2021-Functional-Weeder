@@ -84,11 +84,11 @@ defmodule ArmMechanismTest do
   for 500ms each and then stops
   """
   def test_motion do
-    Logger.debug("Testing Motion of the Robot ")
+    # Logger.debug("Testing Motion of the Robot ")
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
-    motion_list = [@forward,@forward,@forward,@forward,@stop]
+    motion_list = [@forward,@forward,@forward,@forward,@forward,@forward,@stop]
     Enum.each(motion_list, fn motion -> motor_action(motor_ref,motion) end)
     # Enum.map(@duty_cycles, fn value -> motion_pwm(value) end)
 
@@ -117,23 +117,33 @@ defmodule ArmMechanismTest do
   # end
 
   def weeding do
+    IO.puts("Positioning the arm...")
     test_servo_b(45)  #setting arm at height
-    Process.sleep(150)
+    Process.sleep(250)
+    IO.puts("Opening the Claws...")
     test_servo_a(90)  #opening claws
     Process.sleep(250)
+    IO.puts("Weeding Begins...")
     test_servo_b(20)
     Process.sleep(500)
     test_servo_a(0)
     Process.sleep(500)
     test_servo_b(50)
     Process.sleep(1000)
+
+    IO.puts("Change position...")
     test_motion
+
+    IO.puts("Weed Depositing...")
     Process.sleep(500)
     test_servo_b(30)
+
     Process.sleep(500)
     test_servo_a(90)
+
     Process.sleep(500)
     test_servo_b(50)
+    IO.puts("Weeding Ends...")
 
 
 
@@ -176,7 +186,7 @@ defmodule ArmMechanismTest do
   values from 0 to 180
   """
   def test_servo_a(angle) do
-    Logger.debug("Testing Servo A")
+    # Logger.debug("Testing Servo A")
     val = trunc(((2.5 + 10.0 * angle / 180) / 100 ) * 255)
     Pigpiox.Pwm.set_pwm_frequency(@servo_a_pin, @pwm_frequency)
     Pigpiox.Pwm.gpio_pwm(@servo_a_pin, val)
@@ -197,7 +207,7 @@ defmodule ArmMechanismTest do
   values from 0 to 180
   """
   def test_servo_b(angle) do
-    Logger.debug("Testing Servo B")
+    # Logger.debug("Testing Servo B")
     val = trunc(((2.5 + 10.0 * angle / 180) / 100 ) * 255)
     Pigpiox.Pwm.set_pwm_frequency(@servo_b_pin, @pwm_frequency)
     Pigpiox.Pwm.gpio_pwm(@servo_b_pin, val)
