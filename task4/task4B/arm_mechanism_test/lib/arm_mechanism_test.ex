@@ -47,19 +47,20 @@ defmodule ArmMechanismTest do
   end
 
   def weeding do
+    Process.sleep(5000)
+    IO.puts("Opening the Claws...")
+    test_servo_a(0)  #opening claws
+    Process.sleep(1000)
+
     IO.puts("Positioning the arm...")
     test_servo_b(45)  #setting arm at height
-    Process.sleep(250)
-
-    IO.puts("Opening the Claws...")
-    test_servo_a(90)  #opening claws
-    Process.sleep(250)
+    Process.sleep(1000)
 
     IO.puts("Weeding Begins...")
     test_servo_b(20)
-    Process.sleep(500)
-    test_servo_a(0)
-    Process.sleep(500)
+    Process.sleep(1000)
+    test_servo_a(180)
+    Process.sleep(1000)
     test_servo_b(50)
     Process.sleep(1000)
 
@@ -67,11 +68,11 @@ defmodule ArmMechanismTest do
     test_motion
 
     IO.puts("Weed Depositing...")
-    Process.sleep(500)
+    Process.sleep(1000)
     test_servo_b(30)
-    Process.sleep(500)
-    test_servo_a(90)
-    Process.sleep(500)
+    Process.sleep(1000)
+    test_servo_a(00)
+    Process.sleep(1000)
     test_servo_b(50)
     IO.puts("Weeding Ends...")
 
