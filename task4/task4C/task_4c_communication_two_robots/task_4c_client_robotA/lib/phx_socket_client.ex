@@ -54,7 +54,7 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
     ###########################
     ## complete this funcion ##
     ###########################
-    Process.sleep(2000)
+    Process.sleep(500)
     tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing},1000)
     {:ok, rep} = tup
     [ax,ay,afacing,_bx,_by,_bfacing,sow,_weed,obs] = rep

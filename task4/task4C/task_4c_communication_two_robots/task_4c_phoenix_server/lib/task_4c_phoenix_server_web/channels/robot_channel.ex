@@ -56,7 +56,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
       b
     end)
 
-    if (Process.whereis(:cli_robot_states) == nil) do
+    if (Process.whereis(:cli_robot_states) == nil and message["client"] == "robot_A") do
       pid = spawn_link(fn -> listen_from_cli(0,0,0,0,0,0,sow,weed) end)
       Process.register(pid, :cli_robot_states)
     end
@@ -140,15 +140,23 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
 
   def handle_info(%{robotA_start: a, robotB_start: b} = data, socket) do
     IO.puts("inside")
-    IO.inspect(data)
     IO.inspect(Process.whereis(:cli_robotB_start))
+    IO.inspect(Process.whereis(:cli_robotA_start))
     if(Process.whereis(:cli_robotB_start) == nil) do
-    pid = spawn_link(fn -> listen_from_cli_b_start(b) end)
-    Process.register(pid, :cli_robotB_start)
+      pid = spawn_link(fn -> listen_from_cli_b_start(b) end)
+      Process.register(pid, :cli_robotB_start)
+    else
+      Process.unregister(:cli_robotB_start)
+      pid = spawn_link(fn -> listen_from_cli_b_start(b) end)
+      Process.register(pid, :cli_robotB_start)
     end
     if(Process.whereis(:cli_robotA_start) == nil) do
-    pid = spawn_link(fn -> listen_from_cli_a_start(a) end)
-    Process.register(pid, :cli_robotA_start)
+      pid = spawn_link(fn -> listen_from_cli_a_start(a) end)
+      Process.register(pid, :cli_robotA_start)
+    else
+      Process.unregister(:cli_robotA_start)
+      pid = spawn_link(fn -> listen_from_cli_a_start(a) end)
+      Process.register(pid, :cli_robotA_start)
     end
     {:noreply, socket}
   end
@@ -161,7 +169,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
   # end
 
   def handle_info(data, socket) do
-    IO.puts("in handle_info")
+    # IO.puts("in handle_info")
     # IO.inspect(data)
     # socket = cond do
     #   data["client"] == "robot_A" ->

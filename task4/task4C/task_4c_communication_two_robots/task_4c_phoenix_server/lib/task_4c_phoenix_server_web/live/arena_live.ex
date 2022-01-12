@@ -255,7 +255,11 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
           assign(socket, :img_robotA, "robot_facing_west_a.png")
       end
       socket = assign(socket, :bottom_robotA,data["bottom"])
-      socket = assign(socket, :robotA_goals,data["sow"])
+      socket = if(data["sow"] != nil) do
+        assign(socket, :robotA_goals,data["sow"])
+      else
+        socket
+      end
       assign(socket, :left_robotA,data["left"])
 
     else
@@ -273,7 +277,11 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
           assign(socket, :img_robotB, "robot_facing_west_b.png")
       end
       socket = assign(socket, :bottom_robotB,data["bottom"])
-      socket = assign(socket, :robotB_goals,data["weed"])
+      socket = if(data["weed"] != nil) do
+        assign(socket, :robotB_goals,data["weed"])
+      else
+        socket
+      end
       assign(socket, :left_robotB,data["left"])
     end
 

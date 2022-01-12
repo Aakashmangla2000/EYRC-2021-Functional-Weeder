@@ -551,6 +551,8 @@ defmodule Task4CClientRobotB do
       0
     end
 
+    [ax,ay,afacing,goal_locs,obs] = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+
     {q,visited,robot,len,ax,ay,afacing, goal_locs,obs} = cond do
       new_goal_x == ax and new_goal_y == ay->
       # IO.puts("B crash into A")

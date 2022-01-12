@@ -555,6 +555,8 @@ defmodule Task4CClientRobotA do
       0
     end
 
+    [bx,by,bfacing,goal_locs,obs] = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
+
     first = if(new_goal_x == bx and new_goal_y == by) do
       x = cond do
         bfacing == :east and robot.facing == :west ->
