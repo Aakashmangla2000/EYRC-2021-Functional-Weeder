@@ -76,6 +76,8 @@ defmodule Task4CClientRobotB do
     # x = 1
     # IO.puts("#{ax} #{ay} #{afacing} #{inspect(goal_locs)}")
     stop(robot, goal_locs,channel)
+    robot = %Task4CClientRobotB.Position{x: 7, y: "g", facing: "north"}
+    [_ax,_ay,_afacing,_goal_locs,_obs] = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
   end
 
   def repss(channel,start) do
@@ -550,19 +552,39 @@ defmodule Task4CClientRobotB do
       # IO.puts("B Reached #{x} #{y}")
       0
     end
+    IO.puts("a pos #{ax} #{ay} #{afacing}")
+    IO.puts("b pos #{x} #{y}")
 
     [ax,ay,afacing,goal_locs,obs] = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+    first = 0
+    first = if(new_goal_x == ax and new_goal_y == ay) do
+      x = cond do
+        afacing == :east and robot.facing == :west ->
+            1
+        afacing == :west and robot.facing == :east ->
+          1
+        afacing == :north and robot.facing == :south ->
+          1
+        afacing == :south and robot.facing == :north ->
+          1
+        true -> first
+      end
+      x
+    else
+      0
+    end
 
     {q,visited,robot,len,ax,ay,afacing, goal_locs,obs} = cond do
-      new_goal_x == ax and new_goal_y == ay->
-      # IO.puts("B crash into A")
+      new_goal_x == ax and new_goal_y == ay and first == 0 ->
+      IO.puts("B crash into A")
       [ax,ay,afacing,goal_locs,obs] = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
 
       q = :queue.in({x,y,dirs},q)
       len = :queue.len(q)
       {q,visited,robot,len,ax,ay,afacing, goal_locs,obs}
       true ->
-      #travelling to new goals
+      {q,robot, obs, ax, ay, afacing, goal_locs,dir,visited} = if(first == 0) do
+        #travelling to new goals
         {robot,ax,ay,afacing, goal_locs} = Task4CClientRobotB.forGoal_x(ax,ay,afacing, goal_locs,robot,new_goal_x, channel)
         {robot,obs,ax,ay,afacing, goal_locs} = Task4CClientRobotB.goX(ax,ay,afacing, goal_locs,robot,new_goal_x,new_goal_y,channel,obs)
         {robot,ax,ay,afacing, goal_locs} = Task4CClientRobotB.forGoal_y(ax,ay,afacing, goal_locs,robot,new_goal_y, channel)
@@ -710,8 +732,28 @@ defmodule Task4CClientRobotB do
         both
         end
         {robot, obs, ax, ay, afacing, goal_locs} = both
+        {q,robot, obs, ax, ay, afacing, goal_locs,dir,visited}
         # struc = {q,visited}
+      else
+        IO.puts("aamne saamne 2 #{:queue.len(q)} #{:queue.len(visited)}")
+        {visited,q} = if(:queue.len(visited) != 0) do
+            {{:value, _val}, visited} = :queue.out_r(visited)
+            # {{:value, _value4}, q} = :queue.out_r(q)
+            # q = :queue.in({x,y,dirs},q)
+            {visited,q}
+        else
+          # q = :queue.in({x,y,dirs},q)
+          {visited,q}
+        end
 
+        {_x,_y, dirs} = value3
+        # new_goal_x = x
+        # new_goal_y = y
+        dir = List.last(dirs)
+        # IO.puts(dir)
+        obs = true
+        {q,robot, obs, ax, ay, afacing, goal_locs,dir,visited}
+      end
         {q, visited} = cond do
 
           dir == 0 ->

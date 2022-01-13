@@ -57,9 +57,9 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
     Process.sleep(500)
     tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing},1000)
     {:ok, rep} = tup
-    [ax,ay,afacing,_bx,_by,_bfacing,sow,_weed,obs] = rep
-    IO.inspect(rep)
-    [ax,ay,afacing,sow,obs]
+    [_ax,_ay,_afacing,bx,by,bfacing,sow,_weed,obs] = rep
+    # IO.inspect(rep)
+    [bx,String.to_atom(by),String.to_atom(bfacing),sow,obs]
   end
 
   ######################################################

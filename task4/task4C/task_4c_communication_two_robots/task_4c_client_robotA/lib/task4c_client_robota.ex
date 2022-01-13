@@ -77,6 +77,8 @@ defmodule Task4CClientRobotA do
 
     # IO.puts("#{bx} #{by} #{bfacing} #{inspect(goal_locs)}")
     stop(robot, goal_locs,channel)
+    robot = %Task4CClientRobotA.Position{x: 7, y: "g", facing: "north"}
+    [_ax,_ay,_afacing,_goal_locs,_obs] = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
   end
 
   def change_start(str) do
@@ -556,7 +558,7 @@ defmodule Task4CClientRobotA do
     end
 
     [bx,by,bfacing,goal_locs,obs] = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
-
+    IO.puts("#{bx} #{by} #{x} #{y}")
     first = if(new_goal_x == bx and new_goal_y == by) do
       x = cond do
         bfacing == :east and robot.facing == :west ->
@@ -575,8 +577,8 @@ defmodule Task4CClientRobotA do
     end
 
     {q,visited,robot,len,bx,by,bfacing,goal_locs,obs} = cond do
-      new_goal_x == bx and new_goal_y == by ->
-      # IO.puts("A crash into B")
+      new_goal_x == bx and new_goal_y == by and first == 0 ->
+      IO.puts("A crash into B")
 
       [bx,by,bfacing,goal_locs,obs] = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
 
@@ -690,7 +692,7 @@ defmodule Task4CClientRobotA do
         {robot, obs, bx, by, bfacing, goal_locs} = both
         {q,robot, obs, bx, by, bfacing, goal_locs,dir,visited}
       else
-        # IO.puts("aamne saamne #{:queue.len(q)} #{:queue.len(visited)}")
+        IO.puts("aamne saamne #{:queue.len(q)} #{:queue.len(visited)}")
         {visited,q} = if(:queue.len(visited) != 0) do
             {{:value, _val}, visited} = :queue.out_r(visited)
             # {{:value, _value4}, q} = :queue.out_r(q)
