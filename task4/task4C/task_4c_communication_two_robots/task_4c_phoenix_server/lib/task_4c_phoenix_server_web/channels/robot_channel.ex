@@ -41,8 +41,84 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     ## complete this funcion ##
     ###########################
     mp = %{"a" => 0, "b" => 1, "c" => 2, "d" => 3, "e" => 4, "f" => 5, "g" => 6}
-    IO.inspect(message)
+    # IO.inspect(message)
 
+    msg2 = if(message["x"] < 7) do
+      msg2 = if(is_obs_ahead == false) do
+      %{"client" => message["client"], "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"],  "obs" => is_obs_ahead, "x" => 0, "y" => 0}
+    else
+      facing = message["face"]
+      {x,y} = cond do
+        facing == "north" ->
+          {(message["x"]-1)*150,(Map.get(mp, message["y"])*150)+75}
+        facing == "south" ->
+          {(message["x"]-1)*150,(Map.get(mp, message["y"])*150)-75}
+        facing == "east" ->
+          {((message["x"]-1)*150)+75,(Map.get(mp, message["y"])*150)}
+        facing == "west" ->
+          {((message["x"]-1)*150)-75,(Map.get(mp, message["y"])*150)}
+      end
+      %{"client" => message["client"], "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"], "obs" => is_obs_ahead, "x" => x, "y" => y}
+    end
+    msg2
+    else
+      nil
+    end
+    _msg3 = if(is_obs_ahead == false) do
+      %{client: message["client"], x: message["x"], y: Map.get(mp, message["y"]), face: message["face"]}
+    else
+      %{client: "obs", x: 0, y: 0}
+    end
+
+    if(msg2 !=  nil ) do
+      Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", msg2)
+    else
+    end
+
+    # is_obs_ahead = if(message["client"] == "robot_A") do
+    #   if(ax == 7 and ay == "g") do
+    #     true
+    #   else
+    #     is_obs_ahead
+    #   end
+    # else
+    #   if(bx == 7 and by == "g") do
+    #     true
+    #   else
+    #     is_obs_ahead
+    #   end
+    # end
+
+    # rep = [ax,ay,afacing,bx,by,bfacing,is_obs_ahead]
+    {:reply, {:ok, is_obs_ahead}, socket}
+  end
+
+  def handle_in("get_bots",message,socket) do
+    if (Process.whereis(:cli_robot_states) == nil and message["client"] == "robot_A") do
+      IO.puts("jojo")
+      pid = spawn_link(fn -> listen_from_cli("0","0","0","0","0","0") end)
+      Process.register(pid, :cli_robot_states)
+    end
+
+    {ax,ay,afacing,bx,by,bfacing} = receiving_coors()
+    robots = if(message["client"] == "robot_A") do
+      %{ax: message["x"], ay: message["y"], afacing: message["face"], bx: bx, by: by, bfacing: bfacing}
+    else
+      %{ax: ax, ay: ay, afacing: afacing, bx: message["x"], by: message["y"], bfacing: message["face"]}
+    end
+    sending_coors(robots)
+
+    IO.puts("a:#{ax} #{ay} b:#{bx} #{by}")
+    if ax == 7 and ay == "g" and bx == 7 and by == "g" do
+      IO.puts("over")
+      Task4CPhoenixServerWeb.Endpoint.broadcast("timer:stop", "stop_timer", %{})
+    end
+
+    rep = [ax,ay,afacing,bx,by,bfacing]
+    {:reply, {:ok, rep}, socket}
+  end
+
+  def handle_in("goals", message, socket) do
     y = File.stream!("Plant_Positions.csv")
     |> CSV.decode
     |> Enum.map(fn {_,x} ->
@@ -56,73 +132,12 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     weed = Enum.map(y,fn [_a,b] ->
       b
     end)
-
-    if (Process.whereis(:cli_robot_states) == nil and message["client"] == "robot_A") do
-      IO.puts("jojo")
-      pid = spawn_link(fn -> listen_from_cli("0","0","0","0","0","0",sow,weed) end)
-      Process.register(pid, :cli_robot_states)
-    end
-
-    {ax,ay,afacing,bx,by,bfacing,sow,weed} = receiving_coors()
-    robots = if(message["client"] == "robot_A") do
-      %{ax: message["x"], ay: message["y"], afacing: message["face"], bx: bx, by: by, bfacing: bfacing}
+    goals = if(message["client"] == "robot_A") do
+      sow
     else
-      %{ax: ax, ay: ay, afacing: afacing, bx: message["x"], by: message["y"], bfacing: message["face"]}
+      weed
     end
-    sending_coors(sow,weed,robots)
-
-    msg2 = if(message["x"] < 7) do
-      msg2 = if(is_obs_ahead == false) do
-      %{"client" => message["client"], "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"],  "obs" => is_obs_ahead, "x" => 0, "y" => 0, "sow" => sow, "weed" => weed}
-    else
-      facing = message["face"]
-      {x,y} = cond do
-        facing == "north" ->
-          {(message["x"]-1)*150,(Map.get(mp, message["y"])*150)+75}
-        facing == "south" ->
-          {(message["x"]-1)*150,(Map.get(mp, message["y"])*150)-75}
-        facing == "east" ->
-          {((message["x"]-1)*150)+75,(Map.get(mp, message["y"])*150)}
-        facing == "west" ->
-          {((message["x"]-1)*150)-75,(Map.get(mp, message["y"])*150)}
-      end
-      %{"client" => message["client"], "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"], "obs" => is_obs_ahead, "x" => x, "y" => y, "sow" => sow, "weed" => weed}
-    end
-    msg2
-    else
-    # %{"client" => message["client"], "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"], "obs" => is_obs_ahead, "x" => x, "y" => y, "sow" => sow, "weed" => weed}
-    nil
-    end
-    _msg3 = if(is_obs_ahead == false) do
-      %{client: message["client"], x: message["x"], y: Map.get(mp, message["y"]), face: message["face"]}
-    else
-      %{client: "obs", x: 0, y: 0}
-    end
-
-    if(msg2 !=  nil ) do
-    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", msg2)
-    else
-    end
-
-    is_obs_ahead = if(message["client"] == "robot_A") do
-      if(ax == 7 and ay == "g") do
-        true
-      else
-        is_obs_ahead
-      end
-    else
-      if(bx == 7 and by == "g") do
-        true
-      else
-        is_obs_ahead
-      end
-    end
-
-    # push(socket, "incoming:msg", msg2)
-    # broadcast(socket, "incoming:msg", %{id: 1, content: "hello"})
-    rep = [ax,ay,afacing,bx,by,bfacing,sow,weed,is_obs_ahead]
-    # IO.inspect(rep)
-    {:reply, {:ok, rep}, socket}
+    {:reply, {:ok, goals}, socket}
   end
 
   def handle_in("start_pos", message, socket) do
@@ -166,10 +181,11 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
   ## define callback functions as needed ##
   #########################################
 
-  def handle_info(%{robotA_start: a, robotB_start: b} = data, socket) do
+  def handle_info(%{robotA_start: a, robotB_start: b} = _data, socket) do
     IO.puts("inside")
-    IO.inspect(Process.whereis(:cli_robotB_start))
-    IO.inspect(Process.whereis(:cli_robotA_start))
+    # IO.inspect(data)
+    # IO.inspect(Process.whereis(:cli_robotB_start))
+    # IO.inspect(Process.whereis(:cli_robotA_start))
     if(Process.whereis(:cli_robotB_start) == nil) do
       pid = spawn_link(fn -> listen_from_cli_b_start(b) end)
       Process.register(pid, :cli_robotB_start)
@@ -186,7 +202,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
       pid = spawn_link(fn -> listen_from_cli_a_start(a) end)
       Process.register(pid, :cli_robotA_start)
     end
-    {:noreply, socket}
+    {:noreply, socket, 1000}
   end
 
   # def handle_info(%{client: _cli, x: _x, y: _y, face: _face} = _data, socket) do
@@ -196,7 +212,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
   #   {:noreply, socket}
   # end
 
-  def handle_info(data, socket) do
+  def handle_info(_data, socket) do
     # IO.puts("in handle_info")
     # IO.inspect(data)
     # socket = cond do
@@ -277,10 +293,10 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
       end
   end
 
-  def listen_from_cli(ax,ay,afacing,bx,by,bfacing,sow,weed) do
+  def listen_from_cli(ax,ay,afacing,bx,by,bfacing) do
     receive do
       {:toyrobots} ->
-        send(:get_bots, {:positions, {ax,ay,afacing,bx,by,bfacing,sow,weed}})
+        send(:get_bots, {:positions, {ax,ay,afacing,bx,by,bfacing}})
       end
   end
 
@@ -305,11 +321,10 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
   end
 
   def wait_till_over() do
-    if (Process.whereis(:cli_robot_states) != nil or Process.whereis(:get_bots) != nil) do
+    if (Process.whereis(:cli_robot_states) != nil) do
       # IO.puts("waiting 2")
       Process.sleep(100)
       wait_till_over()
-    else
     end
   end
 
@@ -327,10 +342,10 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     end
   end
 
-  def sending_coors(sow,weed,robots) do
+  def sending_coors(robots) do
     wait_till_over()
     %{ax: ax, ay: ay, afacing: afacing, bx: bx, by: by, bfacing: bfacing} = robots
-    pid = spawn_link(fn -> listen_from_cli(ax,ay,afacing,bx,by,bfacing,sow,weed) end)
+    pid = spawn_link(fn -> listen_from_cli(ax,ay,afacing,bx,by,bfacing) end)
     Process.register(pid, :cli_robot_states)
   end
 
