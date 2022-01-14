@@ -75,7 +75,7 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
     %Task4CClientRobotB.Position{facing: facing,x: x, y: y} = robot
     tup = PhoenixClient.Channel.push(channel,"get_bots",%{"client" => "robot_B","x" => x, "y" => y, "face" => facing},1000)
     {:ok, rep} = tup
-    [ax,ay,afacing,bx,by,bfacing] = rep
+    [ax,ay,afacing,_bx,_by,_bfacing] = rep
     [ax,String.to_atom(ay),String.to_atom(afacing)]
   end
 

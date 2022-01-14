@@ -216,6 +216,20 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
 
   end
 
+  def handle_info(%{sow: sow, weed: weed} = _data, socket) do
+    socket = if(sow != nil) do
+        assign(socket, :robotA_goals,sow)
+      else
+        socket
+      end
+    socket = if(weed != nil) do
+        assign(socket, :robotB_goals,weed)
+      else
+        socket
+      end
+    {:noreply, socket}
+  end
+
   @doc """
   Callback function to handle any incoming data from the RobotChannel module
   broadcasted on the "robot:update" topic.
@@ -229,11 +243,6 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
     ###########################
     ## complete this funcion ##
     ###########################
-
-    # :ok = Phoenix.PubSub.subscribe(Task4CPhoenixServerWeb.PubSub, "robot:update")
-    # IO.puts("data #{inspect(data)}")
-    # x = Map.get(socket.assigns,:bottom_robotB)
-    # IO.inspect(data)
 
     socket =  if(data["obs"] == true) do
       assign(socket, :obstacle_pos,MapSet.new([{data["x"],data["y"]}]))
@@ -255,11 +264,6 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
           assign(socket, :img_robotA, "robot_facing_west_a.png")
       end
       socket = assign(socket, :bottom_robotA,data["bottom"])
-      socket = if(data["sow"] != nil) do
-        assign(socket, :robotA_goals,data["sow"])
-      else
-        socket
-      end
       assign(socket, :left_robotA,data["left"])
 
     else
@@ -277,11 +281,6 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
           assign(socket, :img_robotB, "robot_facing_west_b.png")
       end
       socket = assign(socket, :bottom_robotB,data["bottom"])
-      socket = if(data["weed"] != nil) do
-        assign(socket, :robotB_goals,data["weed"])
-      else
-        socket
-      end
       assign(socket, :left_robotB,data["left"])
     end
 

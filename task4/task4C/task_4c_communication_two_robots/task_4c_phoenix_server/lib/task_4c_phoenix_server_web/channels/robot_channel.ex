@@ -75,21 +75,6 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     else
     end
 
-    # is_obs_ahead = if(message["client"] == "robot_A") do
-    #   if(ax == 7 and ay == "g") do
-    #     true
-    #   else
-    #     is_obs_ahead
-    #   end
-    # else
-    #   if(bx == 7 and by == "g") do
-    #     true
-    #   else
-    #     is_obs_ahead
-    #   end
-    # end
-
-    # rep = [ax,ay,afacing,bx,by,bfacing,is_obs_ahead]
     {:reply, {:ok, is_obs_ahead}, socket}
   end
 
@@ -137,6 +122,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     else
       weed
     end
+    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{sow: sow, weed: weed})
     {:reply, {:ok, goals}, socket}
   end
 
@@ -183,9 +169,6 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
 
   def handle_info(%{robotA_start: a, robotB_start: b} = _data, socket) do
     IO.puts("inside")
-    # IO.inspect(data)
-    # IO.inspect(Process.whereis(:cli_robotB_start))
-    # IO.inspect(Process.whereis(:cli_robotA_start))
     if(Process.whereis(:cli_robotB_start) == nil) do
       pid = spawn_link(fn -> listen_from_cli_b_start(b) end)
       Process.register(pid, :cli_robotB_start)
@@ -205,30 +188,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     {:noreply, socket, 1000}
   end
 
-  # def handle_info(%{client: _cli, x: _x, y: _y, face: _face} = _data, socket) do
-  #   IO.puts("inside")
-  #   # IO.inspect(face)
-  #   # IO.inspect(socket)
-  #   {:noreply, socket}
-  # end
-
   def handle_info(_data, socket) do
-    # IO.puts("in handle_info")
-    # IO.inspect(data)
-    # socket = cond do
-    #   data["client"] == "robot_A" ->
-    #       socket = assign(socket, :robotA_x, data["left"])
-    #       socket = assign(socket, :robotA_y, data["bottom"])
-    #       assign(socket, :robotA_facing, data["face"])
-
-    #   data["client"] == "robot_B" ->
-    #       socket = assign(socket, :robotB_x, data["left"])
-    #       socket = assign(socket, :robotB_y, data["bottom"])
-    #       assign(socket, :robotB_facing, data["face"])
-
-    #   true ->
-    #     socket
-    # end
 
     {:noreply, socket}
   end

@@ -71,8 +71,8 @@ defmodule Task4CClientRobotA do
     _obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
     stop(robot,goal_locs,channel)
     robot = %Task4CClientRobotA.Position{x: 7, y: "g", facing: "north"}
-    _obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
-    _obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
+    Task4CClientRobotA.PhoenixSocketClient.get_bot_position(channel,robot)
+    Task4CClientRobotA.PhoenixSocketClient.get_bot_position(channel,robot)
   end
 
   def change_start(str) do
@@ -535,8 +535,8 @@ defmodule Task4CClientRobotA do
 
     obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
     [bx,by,bfacing] = Task4CClientRobotA.PhoenixSocketClient.get_bot_position(channel,robot)
-    IO.puts("a pos #{robot.x} #{robot.y}")
-    IO.puts("b pos #{bx} #{by} #{bfacing}")
+    # IO.puts("a pos #{robot.x} #{robot.y}")
+    # IO.puts("b pos #{bx} #{by} #{bfacing}")
     first = 0
     first = if(new_goal_x == bx and new_goal_y == by) do
       x = cond do

@@ -71,8 +71,8 @@ defmodule Task4CClientRobotB do
     _obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
     stop(robot, goal_locs,channel)
     robot = %Task4CClientRobotB.Position{x: 7, y: "g", facing: "north"}
-    _obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
-    _obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+    Task4CClientRobotB.PhoenixSocketClient.get_bot_position(channel,robot)
+    Task4CClientRobotB.PhoenixSocketClient.get_bot_position(channel,robot)
   end
 
   def repss(channel,start) do
@@ -532,8 +532,8 @@ defmodule Task4CClientRobotB do
     obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
     [ax,ay,afacing] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(channel,robot)
     first = 0
-    IO.puts("a pos #{ax} #{ay} #{afacing}")
-    IO.puts("b pos #{robot.x} #{robot.y}")
+    # IO.puts("a pos #{ax} #{ay} #{afacing}")
+    # IO.puts("b pos #{robot.x} #{robot.y}")
     # first = if(new_goal_x == ax and new_goal_y == ay) do
     #   x = cond do
     #     afacing == :east and robot.facing == :west ->
