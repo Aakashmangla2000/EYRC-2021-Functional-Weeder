@@ -306,6 +306,17 @@ defmodule Task4CClientRobotB do
           end
         end
         dir
+      goal_x == x and goal_y == y ->
+        cond do
+          facing == :north ->
+            0
+          facing == :south ->
+            2
+          facing == :west ->
+            1
+          facing == :east ->
+            3
+        end
       goal_x == x ->
         dir = if(goal_y > y) do
           0
@@ -534,7 +545,7 @@ defmodule Task4CClientRobotB do
     first = 0
     # IO.puts("a pos #{ax} #{ay} #{afacing}")
     # IO.puts("b pos #{robot.x} #{robot.y}")
-    # first = if(new_goal_x == ax and new_goal_y == ay) do
+    # first = if(new_goal_x == ax and new_goal_y == ay and robot.x != new_goal_x and robot.y != new_goal_y) do
     #   x = cond do
     #     afacing == :east and robot.facing == :west ->
     #         1
