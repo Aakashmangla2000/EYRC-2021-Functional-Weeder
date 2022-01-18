@@ -45,6 +45,7 @@ defmodule LineFollower do
 
   def pid() do
     Logger.debug("PID")
+    Process.sleep(4000)
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
@@ -65,11 +66,12 @@ defmodule LineFollower do
     y = 1
     forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
     pwm(70)
-    motor_action(motor_ref,@forward)
-    forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
     right(motor_ref)
     pwm(70)
-    # motor_action(motor_ref,@forward)
+    motor_action(motor_ref,@forward)
+    forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
+    motor_action(motor_ref,@forward)
+    forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
   end
 
   def right(motor_ref) do
@@ -190,10 +192,11 @@ defmodule LineFollower do
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
 
-    {nodes,count} = if(count >= 12 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0))) do
+    {nodes,count} = if(count >= 13 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0))) do
         nodes = nodes + 1
         count = 1
-        IO.puts(nodes)
+        # IO.puts(nodes)
+        IO.puts("Node")
         # if(count < 10) do
         # # pwm(80)
         # motor_action(motor_ref,@forward)
