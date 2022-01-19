@@ -76,10 +76,19 @@ defmodule ArmMechanismTest do
     test_servo_b(50)
     IO.puts("Weeding Ends...")
 
-
   end
 
-
+  def seeding do
+    Process.sleep(5000)
+    IO.puts("Getting the seed...")
+    test_servo_b(0)  #opening claws
+    Process.sleep(1000)
+    IO.puts("Dropping the seed...")
+    test_servo_b(90)  #opening claws
+    Process.sleep(1000)
+    IO.puts("Change position...")
+    test_motion
+  end
 
   def test_servo_a(angle) do
     # Logger.debug("Testing Servo A")
