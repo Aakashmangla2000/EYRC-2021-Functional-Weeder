@@ -566,6 +566,7 @@ defmodule Task4CClientRobotB do
       new_goal_x == ax and new_goal_y == ay and first == 0 ->
         IO.puts("B crash into A")
         _obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+        [ax,ay,afacing] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(channel,robot)
         q = :queue.in({x,y,dirs},q)
         len = :queue.len(q)
         {q,visited,robot,len}
@@ -576,6 +577,8 @@ defmodule Task4CClientRobotB do
           {robot,obs} = Task4CClientRobotB.goX(robot,new_goal_x,new_goal_y,channel,obs)
           {robot,obs} = Task4CClientRobotB.forGoal_y(obs,robot,new_goal_y,channel)
           {robot,obs} = Task4CClientRobotB.goY(robot,new_goal_x,new_goal_y,channel,obs)
+
+          [ax,ay,afacing] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(channel,robot)
 
           #putting back with changed dir
           dir = List.last(dirs)
@@ -688,6 +691,7 @@ defmodule Task4CClientRobotB do
             both
           end
           {robot,obs} = both
+          [ax,ay,afacing] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(channel,robot)
           {q,robot,dir,visited,obs}
         else
           IO.puts("aamne saamne 2 #{:queue.len(q)} #{:queue.len(visited)}")
