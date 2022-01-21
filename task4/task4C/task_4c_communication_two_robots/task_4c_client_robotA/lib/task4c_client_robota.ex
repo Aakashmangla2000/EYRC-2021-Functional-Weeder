@@ -548,7 +548,7 @@ defmodule Task4CClientRobotA do
     # IO.puts("#{goal_x} #{goal_y}")
     # IO.puts("#{new_goal_x} #{new_goal_y}")
     # IO.puts("a pos #{robot.x} #{robot.y} #{inspect(dirs)} #{inspect(robot.facing)}")
-    # IO.puts("b pos #{bx} #{by} #{inspect(bfacing)}")
+    IO.puts("b pos #{bx} #{by} #{inspect(bfacing)}")
     first = 0
     first = if(new_goal_x == bx and new_goal_y == by and (robot.x != new_goal_x or robot.y != new_goal_y)) do
       x = cond do
