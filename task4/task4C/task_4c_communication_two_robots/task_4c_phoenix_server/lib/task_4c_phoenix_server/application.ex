@@ -16,7 +16,9 @@ defmodule Task4CPhoenixServer.Application do
       Task4CPhoenixServerWeb.Endpoint,
       # Start a worker by calling: Task4CPhoenixServer.Worker.start_link(arg)
       # {Task4CPhoenixServer.Worker, arg}
-      {Task4CPhoenixServer.Timer, []}
+      {Task4CPhoenixServer.Timer, []},
+      {Task4CPhoenixServer.Stack, [[0,0,0,0,0,0]]},
+      {Mutex, name: MyMutex, meta: []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

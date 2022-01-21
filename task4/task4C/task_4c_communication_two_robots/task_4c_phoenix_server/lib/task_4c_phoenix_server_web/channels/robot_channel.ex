@@ -8,6 +8,9 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
   """
   def join("robot:status", _params, socket) do
     Task4CPhoenixServerWeb.Endpoint.subscribe("robot:update")
+    if(GenServer.whereis(Positions) == nil) do
+    {:ok, _} = GenServer.start_link(Task4CPhoenixServer.Stack, [["0","0","0","0","0","0"]], name: Positions)
+    end
     {:ok, socket}
   end
 
@@ -79,21 +82,25 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
   end
 
   def handle_in("get_bots",message,socket) do
-    if (Process.whereis(:cli_robot_states) == nil and message["client"] == "robot_A") do
-      IO.puts("jojo")
-      pid = spawn_link(fn -> listen_from_cli("0","0","0","0","0","0") end)
-      Process.register(pid, :cli_robot_states)
+    resource_id = {User, {:id, 1}}
+    update_user = fn(parent) ->
+      lock = Mutex.await(MyMutex, resource_id)
+      [ax,ay,afacing,bx,by,bfacing] = GenServer.call(Positions, :pop)
+      [ax,ay,afacing,bx,by,bfacing] = if(message["client"] == "robot_A") do
+      [message["x"],message["y"],message["face"],bx,by,bfacing]
+      else
+        [ax,ay,afacing,message["x"],message["y"],message["face"]]
+      end
+      GenServer.cast(Positions,{:push, [ax,ay,afacing,bx,by,bfacing]})
+      Mutex.release(MyMutex, lock)
+      send(parent,{:pos,[ax,ay,afacing,bx,by,bfacing]})
+    end
+    parent = self()
+    spawn(fn -> update_user.(parent) end)
+    [ax,ay,afacing,bx,by,bfacing] = receive do
+      {:pos, value} -> value
     end
 
-    {ax,ay,afacing,bx,by,bfacing} = receiving_coors()
-    robots = if(message["client"] == "robot_A") do
-      %{ax: message["x"], ay: message["y"], afacing: message["face"], bx: bx, by: by, bfacing: bfacing}
-    else
-      %{ax: ax, ay: ay, afacing: afacing, bx: message["x"], by: message["y"], bfacing: message["face"]}
-    end
-    sending_coors(robots)
-
-    IO.puts("a:#{ax} #{ay} b:#{bx} #{by}")
     if ax == 7 and ay == "g" and bx == 7 and by == "g" do
       IO.puts("over")
       Task4CPhoenixServerWeb.Endpoint.broadcast("timer:stop", "stop_timer", %{})
@@ -168,7 +175,6 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
   #########################################
 
   def handle_info(%{robotA_start: a, robotB_start: b} = _data, socket) do
-    IO.puts("inside")
     if(Process.whereis(:cli_robotB_start) == nil) do
       pid = spawn_link(fn -> listen_from_cli_b_start(b) end)
       Process.register(pid, :cli_robotB_start)
@@ -251,62 +257,6 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
       {:toyrobotA} ->
         send(:a_start, {:positions, {a}})
       end
-  end
-
-  def listen_from_cli(ax,ay,afacing,bx,by,bfacing) do
-    receive do
-      {:toyrobots} ->
-        send(:get_bots, {:positions, {ax,ay,afacing,bx,by,bfacing}})
-      end
-  end
-
-  def send_robot_stats() do
-    send(:cli_robot_states, {:toyrobots})
-    rec_bots()
-  end
-
-  def rec_bots() do
-    receive do
-      {:positions, pos} -> pos
-    end
-  end
-
-  def wait_until_received() do
-    if (Process.whereis(:cli_robot_states) != nil and Process.whereis(:get_bots) == nil) do
-      else
-      # IO.puts("waiting 1")
-      Process.sleep(100)
-      wait_until_received()
-    end
-  end
-
-  def wait_till_over() do
-    if (Process.whereis(:cli_robot_states) != nil) do
-      # IO.puts("waiting 2")
-      Process.sleep(100)
-      wait_till_over()
-    end
-  end
-
-  def receiving_coors() do
-    wait_until_received()
-    parent = self()
-    pid2 = spawn_link(fn ->
-      coor = send_robot_stats()
-      send(parent, {coor})
-      end)
-    Process.register(pid2, :get_bots)
-
-    receive do
-      {coor} -> coor
-    end
-  end
-
-  def sending_coors(robots) do
-    wait_till_over()
-    %{ax: ax, ay: ay, afacing: afacing, bx: bx, by: by, bfacing: bfacing} = robots
-    pid = spawn_link(fn -> listen_from_cli(ax,ay,afacing,bx,by,bfacing) end)
-    Process.register(pid, :cli_robot_states)
   end
 
 end

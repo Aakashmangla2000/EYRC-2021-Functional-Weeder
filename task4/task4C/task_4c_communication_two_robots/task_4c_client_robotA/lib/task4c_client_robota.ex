@@ -545,14 +545,14 @@ defmodule Task4CClientRobotA do
 
     obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
     [bx,by,bfacing] = Task4CClientRobotA.PhoenixSocketClient.get_bot_position(channel,robot)
-    # IO.puts("#{goal_x} #{goal_y}")
-    # IO.puts("a pos #{x} #{y} #{inspect(dirs)} #{robot.facing}")
-    # IO.puts("b pos #{bx} #{by} #{bfacing}")
+    # IO.puts("#{new_goal_x} #{new_goal_y}")
+    # IO.puts("a pos #{robot.x} #{robot.y} #{inspect(dirs)} #{inspect(robot.facing)}")
+    # IO.puts("b pos #{bx} #{by} #{inspect(bfacing)}")
     first = 0
-    first = if(new_goal_x == bx and new_goal_y == by and robot.x != new_goal_x and robot.y != new_goal_y) do
+    first = if(new_goal_x == bx and new_goal_y == by and (robot.x != new_goal_x or robot.y != new_goal_y)) do
       x = cond do
         bfacing == :east and robot.facing == :west ->
-            1
+          1
         bfacing == :west and robot.facing == :east ->
           1
         bfacing == :north and robot.facing == :south ->
@@ -565,6 +565,7 @@ defmodule Task4CClientRobotA do
     else
       0
     end
+    # IO.puts("first #{first}")
     {q,visited,robot,len} = cond do
       new_goal_x == bx and new_goal_y == by and first == 0 ->
       IO.puts("A crash into B")

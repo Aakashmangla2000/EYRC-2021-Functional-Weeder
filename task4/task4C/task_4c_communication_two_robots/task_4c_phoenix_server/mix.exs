@@ -46,7 +46,8 @@ defmodule Task4CPhoenixServer.MixProject do
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:csv, "~> 2.4.1"}
+      {:csv, "~> 2.4.1"},
+      {:mutex, "~> 1.3"}
     ]
   end
 
