@@ -564,14 +564,14 @@ defmodule Task4CClientRobotB do
 
     {q,visited,robot,len} = cond do
       new_goal_x == ax and new_goal_y == ay and first == 0 ->
-        IO.puts("B crash into A")
+        # IO.puts("B crash into A")
         _obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
         [ax,ay,afacing] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(channel,robot)
         q = :queue.in({x,y,dirs},q)
         len = :queue.len(q)
         {q,visited,robot,len}
       true ->
-        {q,robot,dir,visited,obs} = if(first == 0) do
+        {q,robot,dir,visited,obs,len} = if(first == 0) do
           #travelling to new goals
           {robot,obs} = Task4CClientRobotB.forGoal_x(obs,robot,new_goal_x,channel)
           {robot,obs} = Task4CClientRobotB.goX(robot,new_goal_x,new_goal_y,channel,obs)
@@ -692,9 +692,9 @@ defmodule Task4CClientRobotB do
           end
           {robot,obs} = both
           [ax,ay,afacing] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(channel,robot)
-          {q,robot,dir,visited,obs}
+          {q,robot,dir,visited,obs,len}
         else
-          IO.puts("aamne saamne 2 #{:queue.len(q)} #{:queue.len(visited)}")
+          # IO.puts("aamne saamne 2 #{:queue.len(q)} #{:queue.len(visited)}")
           {visited,q} = if(:queue.len(visited) != 0) do
             {{:value, _val},visited} = :queue.out_r(visited)
             {visited,q}
@@ -703,9 +703,11 @@ defmodule Task4CClientRobotB do
           end
 
           {_x,_y, dirs} = value3
-          dir = List.last(dirs)
-          obs = true
-          {q,robot,dir,visited,obs}
+          new_dir = dir_select(robot.facing,robot.x,robot.y,goal_x,goal_y,dirs)
+          dir = List.last(new_dir)
+          obs = false
+          len = :queue.len(q)
+          {q,robot,dir,visited,obs,len}
         end
 
         {q,visited} = cond do
