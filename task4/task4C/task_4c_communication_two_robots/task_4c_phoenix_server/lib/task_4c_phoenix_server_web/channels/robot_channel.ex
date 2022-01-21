@@ -43,7 +43,6 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     mp = %{"a" => 0, "b" => 1, "c" => 2, "d" => 3, "e" => 4, "f" => 5, "g" => 6}
     # IO.inspect(message)
 
-    msg2 = if(message["x"] < 7) do
       msg2 = if(is_obs_ahead == false) do
       %{"client" => message["client"], "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"],  "obs" => is_obs_ahead, "x" => 0, "y" => 0}
     else
@@ -60,15 +59,6 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
       end
       %{"client" => message["client"], "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"], "obs" => is_obs_ahead, "x" => x, "y" => y}
     end
-    msg2
-    else
-      nil
-    end
-    _msg3 = if(is_obs_ahead == false) do
-      %{client: message["client"], x: message["x"], y: Map.get(mp, message["y"]), face: message["face"]}
-    else
-      %{client: "obs", x: 0, y: 0}
-    end
 
     if(msg2 !=  nil ) do
       Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", msg2)
@@ -82,29 +72,30 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     resource_id = {User, {:id, 1}}
     update_user = fn(parent,message) ->
       lock = Mutex.await(MyMutex, resource_id)
-      {ax,ay,afacing,bx,by,bfacing,a_start,b_start} = GenServer.call(Positions, :pop)
+      {ax,ay,afacing,bx,by,bfacing,a_start,b_start,a_alive,b_alive} = GenServer.call(Positions, :pop)
+      IO.inspect({ax,ay,afacing,bx,by,bfacing,a_start,b_start,a_alive,b_alive})
       robots = if(message["client"] == "robot_A") do
-        %{ax: message["x"], ay: message["y"], afacing: message["face"], bx: bx, by: by, bfacing: bfacing}
+        %{ax: message["x"], ay: message["y"], afacing: message["face"], bx: bx, by: by, bfacing: bfacing, a_alive: message["alive"], b_alive: b_alive}
       else
-        %{ax: ax, ay: ay, afacing: afacing, bx: message["x"], by: message["y"], bfacing: message["face"]}
+        %{ax: ax, ay: ay, afacing: afacing, bx: message["x"], by: message["y"], bfacing: message["face"], a_alive: a_alive, b_alive: message["alive"]}
       end
-      %{ax: ax, ay: ay, afacing: afacing, bx: bx, by: by, bfacing: bfacing} = robots
-      GenServer.cast(Positions,{:push, {ax,ay,afacing,bx,by,bfacing,a_start,b_start}})
+      %{ax: ax, ay: ay, afacing: afacing, bx: bx, by: by, bfacing: bfacing ,a_alive: a_alive, b_alive: b_alive} = robots
+      GenServer.cast(Positions,{:push, {ax,ay,afacing,bx,by,bfacing,a_start,b_start,a_alive,b_alive}})
       Mutex.release(MyMutex, lock)
-      send(parent,{:pos,[ax,ay,afacing,bx,by,bfacing]})
+      send(parent,{:pos,[ax,ay,afacing,bx,by,bfacing,a_alive,b_alive]})
     end
     parent = self()
     spawn(fn -> update_user.(parent,message) end)
-    [ax,ay,afacing,bx,by,bfacing] = receive do
+    [ax,ay,afacing,bx,by,bfacing,a_alive,b_alive] = receive do
       {:pos, value} -> value
     end
 
-    if ax == 7 and ay == "g" and bx == 7 and by == "g" do
+    if a_alive == false and b_alive == false do
       IO.puts("over")
       Task4CPhoenixServerWeb.Endpoint.broadcast("timer:stop", "stop_timer", %{})
     end
 
-    rep = [ax,ay,afacing,bx,by,bfacing]
+    rep = [ax,ay,afacing,bx,by,bfacing,a_alive,b_alive]
     {:reply, {:ok, rep}, socket}
   end
 
@@ -134,19 +125,19 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
   def handle_in("start_pos", message, socket) do
 
     if(GenServer.whereis(Positions) == nil) do
-      {:ok, _} = GenServer.start_link(Task4CPhoenixServer.Stack, [{"0","0","0","0","0","0",0,0}], name: Positions)
+      {:ok, _} = GenServer.start_link(Task4CPhoenixServer.Stack, [{"0","0","0","0","0","0",0,0,false,false}], name: Positions)
     end
 
     resource_id = {User, {:id, 1}}
     update_user = fn(parent,message) ->
       lock = Mutex.await(MyMutex, resource_id)
-      {ax,ay,afacing,bx,by,bfacing,a_start,b_start} = GenServer.call(Positions, :pop)
+      {ax,ay,afacing,bx,by,bfacing,a_start,b_start,a_alive,b_alive} = GenServer.call(Positions, :pop)
       socket = if(message["client"] == "robot_A") do
         assign(socket, :robotA_start, a_start)
       else
         assign(socket, :robotB_start, b_start)
       end
-      GenServer.cast(Positions,{:push, {ax,ay,afacing,bx,by,bfacing,a_start,b_start}})
+      GenServer.cast(Positions,{:push, {ax,ay,afacing,bx,by,bfacing,a_start,b_start,a_alive,b_alive}})
       Mutex.release(MyMutex, lock)
       send(parent,{:socket,socket})
     end
@@ -186,8 +177,8 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     resource_id = {User, {:id, 1}}
     update_user = fn(a,b) ->
       lock = Mutex.await(MyMutex, resource_id)
-      {ax,ay,afacing,bx,by,bfacing,_a_start,_b_start} = GenServer.call(Positions, :pop)
-      GenServer.cast(Positions,{:push, {ax,ay,afacing,bx,by,bfacing,a,b}})
+      {ax,ay,afacing,bx,by,bfacing,_a_start,_b_start,a_alive,b_alive} = GenServer.call(Positions, :pop)
+      GenServer.cast(Positions,{:push, {ax,ay,afacing,bx,by,bfacing,a,b,a_alive,b_alive}})
       Mutex.release(MyMutex, lock)
     end
     spawn(fn -> update_user.(a,b) end)

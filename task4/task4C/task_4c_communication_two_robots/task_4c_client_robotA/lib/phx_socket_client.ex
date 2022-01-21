@@ -71,12 +71,12 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
     start
   end
 
-  def get_bot_position(channel,robot) do
+  def get_bot_position(bool,channel,robot) do
     %Task4CClientRobotA.Position{facing: facing,x: x, y: y} = robot
-    tup = PhoenixClient.Channel.push(channel,"get_bots",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing},1000)
+    tup = PhoenixClient.Channel.push(channel,"get_bots",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing, "alive" => bool},1000)
     {:ok, rep} = tup
-    [ax,ay,afacing,bx,by,bfacing] = rep
-    [bx,String.to_atom(by),String.to_atom(bfacing)]
+    [_ax,_ay,_afacing,bx,by,bfacing,_a_alive,b_alive] = rep
+    [bx,String.to_atom(by),String.to_atom(bfacing),b_alive]
   end
 
   def get_goals(channel) do

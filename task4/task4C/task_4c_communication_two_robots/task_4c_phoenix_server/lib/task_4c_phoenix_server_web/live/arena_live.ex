@@ -244,8 +244,7 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
     ## complete this funcion ##
     ###########################
 
-    # IO.inspect(socket.assigns)
-    socket =  if(data["obs"] == true) do
+    socket = if(data["obs"] == true) do
       assign(socket, :obstacle_pos,MapSet.put(socket.assigns.obstacle_pos,{data["x"],data["y"]}))
     else
       assign(socket, :obstacle_pos,socket.assigns.obstacle_pos)
