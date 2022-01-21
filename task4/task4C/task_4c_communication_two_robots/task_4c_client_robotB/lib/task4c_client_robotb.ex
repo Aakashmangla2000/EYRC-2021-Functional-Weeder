@@ -189,7 +189,7 @@ defmodule Task4CClientRobotB do
       else
         count = Enum.count(goal_locs)
         index = 0
-        {goal_locs,goal_x, goal_y} = if(count > 0) do
+        {goal,goal_locs,goal_x, goal_y} = if(count > 0) do
           {val,index} = if (count > 1) do
             val = Enum.at(goal_locs,0)
             ls = nearby(val)
@@ -202,17 +202,17 @@ defmodule Task4CClientRobotB do
           else
             {Enum.at(goal_locs,0),index}
           end
-            {_,goal_locs} = List.pop_at(goal_locs,index)
+            {goal,goal_locs} = List.pop_at(goal_locs,index)
             mp4 = %{1 => :a, 2 => :b, 3 => :c, 4 => :d, 5 => :e, 6 => :f}
             ls = nearby(val)
             min = abs(robot.x - Enum.at(Enum.at(ls,0),0)) + abs(Map.get(mp3, robot.y) -  Enum.at(Enum.at(ls,0),1))
             {_,[goal_x, goal_y]} = min(robot,ls,1,min,0)
-          {goal_locs,goal_x, Map.get(mp4,goal_y)}
+          {goal,goal_locs,goal_x, Map.get(mp4,goal_y)}
         else
-          {goal_locs,robot.x, robot.y}
+          {0,goal_locs,robot.x, robot.y}
         end
         count = Enum.count(goal_locs)
-        {robot} = get_value(robot,goal_x, goal_y,channel)
+        {robot} = get_value(goal,robot,goal_x, goal_y,channel)
         {robot,goal_locs,count}
       end
       count = Enum.count(goal_locs)
@@ -227,7 +227,7 @@ defmodule Task4CClientRobotB do
    robot
   end
 
-  def get_value(robot,goal_x, goal_y,channel) do
+  def get_value(goal,robot,goal_x, goal_y,channel) do
       len = 1
       q = :queue.new()
       visited = :queue.new()
@@ -239,7 +239,7 @@ defmodule Task4CClientRobotB do
       {robot} = if(robot.x == goal_x and robot.y == goal_y) do
         {robot}
       else
-      Task4CClientRobotB.rep(dir,q,visited,robot,goal_x,goal_y,channel,len)
+      Task4CClientRobotB.rep(goal,dir,q,visited,robot,goal_x,goal_y,channel,len)
       end
       {robot}
   end
@@ -528,7 +528,22 @@ defmodule Task4CClientRobotB do
     end
   end
 
-  def rep(dir,q,visited,robot,goal_x,goal_y,channel,len) when len != 0 do
+  def min2(x,y,robot,ls,count,min,index) when count < 4 do
+    mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5, :f => 6}
+    distance = abs(robot.x - Enum.at(Enum.at(ls,count),0)) + abs(Map.get(mp3, robot.y) -  Enum.at(Enum.at(ls,count),1))
+    {index,min} = if(min >= distance and Enum.at(Enum.at(ls,count),0) != x and Enum.at(Enum.at(ls,count),1) != y) do
+      {count, distance}
+    else
+      {index,min}
+    end
+    min(robot,ls,count+1,min,index)
+  end
+
+  def min2(_x,_y,_robot,ls,_count,_min,index) do
+    Enum.fetch(ls,index)
+  end
+
+  def rep(goal,dir,q,visited,robot,goal_x,goal_y,channel,len) when len != 0 do
     #getting next block
     {{:value, value3}, q} = :queue.out_r(q)
     {x,y, dirs} = value3
@@ -536,25 +551,35 @@ defmodule Task4CClientRobotB do
     new_goal_y = y
 
     #if reached destination
-    len = if(x == goal_x and y == goal_y) do
+    len = if(x == goal_x and y == goal_y or (robot.x == goal_x and robot.y == goal_y)) do
       0
     end
+
     obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
     [ax,ay,afacing,a_alive] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(true,channel,robot)
+
+    mp4 = %{1 => :a, 2 => :b, 3 => :c, 4 => :d, 5 => :e, 6 => :f}
+    mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5, :f => 6}
+
+
+    {goal_x,goal_y} = if(ax == goal_x and ay == goal_y and a_alive == false) do
+      # IO.puts("new goals")
+      ls = nearby(goal)
+      min2 = abs(robot.x - Enum.at(Enum.at(ls,0),0)) + abs(Map.get(mp3, robot.y) -  Enum.at(Enum.at(ls,0),1))
+      {_,[g_x, g_y]} = min2(goal_x,Map.get(mp3,goal_y),robot,ls,1,min2,0)
+      {g_x,Map.get(mp4,g_y)}
+    else
+      {goal_x,goal_y}
+    end
+    # IO.puts("Final #{goal_x} #{goal_y}")
     first = 0
+    # IO.puts(len)
     # IO.puts("a pos #{ax} #{ay} #{afacing}")
     # IO.puts("b pos #{robot.x} #{robot.y}")
+    # IO.puts("#{new_goal_x} #{new_goal_y}")
     first = if(new_goal_x == ax and new_goal_y == ay and (robot.x != new_goal_x or robot.y != new_goal_y)) do
       x = cond do
         a_alive == false ->
-          1
-        afacing == :east and robot.facing == :west ->
-          1
-        afacing == :west and robot.facing == :east ->
-          1
-        afacing == :north and robot.facing == :south ->
-          1
-        afacing == :south and robot.facing == :north ->
           1
         true -> first
       end
@@ -710,7 +735,12 @@ defmodule Task4CClientRobotB do
           dir == 3 and robot.facing == :east -> true
           true -> false
         end
-          len = :queue.len(q)
+        len = if((robot.x == goal_x and robot.y == goal_y)) do
+          0
+        else
+          :queue.len(q)
+        end
+
           {q,robot,dir,visited,obs,len,robot.x,robot.y}
         end
 
@@ -804,10 +834,10 @@ defmodule Task4CClientRobotB do
     {q,visited,robot,len,dir}
     end
 
-    rep(dir,q,visited,robot,goal_x,goal_y,channel,len)
+    rep(goal,dir,q,visited,robot,goal_x,goal_y,channel,len)
   end
 
-  def rep(_dir,_q,_visited,robot,_goal_x,_goal_y,_channel,_len) do
+  def rep(goal,_dir,_q,_visited,robot,_goal_x,_goal_y,_channel,_len) do
     {robot}
   end
 

@@ -73,7 +73,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     update_user = fn(parent,message) ->
       lock = Mutex.await(MyMutex, resource_id)
       {ax,ay,afacing,bx,by,bfacing,a_start,b_start,a_alive,b_alive} = GenServer.call(Positions, :pop)
-      IO.inspect({ax,ay,afacing,bx,by,bfacing,a_start,b_start,a_alive,b_alive})
+      # IO.inspect({ax,ay,afacing,bx,by,bfacing,a_start,b_start,a_alive,b_alive})
       robots = if(message["client"] == "robot_A") do
         %{ax: message["x"], ay: message["y"], afacing: message["face"], bx: bx, by: by, bfacing: bfacing, a_alive: message["alive"], b_alive: b_alive}
       else
@@ -147,7 +147,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
       {:socket, socket} -> socket
     end
 
-    IO.inspect(socket.assigns)
+    # IO.inspect(socket.assigns)
 
     x = if(message["client"] == "robot_A") do
       if(socket.assigns.robotA_start == 0) do
