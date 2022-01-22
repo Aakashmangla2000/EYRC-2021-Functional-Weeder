@@ -110,12 +110,9 @@ defmodule Task4CClientRobotA do
 
     mp = %{"1" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5, "6" => 6}
     mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e, "f" => :f}
-    robot = if Enum.count(goal_locs) == 1 do
-      goal_div(robot,goal_locs,channel,1,mp,mp2)
-    else
-      count = Enum.count(goal_locs)
-      goal_div(robot,goal_locs,channel,count,mp,mp2)
-    end
+
+    count = Enum.count(goal_locs)
+    robot = goal_div(robot, goal_locs, channel,count,mp,mp2)
 
     {:ok, robot}
 
@@ -601,7 +598,7 @@ defmodule Task4CClientRobotA do
       new_goal_x == bx and new_goal_y == by and first == 0 ->
       # IO.puts("A crash into B")
       _obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
-      [bx,by,bfacing,b_alive] = Task4CClientRobotA.PhoenixSocketClient.get_bot_position(true,channel,robot)
+      [_bx,_by,_bfacing,_b_alive] = Task4CClientRobotA.PhoenixSocketClient.get_bot_position(true,channel,robot)
       q = :queue.in({x,y,dirs},q)
       len = :queue.len(q)
       {q,visited,robot,len,dir}
@@ -613,7 +610,7 @@ defmodule Task4CClientRobotA do
         {robot,obs} = Task4CClientRobotA.forGoal_y(obs,robot,new_goal_y,channel)
         {robot,obs} = Task4CClientRobotA.goY(robot,new_goal_x,new_goal_y,channel,obs)
 
-        [bx,by,bfacing,b_alive] = Task4CClientRobotA.PhoenixSocketClient.get_bot_position(true,channel,robot)
+        [_bx,_by,_bfacing,_b_alive] = Task4CClientRobotA.PhoenixSocketClient.get_bot_position(true,channel,robot)
 
         #putting back with changed dir
         dir = List.last(dirs)
@@ -727,7 +724,7 @@ defmodule Task4CClientRobotA do
         both
         end
         {robot,obs} = both
-        [bx,by,bfacing,b_alive] = Task4CClientRobotA.PhoenixSocketClient.get_bot_position(true,channel,robot)
+        [_bx,_by,_bfacing,_b_alive] = Task4CClientRobotA.PhoenixSocketClient.get_bot_position(true,channel,robot)
         {q,robot,dir,visited,obs,len,x,y}
       else
         # IO.puts("aamne saamne #{:queue.len(q)} #{:queue.len(visited)}")
@@ -846,7 +843,7 @@ defmodule Task4CClientRobotA do
     rep(goal,dir,q,visited,robot,goal_x,goal_y,channel, len)
   end
 
-  def rep(goal,dir,_q,_visited,robot,_goal_x,_goal_y,_channel, _len) do
+  def rep(_goal,_dir,_q,_visited,robot,_goal_x,_goal_y,_channel, _len) do
     {robot}
   end
 

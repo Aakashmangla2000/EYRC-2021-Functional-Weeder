@@ -107,11 +107,10 @@ defmodule Task4CClientRobotB do
     ###########################
     ## complete this funcion ##
     ###########################
-    require Integer
+
     mp = %{"1" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5, "6" => 6}
     mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e, "f" => :f}
 
-    _obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
     count = Enum.count(goal_locs)
     robot = goal_div(robot, goal_locs, channel,count,mp,mp2)
 
@@ -556,7 +555,7 @@ defmodule Task4CClientRobotB do
     end
 
     obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
-    [ax,ay,afacing,a_alive] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(true,channel,robot)
+    [ax,ay,_afacing,a_alive] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(true,channel,robot)
 
     mp4 = %{1 => :a, 2 => :b, 3 => :c, 4 => :d, 5 => :e, 6 => :f}
     mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5, :f => 6}
@@ -592,7 +591,7 @@ defmodule Task4CClientRobotB do
       new_goal_x == ax and new_goal_y == ay and first == 0 ->
         # IO.puts("B crash into A")
         _obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
-        [ax,ay,afacing,a_alive] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(true,channel,robot)
+        [_ax,_ay,_afacing,_a_alive] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(true,channel,robot)
         q = :queue.in({x,y,dirs},q)
         len = :queue.len(q)
         {q,visited,robot,len,dir}
@@ -604,7 +603,7 @@ defmodule Task4CClientRobotB do
           {robot,obs} = Task4CClientRobotB.forGoal_y(obs,robot,new_goal_y,channel)
           {robot,obs} = Task4CClientRobotB.goY(robot,new_goal_x,new_goal_y,channel,obs)
 
-          [ax,ay,afacing,a_alive] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(true,channel,robot)
+           [_ax,_ay,_afacing,_a_alive] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(true,channel,robot)
 
           #putting back with changed dir
           dir = List.last(dirs)
@@ -717,7 +716,7 @@ defmodule Task4CClientRobotB do
             both
           end
           {robot,obs} = both
-          [ax,ay,afacing,a_alive] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(true,channel,robot)
+           [_ax,_ay,_afacing,_a_alive] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(true,channel,robot)
           {q,robot,dir,visited,obs,len,x,y}
         else
           # IO.puts("aamne saamne 2 #{:queue.len(q)} #{:queue.len(visited)}")
@@ -837,7 +836,7 @@ defmodule Task4CClientRobotB do
     rep(goal,dir,q,visited,robot,goal_x,goal_y,channel,len)
   end
 
-  def rep(goal,_dir,_q,_visited,robot,_goal_x,_goal_y,_channel,_len) do
+  def rep(_goal,_dir,_q,_visited,robot,_goal_x,_goal_y,_channel,_len) do
     {robot}
   end
 

@@ -17,7 +17,7 @@ defmodule Task4CPhoenixServer.Application do
       # Start a worker by calling: Task4CPhoenixServer.Worker.start_link(arg)
       # {Task4CPhoenixServer.Worker, arg}
       {Task4CPhoenixServer.Timer, []},
-      {Task4CPhoenixServer.Stack, [[0,0,0,0,0,0]]},
+      {Task4CPhoenixServer.Stack, []},
       {Mutex, name: MyMutex, meta: []}
     ]
 

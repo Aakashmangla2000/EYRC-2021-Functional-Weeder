@@ -41,9 +41,8 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     ## complete this funcion ##
     ###########################
     mp = %{"a" => 0, "b" => 1, "c" => 2, "d" => 3, "e" => 4, "f" => 5, "g" => 6}
-    # IO.inspect(message)
 
-      msg2 = if(is_obs_ahead == false) do
+    msg2 = if(is_obs_ahead == false) do
       %{"client" => message["client"], "left" => (message["x"]-1)*150, "bottom" => Map.get(mp, message["y"])*150, "face" => message["face"],  "obs" => is_obs_ahead, "x" => 0, "y" => 0}
     else
       facing = message["face"]
@@ -73,7 +72,6 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     update_user = fn(parent,message) ->
       lock = Mutex.await(MyMutex, resource_id)
       {ax,ay,afacing,bx,by,bfacing,a_start,b_start,a_alive,b_alive} = GenServer.call(Positions, :pop)
-      # IO.inspect({ax,ay,afacing,bx,by,bfacing,a_start,b_start,a_alive,b_alive})
       robots = if(message["client"] == "robot_A") do
         %{ax: message["x"], ay: message["y"], afacing: message["face"], bx: bx, by: by, bfacing: bfacing, a_alive: message["alive"], b_alive: b_alive}
       else
@@ -91,7 +89,6 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     end
 
     if a_alive == false and b_alive == false do
-      IO.puts("over")
       Task4CPhoenixServerWeb.Endpoint.broadcast("timer:stop", "stop_timer", %{})
     end
 
@@ -147,8 +144,6 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
       {:socket, socket} -> socket
     end
 
-    # IO.inspect(socket.assigns)
-
     x = if(message["client"] == "robot_A") do
       if(socket.assigns.robotA_start == 0) do
         0
@@ -188,66 +183,6 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
   def handle_info(_data, socket) do
 
     {:noreply, socket}
-  end
-
-  def send_robot_stat_b_start() do
-    send(:cli_robotB_start, {:toyrobotB})
-    rec_botB_start()
-  end
-
-  def rec_botB_start() do
-    receive do
-      {:positions, pos} -> pos
-    end
-  end
-
-  def receiving_coor_b_start() do
-    parent = self()
-    pid2 = spawn_link(fn ->
-      coor = send_robot_stat_b_start()
-      send(parent, {coor})
-    end)
-    Process.register(pid2, :b_start)
-    receive do
-      {coor} -> coor
-    end
-  end
-
-  def listen_from_cli_b_start(b) do
-    receive do
-      {:toyrobotB} ->
-        send(:b_start, {:positions, {b}})
-      end
-  end
-
-  def send_robot_stat_a_start() do
-    send(:cli_robotA_start, {:toyrobotA})
-    rec_botA_start()
-  end
-
-  def rec_botA_start() do
-    receive do
-      {:positions, pos} -> pos
-    end
-  end
-
-  def receiving_coors_start() do
-    parent = self()
-    pid2 = spawn_link(fn ->
-      coor = send_robot_stat_a_start()
-      send(parent, {coor})
-    end)
-    Process.register(pid2, :a_start)
-    receive do
-      {coor} -> coor
-    end
-  end
-
-  def listen_from_cli_a_start(a) do
-    receive do
-      {:toyrobotA} ->
-        send(:a_start, {:positions, {a}})
-      end
   end
 
 end
