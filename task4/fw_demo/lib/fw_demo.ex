@@ -50,7 +50,7 @@ defmodule FW_DEMO do
     sensor_ref = Enum.map(@sensor_pins, fn {atom, pin_no} -> configure_sensor({atom, pin_no}) end)
     sensor_ref = Enum.map(sensor_ref, fn{_atom, ref_id} -> ref_id end)
     sensor_ref = Enum.zip(@ref_atoms, sensor_ref)
-    get_lfa_readings([1,2,3,4,5], sensor_ref)
+    get_lfa_readings([0,1,2,3,4], sensor_ref)
   end
 
 
