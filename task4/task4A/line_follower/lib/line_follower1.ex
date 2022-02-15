@@ -50,7 +50,7 @@ defmodule LineFollower1 do
     pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
 
-    maximum = 130;
+    maximum = 100;
     integral = 0;
     last_proportional = 0
     motor_action(motor_ref,@stop)
@@ -161,7 +161,7 @@ defmodule LineFollower1 do
 		# Remember the last position.
 		last_proportional = proportional
 
-		power_difference = proportional*0.01 + derivative*0.025 #+ integral*0.005;
+		power_difference = proportional*0.005 + derivative*0.030 #+ integral*0.005;
     power_difference = Kernel.round(power_difference)
     IO.puts("Power Difference: #{power_difference}")
 		power_difference = if (power_difference > maximum) do
@@ -197,14 +197,15 @@ defmodule LineFollower1 do
         count = 1
         # IO.puts(nodes)
         IO.puts("Node")
+        IO.puts(nodes)
         # if(count < 10) do
         # # pwm(80)
         # motor_action(motor_ref,@forward)
         # Process.sleep(300)
         # end
-        motor_action(motor_ref,@stop)
-        Process.sleep(1000)
-        pwm(90)
+        # motor_action(motor_ref,@stop)
+        # Process.sleep(1000)
+        # pwm(90)
         # motor_action(motor_ref,@forward)
         {nodes,count}
     else
