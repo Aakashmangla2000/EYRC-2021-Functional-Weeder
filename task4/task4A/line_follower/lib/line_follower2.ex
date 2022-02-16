@@ -1,4 +1,4 @@
-defmodule LineFollower1 do
+defmodule LineFollower2 do
   @moduledoc """
   Documentation for `LineFollower`.
   """
