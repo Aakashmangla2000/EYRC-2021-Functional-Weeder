@@ -65,9 +65,9 @@ defmodule LineFollower1 do
     x = 1
     y = 1
     forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    # pwm(70)
+    # pwm(100)
     # right(motor_ref)
-    # pwm(70)
+    # pwm(100)
     # motor_action(motor_ref,@forward)
     # forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
     # motor_action(motor_ref,@forward)
@@ -138,19 +138,49 @@ defmodule LineFollower1 do
   end
 
   def forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional) when stop == 0 do
-    # IO.puts("#{count}")
+    IO.puts("count: #{count}")
     count = count + 1
+    IO.puts("nodes: #{nodes}")
 
     #Simple ReadLine
     sensor_vals = test_wlf_sensors()
     position = read_line2(sensor_vals)
     IO.inspect(sensor_vals)
 
-    if(count > 6) do
+    sensor_vals = test_wlf_sensors()
+    [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+
+
+    if(count > 6 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0))) do
       motor_action(motor_ref,@forward)
     else
       motor_action(motor_ref,@stop)
     end
+    sensor_vals = test_wlf_sensors()
+    [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+
+    {nodes,count} = if(count >= 25 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0))) do
+
+      nodes = nodes + 1
+      count = 1
+      # IO.puts(nodes)
+      IO.puts("Node")
+      IO.puts(nodes)
+      # if(count < 10) do
+      # # pwm(80)
+      # motor_action(motor_ref,@forward)
+      # Process.sleep(300)
+      # end
+      motor_action(motor_ref,@stop)
+      Process.sleep(1000)
+      pwm(100)
+      # motor_action(motor_ref,@forward)
+
+      {nodes,count}
+
+  else
+    {nodes,count}
+  end
 
     proportional = position - 2000
 
@@ -189,31 +219,31 @@ defmodule LineFollower1 do
     # else
     # end
 
-    sensor_vals = test_wlf_sensors()
-    [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+    # sensor_vals = test_wlf_sensors()
+    # [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
 
-    {nodes,count} = if(count >= 13 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0))) do
-        nodes = nodes + 1
-        count = 1
-        # IO.puts(nodes)
-        IO.puts("Node")
-        IO.puts(nodes)
-        # if(count < 10) do
-        # # pwm(80)
-        # motor_action(motor_ref,@forward)
-        # Process.sleep(300)
-        # end
-        # motor_action(motor_ref,@stop)
-        # Process.sleep(1000)
-        # pwm(90)
-        # motor_action(motor_ref,@forward)
-        {nodes,count}
-    else
-      {nodes,count}
-    end
+    # {nodes,count} = if(count >= 13 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0))) do
+    #     nodes = nodes + 1
+    #     count = 1
+    #     # IO.puts(nodes)
+    #     IO.puts("Node")
+    #     IO.puts(nodes)
+    #     # if(count < 10) do
+    #     # # pwm(80)
+    #     # motor_action(motor_ref,@forward)
+    #     # Process.sleep(300)
+    #     # end
+    #     motor_action(motor_ref,@stop)
+    #     Process.sleep(1000)
+    #     pwm(100)
+    #     # motor_action(motor_ref,@forward)
+    #     {nodes,count}
+    # else
+    #   {nodes,count}
+    # end
 
     # if((s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) or
-    if(nodes == 6) do
+    if(nodes == 2) do #6
       forward(count,nodes,1,motor_ref,maximum,integral,last_proportional)
     else
       forward(count,nodes,0,motor_ref,maximum,integral,last_proportional)
