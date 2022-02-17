@@ -156,31 +156,6 @@ defmodule LineFollower1 do
     else
       motor_action(motor_ref,@stop)
     end
-    sensor_vals = test_wlf_sensors()
-    [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-
-    {nodes,count} = if(count >= 25 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0))) do
-
-      nodes = nodes + 1
-      count = 1
-      # IO.puts(nodes)
-      IO.puts("Node")
-      IO.puts(nodes)
-      # if(count < 10) do
-      # # pwm(80)
-      # motor_action(motor_ref,@forward)
-      # Process.sleep(300)
-      # end
-      motor_action(motor_ref,@stop)
-      Process.sleep(1000)
-      pwm(100)
-      # motor_action(motor_ref,@forward)
-
-      {nodes,count}
-
-  else
-    {nodes,count}
-  end
 
     proportional = position - 2000
 
@@ -219,28 +194,28 @@ defmodule LineFollower1 do
     # else
     # end
 
-    # sensor_vals = test_wlf_sensors()
-    # [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+    sensor_vals = test_wlf_sensors()
+    [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
 
-    # {nodes,count} = if(count >= 13 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0))) do
-    #     nodes = nodes + 1
-    #     count = 1
-    #     # IO.puts(nodes)
-    #     IO.puts("Node")
-    #     IO.puts(nodes)
-    #     # if(count < 10) do
-    #     # # pwm(80)
-    #     # motor_action(motor_ref,@forward)
-    #     # Process.sleep(300)
-    #     # end
-    #     motor_action(motor_ref,@stop)
-    #     Process.sleep(1000)
-    #     pwm(100)
-    #     # motor_action(motor_ref,@forward)
-    #     {nodes,count}
-    # else
-    #   {nodes,count}
-    # end
+    {nodes,count} = if(count >= 13 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0))) do
+        nodes = nodes + 1
+        count = 1
+        # IO.puts(nodes)
+        IO.puts("Node")
+        IO.puts(nodes)
+        # if(count < 10) do
+        # # pwm(80)
+        # motor_action(motor_ref,@forward)
+        # Process.sleep(300)
+        # end
+        motor_action(motor_ref,@stop)
+        Process.sleep(1000)
+        pwm(100)
+        # motor_action(motor_ref,@forward)
+        {nodes,count}
+    else
+      {nodes,count}
+    end
 
     # if((s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) or
     if(nodes == 2) do #6
