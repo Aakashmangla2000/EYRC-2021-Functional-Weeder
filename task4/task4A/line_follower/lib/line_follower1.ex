@@ -64,7 +64,13 @@ defmodule LineFollower1 do
     proportional = 0
     x = 1
     y = 1
-    forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
+    filter = 1
+    forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
+    # pwm(70)
+    # IO.puts("right")
+    # right(motor_ref,0)
+    # IO.puts("left")
+    # left(motor_ref,0)
     # pwm(100)
     # right(motor_ref)
     # pwm(100)
@@ -73,33 +79,81 @@ defmodule LineFollower1 do
     # motor_action(motor_ref,@forward)
     # forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
   end
-
-  def right(motor_ref) do
+  def right(motor_ref,count) do
+    count = count + 1
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    cond do
-      s1 == 1 -> pwm(200)
-      s2 == 1 -> pwm(180)
-      s3 == 1 -> pwm(150)
-      s4 == 1 -> pwm(130)
-      s5 == 1 -> pwm(110)
-      true -> pwm(150)
-    end
-    Process.sleep(230)
+    # cond do
+    #   s1 == 1 -> pwm(200)
+    #   s2 == 1 -> pwm(180)
+    #   s3 == 1 -> pwm(150)
+    #   s4 == 1 -> pwm(130)
+    #   s5 == 1 -> pwm(110)
+    #   true -> pwm(150)
+    # end
+    pwm(120)
+    Process.sleep(100)
     motor_action(motor_ref,@left)
-    Process.sleep(230)
+    Process.sleep(100)
     motor_action(motor_ref,@stop)
-    Process.sleep(500)
+    Process.sleep(100)
+    # if(count > 4 and (s1 == 0 or s2 == 0 or s3 == 1 or s4 == 1 or s5 == 0)) do
+    if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 1 and s5 == 0) do
+    else
+      right(motor_ref,count)
+    end
   end
 
-  def left(motor_ref) do
-    pwm(150)
-    Process.sleep(230)
+  def left(motor_ref,count) do
+    count = count + 1
+    sensor_vals = test_wlf_sensors()
+    [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+    # cond do
+    #   s1 == 1 -> pwm(200)
+    #   s2 == 1 -> pwm(180)
+    #   s3 == 1 -> pwm(150)
+    #   s4 == 1 -> pwm(130)
+    #   s5 == 1 -> pwm(110)
+    #   true -> pwm(150)
+    # end
+    pwm(120)
+    Process.sleep(100)
     motor_action(motor_ref,@right)
-    Process.sleep(230)
+    Process.sleep(100)
     motor_action(motor_ref,@stop)
-    Process.sleep(500)
+    Process.sleep(100)
+    if(count > 2 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
+    else
+      left(motor_ref,count)
+    end
   end
+
+  # def right(motor_ref) do
+  #   sensor_vals = test_wlf_sensors()
+  #   [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+  #   cond do
+  #     s1 == 1 -> pwm(200)
+  #     s2 == 1 -> pwm(180)
+  #     s3 == 1 -> pwm(150)
+  #     s4 == 1 -> pwm(130)
+  #     s5 == 1 -> pwm(110)
+  #     true -> pwm(150)
+  #   end
+  #   Process.sleep(230)
+  #   motor_action(motor_ref,@left)
+  #   Process.sleep(230)
+  #   motor_action(motor_ref,@stop)
+  #   Process.sleep(500)
+  # end
+
+  # def left(motor_ref) do
+  #   pwm(150)
+  #   Process.sleep(230)
+  #   motor_action(motor_ref,@right)
+  #   Process.sleep(230)
+  #   motor_action(motor_ref,@stop)
+  #   Process.sleep(500)
+  # end
 
   def twice(motor_ref) do
     pwm(150)
@@ -137,24 +191,31 @@ defmodule LineFollower1 do
     end
   end
 
-  def forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional) when stop == 0 do
+  def forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional) when stop == 0 do
     IO.puts("count: #{count}")
     count = count + 1
     IO.puts("nodes: #{nodes}")
+    filter = filter + 1
 
     #Simple ReadLine
     sensor_vals = test_wlf_sensors()
     position = read_line2(sensor_vals)
     IO.inspect(sensor_vals)
 
-    sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
 
 
-    if(count > 6 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0))) do
+    if(filter > 6) do
       motor_action(motor_ref,@forward)
+      filter = 1
     else
       motor_action(motor_ref,@stop)
+    end
+
+    [s1,s2,s3,s4,s5] = if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
+      [0,0,1,0,0]
+    else
+      [s1,s1,s3,s4,s5]
     end
 
     proportional = position - 2000
@@ -219,13 +280,13 @@ defmodule LineFollower1 do
 
     # if((s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) or
     if(nodes == 2) do #6
-      forward(count,nodes,1,motor_ref,maximum,integral,last_proportional)
+      forward(count,filter,nodes,1,motor_ref,maximum,integral,last_proportional)
     else
-      forward(count,nodes,0,motor_ref,maximum,integral,last_proportional)
+      forward(count,filter,nodes,0,motor_ref,maximum,integral,last_proportional)
     end
   end
 
-  def forward(_count,_nodes,_stop,motor_ref,_maximum,_integral,_last_proportional) do
+  def forward(_count,_filter,_nodes,_stop,motor_ref,_maximum,_integral,_last_proportional) do
     motor_action(motor_ref,@stop)
   end
 
