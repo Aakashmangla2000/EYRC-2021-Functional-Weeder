@@ -934,7 +934,7 @@ end
 def goX(%Task4CClientRobotB.Position{facing: _facing,x: x, y: _y} = robot, goal_x, goal_y, channel,_ob,motor_ref) when x != goal_x do
   robot = move(robot,motor_ref)
   obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
-  goX(robot,goal_x,goal_y,channel,obs)
+  goX(robot,goal_x,goal_y,channel,obs,motor_ref)
 end
 
 def goX(robot, _goal_x, _goal_y, _channel,ob,_motor_ref) do
@@ -944,7 +944,7 @@ end
 def goY(%Task4CClientRobotB.Position{facing: _facing,x: _x, y: y} = robot, goal_x, goal_y, channel,_ob,motor_ref) when y != goal_y do
   robot = move(robot,motor_ref)
   obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
-  goY(robot,goal_x,goal_y,channel,obs)
+  goY(robot,goal_x,goal_y,channel,obs,motor_ref)
 end
 
 def goY(robot, _goal_x, _goal_y, _channel,ob,_motor_ref) do
