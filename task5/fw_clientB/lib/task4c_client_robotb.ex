@@ -72,6 +72,7 @@ defmodule Task4CClientRobotB do
     {_,robot} = stop(robot,goal_locs,channel)
     Task4CClientRobotB.PhoenixSocketClient.get_bot_position(false,channel,robot)
     Task4CClientRobotB.PhoenixSocketClient.get_bot_position(false,channel,robot)
+    Task4CClientRobotB.PhoenixSocketClient.done(channel)
   end
 
   def repss(channel,start) do

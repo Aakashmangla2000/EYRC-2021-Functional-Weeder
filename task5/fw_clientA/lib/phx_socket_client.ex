@@ -56,6 +56,7 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
     ###########################
     # Process.sleep(1000)
     tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing},5000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 1, "sender" => "A", "value" => %{"x" => x, "y" => y, "face" => facing}},5000)
     {:ok, is_obs_ahead} = tup
     # IO.inspect(rep)
     is_obs_ahead
@@ -83,6 +84,26 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
     tup = PhoenixClient.Channel.push(channel,"goals",%{"client" => "robot_A"},5000)
     {:ok, seed} = tup
     seed
+  end
+
+  def send_obstacle_status(channel, %Task4CClientRobotA.Position{x: x, y: y, facing: facing} = _obs) do
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 2, "sender" => "A", "value" => %{"x" => x, "y" => y, "face" => facing}},5000)
+  end
+
+  def sowing(channel, val) do
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 3, "sender" => "A", "value" => val},5000)
+  end
+
+  def stopping(channel) do
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 7, "sender" => "A", "value" => nil},5000)
+  end
+
+  def starting(channel) do
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 8, "sender" => "A", "value" => nil},5000)
+  end
+
+  def done(channel) do
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 9, "sender" => "A", "value" => nil},5000)
   end
 
 end

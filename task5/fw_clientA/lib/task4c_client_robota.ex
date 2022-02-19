@@ -72,6 +72,7 @@ defmodule Task4CClientRobotA do
     {_,robot} = stop(robot,goal_locs,channel)
     Task4CClientRobotA.PhoenixSocketClient.get_bot_position(false,channel,robot)
     Task4CClientRobotA.PhoenixSocketClient.get_bot_position(false,channel,robot)
+    Task4CClientRobotA.PhoenixSocketClient.done(channel)
   end
 
   def change_start(str) do
