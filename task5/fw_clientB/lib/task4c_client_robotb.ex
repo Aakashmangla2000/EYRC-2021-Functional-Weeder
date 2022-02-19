@@ -258,7 +258,7 @@ defmodule Task4CClientRobotB do
         Task4CClientRobotB.rep(motor_ref,goal,dir,q,visited,robot,goal_x,goal_y,channel,len)
       end
       #weeding action to server
-      Task4CClientRobotB.LineFollower.weeding(channel, goal)
+      # Task4CClientRobotB.ArmMechanismTest.weeding(channel, goal)
       {robot}
   end
 
