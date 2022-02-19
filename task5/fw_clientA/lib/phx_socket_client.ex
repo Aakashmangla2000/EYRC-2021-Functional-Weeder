@@ -54,8 +54,8 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
     ###########################
     ## complete this funcion ##
     ###########################
-    Process.sleep(1000)
-    tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing},1000)
+    # Process.sleep(1000)
+    tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing},5000)
     {:ok, is_obs_ahead} = tup
     # IO.inspect(rep)
     is_obs_ahead
@@ -66,21 +66,21 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
   ######################################################
 
   def get_start(channel) do
-    tup = PhoenixClient.Channel.push(channel,"start_pos",%{"client" => "robot_A"},1000)
+    tup = PhoenixClient.Channel.push(channel,"start_pos",%{"client" => "robot_A"},5000)
     {:ok, start} = tup
     start
   end
 
   def get_bot_position(bool,channel,robot) do
     %Task4CClientRobotA.Position{facing: facing,x: x, y: y} = robot
-    tup = PhoenixClient.Channel.push(channel,"get_bots",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing, "alive" => bool},1000)
+    tup = PhoenixClient.Channel.push(channel,"get_bots",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing, "alive" => bool},5000)
     {:ok, rep} = tup
     [_ax,_ay,_afacing,bx,by,bfacing,_a_alive,b_alive] = rep
     [bx,String.to_atom(by),String.to_atom(bfacing),b_alive]
   end
 
   def get_goals(channel) do
-    tup = PhoenixClient.Channel.push(channel,"goals",%{"client" => "robot_A"},1000)
+    tup = PhoenixClient.Channel.push(channel,"goals",%{"client" => "robot_A"},5000)
     {:ok, seed} = tup
     seed
   end
