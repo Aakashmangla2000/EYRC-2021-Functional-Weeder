@@ -232,7 +232,7 @@ defmodule LineFollower1 do
 		# Remember the last position.
 		last_proportional = proportional
 
-		power_difference = proportional*0.005 + derivative*0.030 #+ integral*0.005;
+		power_difference = proportional*0.015 + derivative*0.020 #+ integral*0.005;
     power_difference = Kernel.round(power_difference)
     IO.puts("Power Difference: #{power_difference}")
 		power_difference = if (power_difference > maximum) do
