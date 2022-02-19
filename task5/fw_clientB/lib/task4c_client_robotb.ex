@@ -221,7 +221,7 @@ defmodule Task4CClientRobotB do
         #deposition
         IO.puts("deposition")
         {robot} = cond do
-          goal_x - 6 == 6 - goal_yy ->
+          6 - goal_x == 6 - goal_yy ->
             get_value(motor_ref,goal,robot,6, goal_y,channel)
           6 - goal_x > 6 - goal_yy ->
             get_value(motor_ref,goal,robot,goal_x, :f,channel)
