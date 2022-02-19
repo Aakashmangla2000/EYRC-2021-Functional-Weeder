@@ -49,7 +49,7 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
   in this format: {:ok, < true OR false >}.
   Create a tuple of this format: '{:obstacle_presence, < true or false >}' as a return of this function.
   """
-  def send_robot_status(channel, %Task4CClientRobotA.Position{x: x, y: y, facing: facing} = _robot) do
+  def send_robot_status(channel, %Task4CClientRobotA.Position{x: x, y: y, facing: facing} = robot) do
 
     ###########################
     ## complete this funcion ##
@@ -58,6 +58,11 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
     tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing},5000)
     _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 1, "sender" => "A", "value" => %{"x" => x, "y" => y, "face" => facing}},5000)
     {:ok, is_obs_ahead} = tup
+
+    if(is_obs_ahead ==  true) do
+      send_obstacle_status(channel,robot)
+    end
+
     # IO.inspect(rep)
     is_obs_ahead
   end

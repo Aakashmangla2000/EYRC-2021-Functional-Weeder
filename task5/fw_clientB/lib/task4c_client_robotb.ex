@@ -240,8 +240,10 @@ defmodule Task4CClientRobotB do
       {robot} = if(robot.x == goal_x and robot.y == goal_y) do
         {robot}
       else
-      Task4CClientRobotB.rep(motor_ref,goal,dir,q,visited,robot,goal_x,goal_y,channel,len)
+        Task4CClientRobotB.rep(motor_ref,goal,dir,q,visited,robot,goal_x,goal_y,channel,len)
       end
+      #weeding action to server
+      Task4CClientRobotB.LineFollower.weeding(channel, goal)
       {robot}
   end
 

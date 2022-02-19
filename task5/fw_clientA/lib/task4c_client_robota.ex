@@ -233,8 +233,10 @@ defmodule Task4CClientRobotA do
       {robot} = if(robot.x == goal_x and robot.y == goal_y) do
         {robot}
       else
-      Task4CClientRobotA.rep(motor_ref,goal,dir,q,visited,robot,goal_x,goal_y,channel,len)
+        Task4CClientRobotA.rep(motor_ref,goal,dir,q,visited,robot,goal_x,goal_y,channel,len)
       end
+      #sowing action to server
+      Task4CClientRobotA.LineFollower.sowing(channel, goal)
       {robot}
   end
 
