@@ -66,10 +66,10 @@ defmodule LineFollower2 do
     y = 1
     forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
     # pwm(70)
-    IO.puts("right")
-    right(motor_ref,0)
-    IO.puts("left")
-    left(motor_ref,0)
+    # IO.puts("right")
+    # right(motor_ref,0)
+    # IO.puts("left")
+    # left(motor_ref,0)
     # pwm(70)
     # motor_action(motor_ref,@forward)
     # forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
@@ -174,7 +174,7 @@ defmodule LineFollower2 do
     #Simple ReadLine
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    # IO.inspect(set_vals(sensor_vals))
+    IO.inspect(set_vals(sensor_vals))
     position = read_line2(sensor_vals)
 
     [s1,s2,s3,s4,s5] = if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
@@ -243,7 +243,7 @@ defmodule LineFollower2 do
     def set_vals(vals) do
     {_s0, vals} = List.pop_at(vals,0)
     # List.replace_at(vals,1,Enum.at(vals,1)+100)
-    Enum.map(vals, fn x -> if(x > 950) do
+    Enum.map(vals, fn x -> if(x > 900) do
         1
       else
         0

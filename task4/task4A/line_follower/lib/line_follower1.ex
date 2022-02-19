@@ -66,7 +66,7 @@ defmodule LineFollower1 do
     y = 1
     filter = 1
     forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    pwm(70)
+    # pwm(70)
     IO.puts("right")
     right(motor_ref,0)
     # IO.puts("left")
@@ -85,6 +85,7 @@ defmodule LineFollower1 do
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
     IO.inspect(sensor_vals)
     IO.inspect(set_vals(sensor_vals))
+    IO.puts(count)
     # cond do
     #   s1 == 1 -> pwm(200)
     #   s2 == 1 -> pwm(180)
@@ -99,8 +100,8 @@ defmodule LineFollower1 do
     Process.sleep(100)
     motor_action(motor_ref,@stop)
     Process.sleep(100)
-    if(count > 4 and (s1 == 0 or s2 == 0 or s3 == 1 or s4 == 1 or s5 == 0)) do
-    # if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 1 and s5 == 0) do
+    # if(count > 4 and (s1 == 0 or s2 == 0 or s3 == 1 or s4 == 1 or s5 == 0)) do
+    if(count > 4 or (s1 == 0 and s2 == 0 and s3 == 0 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 0 and s4 == 1 and s5 == 1))do
     else
       right(motor_ref,count)
     end
@@ -205,6 +206,7 @@ defmodule LineFollower1 do
     IO.inspect(sensor_vals)
 
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+    IO.inspect(set_vals(sensor_vals))
 
 
     if(filter > 6) do
@@ -214,11 +216,12 @@ defmodule LineFollower1 do
       motor_action(motor_ref,@stop)
     end
 
-    [s1,s2,s3,s4,s5] = if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
-      [0,0,1,0,0]
-    else
-      [s1,s1,s3,s4,s5]
-    end
+    # [s1,s2,s3,s4,s5] = if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
+    #   [0,0,1,0,0]
+    # else
+    #   [s1,s1,s3,s4,s5]
+    # end
+
 
     proportional = position - 2000
 
@@ -260,7 +263,7 @@ defmodule LineFollower1 do
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
 
-    {nodes,count} = if(count >= 13 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0))) do
+    {nodes,count} = if(count >= 20 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0))) do
         nodes = nodes + 1
         count = 1
         # IO.puts(nodes)
@@ -295,7 +298,7 @@ defmodule LineFollower1 do
     def set_vals(vals) do
     {_s0, vals} = List.pop_at(vals,0)
     # List.replace_at(vals,1,Enum.at(vals,1)+100)
-    Enum.map(vals, fn x -> if(x > 900) do
+    Enum.map(vals, fn x -> if(x > 800) do
         1
       else
         0
@@ -380,7 +383,7 @@ defmodule LineFollower1 do
     Enum.each(0..5, fn n -> provide_clock(sensor_ref) end)
     GPIO.write(sensor_ref[:cs], 1)
     # IO.inspect(vals)
-    Process.sleep(50)
+    # Process.sleep(50)
     # get_lfa_readings(sensor_list, sensor_ref)
     vals
   end
