@@ -66,9 +66,9 @@ defmodule LineFollower1 do
     y = 1
     filter = 1
     forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    # pwm(70)
-    # IO.puts("right")
-    # right(motor_ref,0)
+    pwm(70)
+    IO.puts("right")
+    right(motor_ref,0)
     # IO.puts("left")
     # left(motor_ref,0)
     # pwm(100)
@@ -83,6 +83,8 @@ defmodule LineFollower1 do
     count = count + 1
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+    IO.inspect(sensor_vals)
+    IO.inspect(set_vals(sensor_vals))
     # cond do
     #   s1 == 1 -> pwm(200)
     #   s2 == 1 -> pwm(180)
@@ -97,8 +99,8 @@ defmodule LineFollower1 do
     Process.sleep(100)
     motor_action(motor_ref,@stop)
     Process.sleep(100)
-    # if(count > 4 and (s1 == 0 or s2 == 0 or s3 == 1 or s4 == 1 or s5 == 0)) do
-    if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 1 and s5 == 0) do
+    if(count > 4 and (s1 == 0 or s2 == 0 or s3 == 1 or s4 == 1 or s5 == 0)) do
+    # if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 1 and s5 == 0) do
     else
       right(motor_ref,count)
     end
