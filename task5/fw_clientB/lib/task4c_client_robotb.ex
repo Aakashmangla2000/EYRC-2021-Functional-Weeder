@@ -214,6 +214,21 @@ defmodule Task4CClientRobotB do
         end
         count = Enum.count(goal_locs)
         {robot} = get_value(motor_ref,goal,robot,goal_x, goal_y,channel)
+
+        mpp = %{:a => 1, :b => 2, :c => 3, :d => 5, :e => 5, :f => 6}
+        goal_yy = Map.get(mpp, goal_y)
+
+        #deposition
+        IO.puts("deposition")
+        {robot} = cond do
+          goal_x - 6 == 6 - goal_yy ->
+            get_value(motor_ref,goal,robot,6, goal_y,channel)
+          6 - goal_x > 6 - goal_yy ->
+            get_value(motor_ref,goal,robot,goal_x, :f,channel)
+          6 - goal_x < 6 - goal_yy ->
+            get_value(motor_ref,goal,robot,6, goal_y,channel)
+        end
+
         {robot,goal_locs,count}
       end
       count = Enum.count(goal_locs)
@@ -972,7 +987,7 @@ end
   Rotates the robot to the right
   """
   def right(%Task4CClientRobotB.Position{facing: facing} = robot, motor_ref) do
-    Task4CClientRobotB.LineFollower.right(motor_ref,0)
+    # Task4CClientRobotB.LineFollower.right(motor_ref,0)
     %Task4CClientRobotB.Position{robot | facing: @directions_to_the_right[facing]}
   end
 
@@ -981,7 +996,7 @@ end
   Rotates the robot to the left
   """
   def left(%Task4CClientRobotB.Position{facing: facing} = robot, motor_ref) do
-    Task4CClientRobotB.LineFollower.left(motor_ref,0)
+    # Task4CClientRobotB.LineFollower.left(motor_ref,0)
     %Task4CClientRobotB.Position{robot | facing: @directions_to_the_left[facing]}
   end
 
@@ -989,8 +1004,8 @@ end
   Moves the robot to the north, but prevents it to fall
   """
   def move(%Task4CClientRobotB.Position{x: _, y: y, facing: :north} = robot, motor_ref) when y < @table_top_y do
-    maximum = 110
-    Task4CClientRobotB.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
+    # maximum = 110
+    # Task4CClientRobotB.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
     %Task4CClientRobotB.Position{ robot | y: Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) + 1 end) |> elem(0) }
   end
 
@@ -998,8 +1013,8 @@ end
   Moves the robot to the east, but prevents it to fall
   """
   def move(%Task4CClientRobotB.Position{x: x, y: _, facing: :east} = robot, motor_ref) when x < @table_top_x do
-    maximum = 110
-    Task4CClientRobotB.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
+    # maximum = 110
+    # Task4CClientRobotB.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
     %Task4CClientRobotB.Position{robot | x: x + 1}
   end
 
@@ -1007,8 +1022,8 @@ end
   Moves the robot to the south, but prevents it to fall
   """
   def move(%Task4CClientRobotB.Position{x: _, y: y, facing: :south} = robot, motor_ref) when y > :a do
-    maximum = 110
-    Task4CClientRobotB.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
+    # maximum = 110
+    # Task4CClientRobotB.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
     %Task4CClientRobotB.Position{ robot | y: Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) - 1 end) |> elem(0)}
   end
 
@@ -1016,8 +1031,8 @@ end
   Moves the robot to the west, but prevents it to fall
   """
   def move(%Task4CClientRobotB.Position{x: x, y: _, facing: :west} = robot, motor_ref) when x > 1 do
-    maximum = 110
-    Task4CClientRobotB.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
+    # maximum = 110
+    # Task4CClientRobotB.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
     %Task4CClientRobotB.Position{robot | x: x - 1}
   end
 
