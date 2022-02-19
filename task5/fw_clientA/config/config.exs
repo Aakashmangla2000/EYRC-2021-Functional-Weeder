@@ -21,7 +21,7 @@ use Mix.Config
 #     config :logger, level: :info
 #
 
-config :task_4c_client_robota, phoenix_server_url: "ws://10f1-122-176-200-79.ngrok.io:80/socket/websocket"
+config :task_4c_client_robota, phoenix_server_url: "ws://612c-122-176-200-79.ngrok.io:80/socket/websocket"
 # config :task_4c_client_robota, phoenix_server_url: "ws://localhost:4000/socket/websocket"
 
 # It is also possible to import configuration files, relative to this

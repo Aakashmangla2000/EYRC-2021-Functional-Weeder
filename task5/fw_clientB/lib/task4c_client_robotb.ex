@@ -618,9 +618,9 @@ defmodule Task4CClientRobotB do
         {q,robot,dir,visited,obs,len,x,y} = if(first == 0) do
           #travelling to new goals
           {robot,obs} = Task4CClientRobotB.forGoal_x(motor_ref,obs,robot,new_goal_x,channel)
-          {robot,obs} = Task4CClientRobotB.goX(robot,new_goal_x,new_goal_y,channel,obs)
+          {robot,obs} = Task4CClientRobotB.goX(robot,new_goal_x,new_goal_y,channel,obs,motor_ref)
           {robot,obs} = Task4CClientRobotB.forGoal_y(motor_ref,obs,robot,new_goal_y,channel)
-          {robot,obs} = Task4CClientRobotB.goY(robot,new_goal_x,new_goal_y,channel,obs)
+          {robot,obs} = Task4CClientRobotB.goY(robot,new_goal_x,new_goal_y,channel,obs,motor_ref)
 
            [_ax,_ay,_afacing,_a_alive] = Task4CClientRobotB.PhoenixSocketClient.get_bot_position(true,channel,robot)
 

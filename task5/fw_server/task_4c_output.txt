@@ -262,3 +262,5 @@ robot_A => 3, c, east
 robot_A => 4, c, east
 robot_A => 4, c, east
 robot_A => 5, c, east
+robot_B => 5, e, south
+robot_B => 5, e, south
