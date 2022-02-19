@@ -1,4 +1,4 @@
-defmodule ArmMechanismTest do
+defmodule Task4CClientRobotB.ArmMechanismTest do
   @moduledoc """
   Documentation for `ArmMechanismTest'
   """

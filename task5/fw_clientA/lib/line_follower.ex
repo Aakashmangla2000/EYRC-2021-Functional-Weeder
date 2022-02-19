@@ -1,4 +1,4 @@
-defmodule LineFollower do
+defmodule Task4CClientRobotA.LineFollower do
   @moduledoc """
   Documentation for `LineFollower`.
   """
@@ -43,12 +43,17 @@ defmodule LineFollower do
     get_lfa_readings([0,1,2,3,4], sensor_ref)
   end
 
-  def pid() do
-    Logger.debug("PID")
-    # Process.sleep(4000)
+  def open_motor_pwm_pins() do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
+    {motor_ref,pwm_ref}
+  end
+
+  def pid() do
+    Logger.debug("PID")
+    # Process.sleep(4000)
+    {motor_ref,pwm_ref} = open_motor_pwm_pins()
 
     maximum = 110;
     integral = 0;

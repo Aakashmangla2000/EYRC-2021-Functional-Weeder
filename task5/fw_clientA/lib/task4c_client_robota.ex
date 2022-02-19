@@ -112,8 +112,9 @@ defmodule Task4CClientRobotA do
     mp = %{"1" => 1, "2" => 2, "3" => 3, "4" => 4, "5" => 5, "6" => 6}
     mp2 = %{"a" => :a, "b" => :b, "c" => :c, "d" => :d, "e" => :e, "f" => :f}
 
+    {motor_ref,pwm_ref} = Task4CClientRobotA.LineFollower.open_motor_pwm_pins()
     count = Enum.count(goal_locs)
-    robot = goal_div(robot, goal_locs, channel,count,mp,mp2)
+    robot = goal_div(motor_ref,robot, goal_locs, channel,count,mp,mp2)
 
     {:ok, robot}
 
@@ -171,7 +172,7 @@ defmodule Task4CClientRobotA do
     Enum.fetch(ls,index)
   end
 
-  def goal_div(robot, goal_locs,channel,count,mp,mp2) when count > 0 do
+  def goal_div(motor_ref,robot, goal_locs,channel,count,mp,mp2) when count > 0 do
     mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5, :f => 6}
     parent = self()
     pid = spawn_link(fn ->
@@ -204,7 +205,7 @@ defmodule Task4CClientRobotA do
           {0,goal_locs,robot.x, robot.y}
         end
         count = Enum.count(goal_locs)
-        {robot} = get_value(goal,robot,goal_x, goal_y,channel)
+        {robot} = get_value(motor_ref,goal,robot,goal_x, goal_y,channel)
         {robot,goal_locs,count}
       end
       count = Enum.count(goal_locs)
@@ -213,15 +214,15 @@ defmodule Task4CClientRobotA do
     Process.register(pid, :client_toyrobotA)
     {robot,goal_locs,count} = rec_value()
 
-    goal_div(robot, goal_locs,channel,count,mp,mp2)
+    goal_div(motor_ref,robot, goal_locs,channel,count,mp,mp2)
   end
 
-  def goal_div(robot, _goal_locs, _channel, _count,_mp,_mp2) do
+  def goal_div(motor_ref,robot, _goal_locs, _channel, _count,_mp,_mp2) do
    robot
   end
 
 
-  def get_value(goal,robot,goal_x, goal_y,channel) do
+  def get_value(motor_ref,goal,robot,goal_x, goal_y,channel) do
       len = 1
       q = :queue.new()
       visited = :queue.new()
@@ -232,7 +233,7 @@ defmodule Task4CClientRobotA do
       {robot} = if(robot.x == goal_x and robot.y == goal_y) do
         {robot}
       else
-      Task4CClientRobotA.rep(goal,dir,q,visited,robot,goal_x,goal_y,channel,len)
+      Task4CClientRobotA.rep(motor_ref,goal,dir,q,visited,robot,goal_x,goal_y,channel,len)
       end
       {robot}
   end
@@ -543,7 +544,7 @@ defmodule Task4CClientRobotA do
     Enum.fetch(ls,index)
   end
 
-  def rep(goal,dir,q,visited,robot,goal_x,goal_y,channel, len) when len != 0 do
+  def rep(motor_ref,goal,dir,q,visited,robot,goal_x,goal_y,channel, len) when len != 0 do
     #getting next block
     {{:value, value3}, q} = :queue.out_r(q)
     {x,y, dirs} = value3
@@ -626,19 +627,19 @@ defmodule Task4CClientRobotA do
           dir == 0 ->
             both = cond do
               robot.facing == :east ->
-                robot = left(robot)
+                robot = left(robot,motor_ref)
                 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
                 {robot,obs}
 
               robot.facing == :south ->
-                robot = left(robot)
+                robot = left(robot,motor_ref)
                 Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
-                robot = left(robot)
+                robot = left(robot,motor_ref)
                 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
                 {robot,obs}
 
               robot.facing == :west ->
-                robot = right(robot)
+                robot = right(robot,motor_ref)
                 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
                 {robot,obs}
 
@@ -650,19 +651,19 @@ defmodule Task4CClientRobotA do
           dir == 1 ->
             both = cond do
               robot.facing == :north ->
-                robot = left(robot)
+                robot = left(robot,motor_ref)
                 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
                 {robot,obs}
 
               robot.facing == :east ->
-                robot = left(robot)
+                robot = left(robot,motor_ref)
                 Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
-                robot = left(robot)
+                robot = left(robot,motor_ref)
                 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
                 {robot,obs}
 
               robot.facing == :south ->
-                robot = right(robot)
+                robot = right(robot,motor_ref)
                 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
                 {robot,obs}
 
@@ -674,19 +675,19 @@ defmodule Task4CClientRobotA do
           dir == 2 ->
             both = cond do
               robot.facing == :west ->
-                robot = left(robot)
+                robot = left(robot,motor_ref)
                 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
                 {robot,obs}
 
               robot.facing == :north ->
-                robot = left(robot)
+                robot = left(robot,motor_ref)
                 Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
-                robot = left(robot)
+                robot = left(robot,motor_ref)
                 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
                 {robot,obs}
 
               robot.facing == :east ->
-                robot = right(robot)
+                robot = right(robot,motor_ref)
                 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
                 {robot,obs}
 
@@ -698,19 +699,19 @@ defmodule Task4CClientRobotA do
           dir == 3 ->
             both = cond do
               robot.facing == :south ->
-                robot = left(robot)
+                robot = left(robot,motor_ref)
                 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
                 {robot,obs}
 
               robot.facing == :west ->
-                robot = left(robot)
+                robot = left(robot,motor_ref)
                 Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
-                robot = left(robot)
+                robot = left(robot,motor_ref)
                 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
                 {robot,obs}
 
               robot.facing == :north ->
-                robot = right(robot)
+                robot = right(robot,motor_ref)
                 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
                 {robot,obs}
 
@@ -841,10 +842,10 @@ defmodule Task4CClientRobotA do
         {q,visited,robot,len,dir}
     end
 
-    rep(goal,dir,q,visited,robot,goal_x,goal_y,channel, len)
+    rep(motor_ref,goal,dir,q,visited,robot,goal_x,goal_y,channel, len)
   end
 
-  def rep(_goal,_dir,_q,_visited,robot,_goal_x,_goal_y,_channel, _len) do
+  def rep(motor_ref,_goal,_dir,_q,_visited,robot,_goal_x,_goal_y,_channel, _len) do
     {robot}
   end
 
@@ -852,15 +853,15 @@ def forGoal_x(_obs,robot,goal_x,channel) when robot.x < goal_x and robot.facing 
   obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
     [_obs,robot] = cond do
       robot.facing == :north ->
-        robot = right(robot)
+        robot = right(robot,motor_ref)
         [obs,robot]
       robot.facing == :west ->
-        robot = left(robot)
+        robot = left(robot,motor_ref)
         obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
-        robot = left(robot)
+        robot = left(robot,motor_ref)
         [obs,robot]
       robot.facing == :south ->
-        robot = left(robot)
+        robot = left(robot,motor_ref)
         [obs,robot]
   end
   obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
@@ -871,15 +872,15 @@ def forGoal_x(_obs,robot,goal_x,channel) when robot.x > goal_x and robot.facing 
 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
   [_obs,robot] = cond do
     robot.facing == :south ->
-      robot = right(robot)
+      robot = right(robot,motor_ref)
       [obs,robot]
     robot.facing == :east ->
-      robot = left(robot)
+      robot = left(robot,motor_ref)
       obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
-      robot = left(robot)
+      robot = left(robot,motor_ref)
       [obs,robot]
     robot.facing == :north ->
-      robot = left(robot)
+      robot = left(robot,motor_ref)
       [obs,robot]
   end
   obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
@@ -894,15 +895,15 @@ def forGoal_y(_obs,robot,goal_y,channel) when robot.y < goal_y and robot.facing 
 obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
   [_obs,robot] = cond do
     robot.facing == :west ->
-      robot = right(robot)
+      robot = right(robot,motor_ref)
       [obs,robot]
     robot.facing == :south ->
-      robot = left(robot)
+      robot = left(robot,motor_ref)
       obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
-      robot = left(robot)
+      robot = left(robot,motor_ref)
       [obs,robot]
     robot.facing == :east ->
-      robot = left(robot)
+      robot = left(robot,motor_ref)
       [obs,robot]
   end
   obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
@@ -915,15 +916,15 @@ def forGoal_y(_obs,robot,goal_y,channel) when robot.y > goal_y and robot.facing 
 
   [_obs,robot] = cond do
   robot.facing == :east ->
-    robot = right(robot)
+    robot = right(robot,motor_ref)
     [obs,robot]
   robot.facing == :north ->
-    robot = left(robot)
+    robot = left(robot,motor_ref)
     obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
-    robot = left(robot)
+    robot = left(robot,motor_ref)
     [obs,robot]
   robot.facing == :west ->
-    robot = left(robot)
+    robot = left(robot,motor_ref)
     [obs,robot]
   end
   obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
@@ -935,23 +936,23 @@ def forGoal_y(obs,robot,_goal_y, _channel) do
   {robot,obs}
 end
 
-def goX(%Task4CClientRobotA.Position{facing: _facing,x: x, y: _y} = robot, goal_x, goal_y,channel, _ob) when x != goal_x do
-  robot = move(robot)
+def goX(%Task4CClientRobotA.Position{facing: _facing,x: x, y: _y} = robot, goal_x, goal_y,channel, _ob, motor_ref) when x != goal_x do
+  robot = move(robot,motor_ref)
   ob = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
   goX(robot,goal_x,goal_y,channel, ob)
 end
 
-def goX(robot, _goal_x, _goal_y, _channel, ob) do
+def goX(robot, _goal_x, _goal_y, _channel, ob, _motor_ref) do
   {robot,ob}
 end
 
-def goY(%Task4CClientRobotA.Position{facing: _facing,x: _x, y: y} = robot, goal_x, goal_y,channel,_ob) when y != goal_y do
-  robot = move(robot)
+def goY(%Task4CClientRobotA.Position{facing: _facing,x: _x, y: y} = robot, goal_x, goal_y, channel, _ob, motor_ref) when y != goal_y do
+  robot = move(robot,motor_ref)
   ob = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
   goY(robot,goal_x,goal_y,channel,ob)
 end
 
-def goY(robot, _goal_x, _goal_y, _channel,ob) do
+def goY(robot, _goal_x, _goal_y, _channel,ob,_motor_ref) do
   {robot,ob}
 end
 
@@ -972,7 +973,8 @@ end
   @doc """
   Rotates the robot to the right
   """
-  def right(%Task4CClientRobotA.Position{facing: facing} = robot) do
+  def right(%Task4CClientRobotA.Position{facing: facing} = robot,motor_ref) do
+    Task4CClientRobotA.LineFollower.right(motor_ref,0)
     %Task4CClientRobotA.Position{robot | facing: @directions_to_the_right[facing]}
   end
 
@@ -980,36 +982,44 @@ end
   @doc """
   Rotates the robot to the left
   """
-  def left(%Task4CClientRobotA.Position{facing: facing} = robot) do
+  def left(%Task4CClientRobotA.Position{facing: facing} = robot,motor_ref) do
+    Task4CClientRobotA.LineFollower.left(motor_ref,0)
     %Task4CClientRobotA.Position{robot | facing: @directions_to_the_left[facing]}
   end
 
   @doc """
   Moves the robot to the north, but prevents it to fall
   """
-  def move(%Task4CClientRobotA.Position{x: _, y: y, facing: :north} = robot) when y < @table_top_y do
-    %Task4CClientRobotA.Position{ robot | y: Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) + 1 end) |> elem(0)
-    }
+  def move(%Task4CClientRobotA.Position{x: _, y: y, facing: :north} = robot, motor_ref) when y < @table_top_y do
+    maximum = 110
+    Task4CClientRobotA.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
+    %Task4CClientRobotA.Position{ robot | y: Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) + 1 end) |> elem(0) }
   end
 
   @doc """
   Moves the robot to the east, but prevents it to fall
   """
-  def move(%Task4CClientRobotA.Position{x: x, y: _, facing: :east} = robot) when x < @table_top_x do
+  def move(%Task4CClientRobotA.Position{x: x, y: _, facing: :east} = robot, motor_ref) when x < @table_top_x do
+    maximum = 110
+    Task4CClientRobotA.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
     %Task4CClientRobotA.Position{robot | x: x + 1}
   end
 
   @doc """
   Moves the robot to the south, but prevents it to fall
   """
-  def move(%Task4CClientRobotA.Position{x: _, y: y, facing: :south} = robot) when y > :a do
+  def move(%Task4CClientRobotA.Position{x: _, y: y, facing: :south} = robot, motor_ref) when y > :a do
+    maximum = 110
+    Task4CClientRobotA.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
     %Task4CClientRobotA.Position{ robot | y: Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) - 1 end) |> elem(0)}
   end
 
   @doc """
   Moves the robot to the west, but prevents it to fall
   """
-  def move(%Task4CClientRobotA.Position{x: x, y: _, facing: :west} = robot) when x > 1 do
+  def move(%Task4CClientRobotA.Position{x: x, y: _, facing: :west} = robot, motor_ref) when x > 1 do
+    maximum = 110
+    Task4CClientRobotA.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
     %Task4CClientRobotA.Position{robot | x: x - 1}
   end
 
