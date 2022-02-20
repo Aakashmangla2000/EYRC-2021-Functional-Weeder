@@ -121,58 +121,58 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
         cond do
           val == 1 ->
             Task4CClientRobotA.LineFollower.right(motor_ref,0)
-            find_on_left(0)
+            find_on_left(motor_ref,0)
           val == 2 ->
             Task4CClientRobotA.LineFollower.left(motor_ref,0)
-            find_on_right(0)
+            find_on_right(motor_ref,0)
           val == 3 ->
-            find_on_left(0)
+            find_on_left(motor_ref,0)
           val == 4 ->
-            find_on_right(0)
+            find_on_right(motor_ref,0)
         end
       robot.facing == :east ->
         cond do
           val == 1 ->
-            find_on_left(0)
+            find_on_left(motor_ref,0)
           val == 2 ->
             Task4CClientRobotA.LineFollower.right(motor_ref,0)
-            find_on_left(0)
+            find_on_left(motor_ref,0)
           val == 3 ->
-            find_on_right(0)
+            find_on_right(motor_ref,0)
           val == 4 ->
             Task4CClientRobotA.LineFollower.left(motor_ref,0)
-            find_on_right(0)
+            find_on_right(motor_ref,0)
         end
       robot.facing == :west ->
         cond do
           val == 1 ->
             Task4CClientRobotA.LineFollower.left(motor_ref,0)
-            find_on_right(0)
+            find_on_right(motor_ref,0)
           val == 2 ->
-            find_on_right(0)
+            find_on_right(motor_ref,0)
           val == 3 ->
             Task4CClientRobotA.LineFollower.right(motor_ref,0)
-            find_on_left(0)
+            find_on_left(motor_ref,0)
           val == 4 ->
-            find_on_left(0)
+            find_on_left(motor_ref,0)
         end
       robot.facing == :south ->
         cond do
           val == 1 ->
-            find_on_right(0)
+            find_on_right(motor_ref,0)
           val == 2 ->
-            find_on_left(0)
+            find_on_left(motor_ref,0)
           val == 3 ->
             Task4CClientRobotA.LineFollower.left(motor_ref,0)
-            find_on_right(0)
+            find_on_right(motor_ref,0)
           val == 4 ->
             Task4CClientRobotA.LineFollower.right(motor_ref,0)
-            find_on_left(0)
+            find_on_left(motor_ref,0)
         end
     end
   end
 
-  def find_on_right(count) do
+  def find_on_right(motor_ref,count) do
     count = count + 1
     [a,b] = test_ir()
     pwm(120)
@@ -183,11 +183,11 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     Process.sleep(60)
     if(count > 2 and a == 1) do
     else
-      find_on_right(count)
+      find_on_right(motor_ref,count)
     end
   end
 
-  def find_on_left(count) do
+  def find_on_left(motor_ref,count) do
     count = count + 1
     [a,b] = test_ir()
     pwm(120)
@@ -198,7 +198,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     Process.sleep(60)
     if(count > 2 and a == 1) do
     else
-      find_on_left(count)
+      find_on_left(motor_ref,count)
     end
   end
 
