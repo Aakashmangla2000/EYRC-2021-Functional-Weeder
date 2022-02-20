@@ -212,22 +212,48 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
       motor_action(motor_ref,@stop)
       Process.sleep(100)
     end
-    [a,b] = if(a == 1) do
-      test_ir()
+    [a,b] = test_ir()
+    # if(a == 1) do
+      # pwm(150)
+      # # Process.sleep(100)
+      # motor_action(motor_ref,@left)
+      # Process.sleep(60)
+    # else
+    rep()
+    motor_action(motor_ref,@stop)
+    Process.sleep(100)
+    # end
+    # [a,b] = if(a == 1) do
+    #   test_ir()
+    # else
+    #   [a,b]
+    # end
+    # [a,b] = if(a == 1) do
+    #   test_ir()
+    # else
+    #   [a,b]
+    # end
+    # [a,b] = if(a == 1) do
+    #   test_ir()
+    # else
+    #   [a,b]
+    # end
+    # IO.inspect("a: #{a} b: #{b} count #{count}")
+    # if(count > 2 and a == 0) do
+    #   motor_action(motor_ref,@stop)
+    #   Process.sleep(100)
+    # else
+    #   find_on_right(motor_ref,count)
+    # end
+  end
+
+  def rep() do
+    [a,b] = test_ir()
+    IO.inspect("a: #{a} b: #{b}")
+    if(a == 1) do
+      rep()
     else
       [a,b]
-    end
-    [a,b] = if(a == 1) do
-      test_ir()
-    else
-      [a,b]
-    end
-    IO.inspect("a: #{a} b: #{b} count #{count}")
-    if(count > 2 and a == 0) do
-      motor_action(motor_ref,@stop)
-      Process.sleep(100)
-    else
-      find_on_right(motor_ref,count)
     end
   end
 
