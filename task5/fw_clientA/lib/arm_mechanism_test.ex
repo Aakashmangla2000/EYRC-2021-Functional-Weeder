@@ -103,15 +103,21 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
           goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
         end
       robot.y == :f ->
-        goal == robot.x + 5*Map.get(p3,robot.y) - 5 -> 4
-        goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
+        cond do
+          goal == robot.x + 5*Map.get(p3,robot.y) - 5 -> 4
+          goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
+        end
       robot.x == 6 and robot.y == :f ->
-        goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
+        cond do
+          goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
+        end
       true ->
-        goal == robot.x + 5*Map.get(p3,robot.y) - 1 -> 1
-        goal == robot.x + 5*Map.get(p3,robot.y) ->     2
-        goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
-        goal == robot.x + 5*Map.get(p3,robot.y) - 5 -> 4
+        cond do
+          goal == robot.x + 5*Map.get(p3,robot.y) - 1 -> 1
+          goal == robot.x + 5*Map.get(p3,robot.y) ->     2
+          goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
+          goal == robot.x + 5*Map.get(p3,robot.y) - 5 -> 4
+        end
     end
 
     cond do
