@@ -43,6 +43,13 @@ defmodule Task4CClientRobotB.LineFollower do
     get_lfa_readings([0,1,2,3,4], sensor_ref)
   end
 
+  def test_ir do
+    ir_ref = Enum.map(@ir_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :input, pull_mode: :pullup) end)
+    ir_values = Enum.map(ir_ref,fn {_, ref_no} -> GPIO.read(ref_no) end)
+    IO.inspect(ir_values)
+  end
+
+
   def open_motor_pwm_pins() do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
@@ -58,10 +65,10 @@ defmodule Task4CClientRobotB.LineFollower do
     maximum = 100;
     integral = 0;
     last_proportional = 0
-    motor_action(motor_ref,@stop)
-    pwm(70)
-    motor_action(motor_ref,@forward)
-    Process.sleep(5)
+    # motor_action(motor_ref,@stop)
+    # pwm(70)
+    # motor_action(motor_ref,@forward)
+    # Process.sleep(5)
 
     count = 1
     nodes = 1
@@ -70,7 +77,9 @@ defmodule Task4CClientRobotB.LineFollower do
     x = 1
     y = 1
     filter = 1
-    forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
+    proximity = test_ir()
+    IO.inspect(proximity)
+    # forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
     # pwm(70)
     # IO.puts("right")
     # right(motor_ref,0)
