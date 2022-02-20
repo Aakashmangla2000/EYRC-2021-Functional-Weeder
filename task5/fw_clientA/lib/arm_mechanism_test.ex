@@ -81,6 +81,15 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     test_motion
   end
 
+  def sowing(robot, channel, goal) do
+    p3 = %{:a => 0, :b => 1, :c => 2, :d => 3, :e => 4, :f => 5}
+    Process.sleep(1000)
+    tr = robot.x + 5*Map.get(p3,robot.y)
+    tl = if(robot.x == 6) do
+      tr -1
+    end
+  end
+
   def test_servo_a(angle) do
     val = trunc(((2.5 + 10.0 * angle / 180) / 100 ) * 255)
     Pigpiox.Pwm.set_pwm_frequency(@servo_a_pin, @pwm_frequency)

@@ -236,7 +236,7 @@ defmodule Task4CClientRobotA do
         Task4CClientRobotA.rep(motor_ref,goal,dir,q,visited,robot,goal_x,goal_y,channel,len)
       end
       #sowing action to server
-      # Task4CClientRobotA.ArmMechanismTest.sowing(channel, goal)
+      # Task4CClientRobotA.ArmMechanismTest.sowing(robot, channel, goal)
       {robot}
   end
 
