@@ -183,7 +183,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     Process.sleep(60)
     motor_action(motor_ref,@stop)
     Process.sleep(60)
-    if(count > 2 and b == 1) do
+    if(count > 2 and a == 0) do
     else
       find_on_right(motor_ref,count)
     end
@@ -200,7 +200,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     Process.sleep(60)
     motor_action(motor_ref,@stop)
     Process.sleep(60)
-    if(count > 2 and b == 1) do
+    if(count > 2 and a == 0) do
     else
       find_on_left(motor_ref,count)
     end
