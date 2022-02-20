@@ -139,9 +139,13 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
           val == 1 ->
             find_on_left(0)
           val == 2 ->
+            Task4CClientRobotA.LineFollower.right(motor_ref,0)
+            find_on_left(0)
           val == 3 ->
             find_on_right(0)
           val == 4 ->
+            Task4CClientRobotA.LineFollower.left(motor_ref,0)
+            find_on_right(0)
         end
       robot.facing == :west ->
         cond do
@@ -170,7 +174,6 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
             find_on_left(0)
         end
     end
-
   end
 
   def find_on_right(count) do
