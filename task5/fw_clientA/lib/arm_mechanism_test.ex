@@ -183,7 +183,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     [a,b] = test_ir()
       IO.inspect("a: #{a} b: #{b} #{count}")
     if(a == 1) do
-      pwm(120)
+      pwm(150)
       Process.sleep(100)
       motor_action(motor_ref,@right)
       Process.sleep(60)
@@ -204,7 +204,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     [a,b] = test_ir()
     IO.inspect("a: #{a} b: #{b} count #{count}")
     if(a == 1) do
-      pwm(120)
+      pwm(150)
       Process.sleep(100)
       motor_action(motor_ref,@left)
       Process.sleep(60)
