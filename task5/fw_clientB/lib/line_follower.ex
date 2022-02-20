@@ -71,9 +71,9 @@ defmodule Task4CClientRobotB.LineFollower do
     y = 1
     filter = 1
     forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    pwm(70)
-    IO.puts("right")
-    right(motor_ref,0)
+    # pwm(70)
+    # IO.puts("right")
+    # right(motor_ref,0)
     # IO.puts("left")
     # left(motor_ref,0)
     # pwm(100)
@@ -211,6 +211,8 @@ defmodule Task4CClientRobotB.LineFollower do
 
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
 
+    IO.inspect(set_vals(sensor_vals))
+
 
     if(filter > 6) do
       motor_action(motor_ref,@forward)
@@ -219,11 +221,11 @@ defmodule Task4CClientRobotB.LineFollower do
       motor_action(motor_ref,@stop)
     end
 
-    [s1,s2,s3,s4,s5] = if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
-      [0,0,1,0,0]
-    else
-      [s1,s1,s3,s4,s5]
-    end
+    # [s1,s2,s3,s4,s5] = if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
+    #   [0,0,1,0,0]
+    # else
+    #   [s1,s1,s3,s4,s5]
+    # end
 
     proportional = position - 2000
 
@@ -234,7 +236,7 @@ defmodule Task4CClientRobotB.LineFollower do
 		# Remember the last position.
 		last_proportional = proportional
 
-		power_difference = proportional*0.005 + derivative*0.030 #+ integral*0.005;
+		power_difference = proportional*0.015 + derivative*0.020 #+ integral*0.005;
     power_difference = Kernel.round(power_difference)
     IO.puts("Power Difference: #{power_difference}")
 		power_difference = if (power_difference > maximum) do
@@ -277,9 +279,13 @@ defmodule Task4CClientRobotB.LineFollower do
         # Process.sleep(300)
         # end
         motor_action(motor_ref,@stop)
-        Process.sleep(1000)
+        Process.sleep(100)
         pwm(100)
-        # motor_action(motor_ref,@forward)
+        motor_action(motor_ref,@backward)
+        Process.sleep(200)
+        motor_action(motor_ref,@stop)
+        Process.sleep(1000)
+
         {nodes,count}
     else
       {nodes,count}
@@ -300,7 +306,7 @@ defmodule Task4CClientRobotB.LineFollower do
     def set_vals(vals) do
     {_s0, vals} = List.pop_at(vals,0)
     # List.replace_at(vals,1,Enum.at(vals,1)+100)
-    Enum.map(vals, fn x -> if(x > 900) do
+    Enum.map(vals, fn x -> if(x > 800) do
         1
       else
         0
