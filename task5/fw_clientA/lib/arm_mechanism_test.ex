@@ -176,7 +176,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     count = count + 1
     [a,b] = test_ir()
-      IO.inspect("a: #{a} b: #{b}")
+      IO.inspect("a: #{a} b: #{b} #{count}")
     pwm(120)
     Process.sleep(60)
     motor_action(motor_ref,@right)
@@ -193,7 +193,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     count = count + 1
     [a,b] = test_ir()
-    IO.inspect("a: #{a} b: #{b}")
+    IO.inspect("a: #{a} b: #{b} count #{count}")
     pwm(120)
     Process.sleep(60)
     motor_action(motor_ref,@left)
