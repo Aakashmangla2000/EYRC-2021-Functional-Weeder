@@ -91,10 +91,6 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     p3 = %{:a => 0, :b => 1, :c => 2, :d => 3, :e => 4, :f => 5}
     Process.sleep(1000)
-    tr = robot.x + 5*Map.get(p3,robot.y)
-    tl = if(robot.x == 6) do
-      tr -1
-    end
 
     val = cond do
       robot.x == 6 ->
