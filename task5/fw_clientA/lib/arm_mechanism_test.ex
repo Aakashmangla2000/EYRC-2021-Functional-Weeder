@@ -177,12 +177,14 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     count = count + 1
     [a,b] = test_ir()
       IO.inspect("a: #{a} b: #{b} #{count}")
-    pwm(120)
-    Process.sleep(60)
-    motor_action(motor_ref,@right)
-    Process.sleep(60)
-    motor_action(motor_ref,@stop)
-    Process.sleep(60)
+    if(a == 1) do
+      pwm(120)
+      Process.sleep(60)
+      motor_action(motor_ref,@right)
+      Process.sleep(60)
+      motor_action(motor_ref,@stop)
+      Process.sleep(60)
+    end
     if(count > 2 and a == 0) do
     else
       find_on_left(motor_ref,count)
@@ -194,12 +196,14 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     count = count + 1
     [a,b] = test_ir()
     IO.inspect("a: #{a} b: #{b} count #{count}")
-    pwm(120)
-    Process.sleep(60)
-    motor_action(motor_ref,@left)
-    Process.sleep(60)
-    motor_action(motor_ref,@stop)
-    Process.sleep(60)
+    if(a == 1) do
+      pwm(120)
+      Process.sleep(60)
+      motor_action(motor_ref,@left)
+      Process.sleep(60)
+      motor_action(motor_ref,@stop)
+      Process.sleep(60)
+    end
     if(count > 2 and a == 0) do
     else
       find_on_right(motor_ref,count)
