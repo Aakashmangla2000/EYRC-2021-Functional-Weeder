@@ -228,6 +228,7 @@ defmodule Task4CClientRobotB do
           6 - goal_x < 6 - goal_yy ->
             get_value(motor_ref,goal,robot,6, goal_y,channel)
         end
+        # Task4CClientRobotB.ArmMechanismTest.deposition
 
         {robot,goal_locs,count}
       end

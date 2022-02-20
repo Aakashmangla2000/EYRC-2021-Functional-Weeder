@@ -60,10 +60,9 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     Process.sleep(1000)
     test_servo_b(50)
     Process.sleep(1000)
+  end
 
-    IO.puts("Change position...")
-    test_motion
-
+   def deposition do
     IO.puts("Weed Depositing...")
     Process.sleep(1000)
     test_servo_b(30)
@@ -73,7 +72,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     test_servo_b(50)
     IO.puts("Weeding Ends...")
 
-  end
+   end
 
   def seeding do
     Process.sleep(5000)
@@ -86,6 +85,8 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     IO.puts("Change position...")
     test_motion
   end
+
+  # 1 - top left 2-top right 3- bottom left 4- bottom right
 
   def find_plant(robot,goal) do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)

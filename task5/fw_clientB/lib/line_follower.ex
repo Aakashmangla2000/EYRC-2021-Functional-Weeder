@@ -98,8 +98,6 @@ defmodule Task4CClientRobotB.LineFollower do
     filter = 1
     [front,back] = ir_sensors()
 
-
-
     # forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
     # pwm(70)
     # IO.puts("right")
@@ -113,30 +111,6 @@ defmodule Task4CClientRobotB.LineFollower do
     # forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
     # motor_action(motor_ref,@forward)
     # forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
-  end
-  def set_pos(motor_ref, count, facing, x, y) do
-    mp = %{:a => 0, :b => 1, :c => 2, :d => 3, :e => 4, :f => 5}
-    y_new =  Map.get(mp, y)
-    if (x < 6  and y_new < 5) do
-      tr = x + (5*y)
-      tl = tr - 1
-      br = tr - 5
-      bl = br - 1
-    end
-
-    [front,back] = ir_sensors()
-    pwm(120)
-    Process.sleep(100)
-    motor_action(motor_ref,@left)
-    Process.sleep(100)
-    motor_action(motor_ref,@stop)
-    Process.sleep(100)
-
-    if (back == 0) do
-    else
-      set_pos(motor_ref, count, facing, x, y)
-    end
-
   end
 
   def obs_detect do
@@ -204,32 +178,6 @@ defmodule Task4CClientRobotB.LineFollower do
     end
   end
 
-  # def right(motor_ref) do
-  #   sensor_vals = test_wlf_sensors()
-  #   [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-  #   cond do
-  #     s1 == 1 -> pwm(200)
-  #     s2 == 1 -> pwm(180)
-  #     s3 == 1 -> pwm(150)
-  #     s4 == 1 -> pwm(130)
-  #     s5 == 1 -> pwm(110)
-  #     true -> pwm(150)
-  #   end
-  #   Process.sleep(230)
-  #   motor_action(motor_ref,@left)
-  #   Process.sleep(230)
-  #   motor_action(motor_ref,@stop)
-  #   Process.sleep(500)
-  # end
-
-  # def left(motor_ref) do
-  #   pwm(150)
-  #   Process.sleep(230)
-  #   motor_action(motor_ref,@right)
-  #   Process.sleep(230)
-  #   motor_action(motor_ref,@stop)
-  #   Process.sleep(500)
-  # end
 
   def twice(motor_ref) do
     pwm(150)
