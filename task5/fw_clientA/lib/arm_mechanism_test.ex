@@ -27,6 +27,12 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   @duty_cycles [70]
   @pwm_frequency 50
 
+  def test_ir do
+    Logger.debug("Testing IR Proximity Sensors")
+    ir_ref = Enum.map(@ir_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :input, pull_mode: :pullup) end)
+    ir_values = Enum.map(ir_ref,fn {_, ref_no} -> GPIO.read(ref_no) end)
+  end
+
 
   def test_motion do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
@@ -82,11 +88,112 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   end
 
   def sowing(robot, channel, goal) do
+    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     p3 = %{:a => 0, :b => 1, :c => 2, :d => 3, :e => 4, :f => 5}
     Process.sleep(1000)
     tr = robot.x + 5*Map.get(p3,robot.y)
     tl = if(robot.x == 6) do
       tr -1
+    end
+
+    val = cond do
+      robot.x == 6 ->
+        cond do
+          goal == robot.x + 5*Map.get(p3,robot.y) - 1 -> 1
+          goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
+        end
+      robot.y == :f ->
+        goal == robot.x + 5*Map.get(p3,robot.y) - 5 -> 4
+        goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
+      robot.x == 6 and robot.y == :f ->
+        goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
+      true ->
+        goal == robot.x + 5*Map.get(p3,robot.y) - 1 -> 1
+        goal == robot.x + 5*Map.get(p3,robot.y) ->     2
+        goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
+        goal == robot.x + 5*Map.get(p3,robot.y) - 5 -> 4
+    end
+
+    cond do
+      robot.facing == :north ->
+        cond do
+          val == 1 ->
+            Task4CClientRobotA.LineFollower.right(motor_ref,0)
+            find_on_left(0)
+          val == 2 ->
+            Task4CClientRobotA.LineFollower.left(motor_ref,0)
+            find_on_right(0)
+          val == 3 ->
+            find_on_left(0)
+          val == 4 ->
+            find_on_right(0)
+        end
+      robot.facing == :east ->
+        cond do
+          val == 1 ->
+            find_on_left(0)
+          val == 2 ->
+          val == 3 ->
+            find_on_right(0)
+          val == 4 ->
+        end
+      robot.facing == :west ->
+        cond do
+          val == 1 ->
+            Task4CClientRobotA.LineFollower.left(motor_ref,0)
+            find_on_right(0)
+          val == 2 ->
+            find_on_right(0)
+          val == 3 ->
+            Task4CClientRobotA.LineFollower.right(motor_ref,0)
+            find_on_left(0)
+          val == 4 ->
+            find_on_left(0)
+        end
+      robot.facing == :south ->
+        cond do
+          val == 1 ->
+            find_on_right(0)
+          val == 2 ->
+            find_on_left(0)
+          val == 3 ->
+            Task4CClientRobotA.LineFollower.left(motor_ref,0)
+            find_on_right(0)
+          val == 4 ->
+            Task4CClientRobotA.LineFollower.right(motor_ref,0)
+            find_on_left(0)
+        end
+    end
+
+  end
+
+  def find_on_right(count) do
+    count = count + 1
+    [a,b] = test_ir()
+    pwm(120)
+    Process.sleep(60)
+    motor_action(motor_ref,@right)
+    Process.sleep(60)
+    motor_action(motor_ref,@stop)
+    Process.sleep(60)
+    if(count > 2 and a == 1) do
+    else
+      find_on_right(count)
+    end
+  end
+
+  def find_on_left(count) do
+    count = count + 1
+    [a,b] = test_ir()
+    pwm(120)
+    Process.sleep(60)
+    motor_action(motor_ref,@left)
+    Process.sleep(60)
+    motor_action(motor_ref,@stop)
+    Process.sleep(60)
+    if(count > 2 and a == 1) do
+    else
+      find_on_left(count)
     end
   end
 
