@@ -205,15 +205,18 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     IO.inspect("a: #{a} b: #{b} count #{count}")
     if(a == 1) do
       pwm(150)
-      Process.sleep(100)
+      # Process.sleep(100)
       motor_action(motor_ref,@left)
-      Process.sleep(60)
+      # Process.sleep(60)
+    else
       motor_action(motor_ref,@stop)
       Process.sleep(100)
     end
     [a,b] = test_ir()
     IO.inspect("a: #{a} b: #{b} count #{count}")
     if(count > 2 and a == 0) do
+      motor_action(motor_ref,@stop)
+      Process.sleep(100)
     else
       find_on_right(motor_ref,count)
     end
