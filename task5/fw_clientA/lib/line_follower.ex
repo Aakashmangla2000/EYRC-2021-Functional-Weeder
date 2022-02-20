@@ -12,6 +12,7 @@ defmodule Task4CClientRobotA.LineFollower do
   @sensor_pins [cs: 5, clock: 25, address: 24, dataout: 23]
   @motor_pins [lf: 12, lb: 13, rf: 20, rb: 21]
   @pwm_pins [enl: 6, enr: 26]
+  @ir_pins [dr: 16, dl: 19]
 
   @ref_atoms [:cs, :clock, :address, :dataout]
   @lf_sensor_data %{sensor0: 0, sensor1: 0, sensor2: 0, sensor3: 0, sensor4: 0, sensor5: 0}
@@ -41,6 +42,34 @@ defmodule Task4CClientRobotA.LineFollower do
     sensor_ref = Enum.map(sensor_ref, fn{_atom, ref_id} -> ref_id end)
     sensor_ref = Enum.zip(@ref_atoms, sensor_ref)
     get_lfa_readings([0,1,2,3,4], sensor_ref)
+  end
+
+  def test_ir do
+    ir_ref = Enum.map(@ir_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :input, pull_mode: :pullup) end)
+    ir_values = Enum.map(ir_ref,fn {_, ref_no} -> GPIO.read(ref_no) end)
+    # IO.inspect(ir_values)
+  end
+
+   def ir_sensors do
+    proximity = test_ir()
+    front  =  Enum.at(proximity, 0)
+    back = Enum.at(proximity, 1)
+    [front,back]
+    IO.puts("front: #{front}")
+    IO.puts("back: #{back}")
+  end
+
+  def obs_detect do
+    obs = false
+    [front,back] = ir_sensors()
+    IO.inspect(ir_sensors())
+
+    obs = if front == 0 do
+      true
+    else
+      false
+    end
+    obs
   end
 
   def open_motor_pwm_pins() do

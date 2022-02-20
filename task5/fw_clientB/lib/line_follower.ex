@@ -47,7 +47,7 @@ defmodule Task4CClientRobotB.LineFollower do
   def test_ir do
     ir_ref = Enum.map(@ir_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :input, pull_mode: :pullup) end)
     ir_values = Enum.map(ir_ref,fn {_, ref_no} -> GPIO.read(ref_no) end)
-    IO.inspect(ir_values)
+    # IO.inspect(ir_values)
   end
 
 

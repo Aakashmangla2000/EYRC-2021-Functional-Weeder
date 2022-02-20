@@ -87,7 +87,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     test_motion
   end
 
-  def sowing(robot, channel, goal) do
+  def find_plant(robot,goal) do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     p3 = %{:a => 0, :b => 1, :c => 2, :d => 3, :e => 4, :f => 5}
     Process.sleep(1000)
@@ -170,6 +170,11 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
             find_on_left(motor_ref,0)
         end
     end
+  end
+
+  def sowing(robot, channel, goal) do
+    find_plant(robot,goal)
+    seeding()
   end
 
   def find_on_left(motor_ref,count) do
