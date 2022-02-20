@@ -71,20 +71,8 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     Process.sleep(1000)
     test_servo_b(50)
     IO.puts("Weeding Ends...")
-
    end
 
-  def seeding do
-    Process.sleep(5000)
-    IO.puts("Getting the seed...")
-    test_servo_b(0)
-    Process.sleep(1000)
-    IO.puts("Dropping the seed...")
-    test_servo_b(90)
-    Process.sleep(1000)
-    IO.puts("Change position...")
-    test_motion
-  end
 
   # 1 - top left 2-top right 3- bottom left 4- bottom right
 
@@ -177,19 +165,18 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     count = count + 1
     [a,b] = test_ir()
-      IO.inspect("a: #{a} b: #{b} #{count}")
+    IO.inspect("a: #{a} b: #{b} count #{count}")
     if(b == 1) do
-      pwm(120)
-      Process.sleep(60)
+      pwm(100)
       motor_action(motor_ref,@right)
-      Process.sleep(60)
-      motor_action(motor_ref,@stop)
-      Process.sleep(60)
-    end
-    if(count > 2 and b == 0) do
     else
-      find_on_left(motor_ref,count)
+      motor_action(motor_ref,@stop)
+      Process.sleep(100)
     end
+    [a,b] = test_ir()
+    rep()
+    motor_action(motor_ref,@stop)
+    Process.sleep(100)
   end
 
   def find_on_right(motor_ref,count) do
@@ -198,16 +185,25 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     [a,b] = test_ir()
     IO.inspect("a: #{a} b: #{b} count #{count}")
     if(b == 1) do
-      pwm(120)
-      Process.sleep(60)
+      pwm(100)
       motor_action(motor_ref,@left)
-      Process.sleep(60)
-      motor_action(motor_ref,@stop)
-      Process.sleep(60)
-    end
-    if(count > 2 and b == 0) do
     else
-      find_on_right(motor_ref,count)
+      motor_action(motor_ref,@stop)
+      Process.sleep(100)
+    end
+    [a,b] = test_ir()
+    rep()
+    motor_action(motor_ref,@stop)
+    Process.sleep(100)
+  end
+
+  def rep() do
+    [a,b] = test_ir()
+    IO.inspect("a: #{a} b: #{b}")
+    if(b == 1) do
+      rep()
+    else
+      [a,b]
     end
   end
 

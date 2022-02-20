@@ -56,10 +56,10 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
     ## complete this funcion ##
     ###########################
     # Process.sleep(1000)
-    tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_B","x" => x, "y" => y, "face" => facing},5000)
+    is_obs_ahead = Task4CClientRobotB.LineFollower.obs_detect()
+    _tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_B","x" => x, "y" => y, "face" => facing, "obs" => is_obs_ahead},5000)
     _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 1, "sender" => "B", "value" => %{"x" => x, "y" => y, "face" => facing}},5000)
-    {:ok, is_obs_ahead} = tup
-    # is_obs_ahead = Task4CClientRobotB.LineFollower.obs_detect()
+    # {:ok, is_obs_ahead} = tup
     if(is_obs_ahead ==  true) do
       send_obstacle_status(channel,robot)
     end

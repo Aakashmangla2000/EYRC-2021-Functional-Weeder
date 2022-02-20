@@ -99,30 +99,12 @@ defmodule Task4CClientRobotA.LineFollower do
     x = 1
     y = 1
     forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    # pwm(70)
-    IO.puts("right")
-    right(motor_ref,0)
-    IO.puts("left")
-    left(motor_ref,0)
-    # pwm(70)
-    # motor_action(motor_ref,@forward)
-    # forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    # motor_action(motor_ref,@forward)
-    # forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
   end
 
   def right(motor_ref,count) do
     count = count + 1
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    # cond do
-    #   s1 == 1 -> pwm(200)
-    #   s2 == 1 -> pwm(180)
-    #   s3 == 1 -> pwm(150)
-    #   s4 == 1 -> pwm(130)
-    #   s5 == 1 -> pwm(110)
-    #   true -> pwm(150)
-    # end
     pwm(120)
     Process.sleep(100)
     motor_action(motor_ref,@left)
@@ -139,14 +121,6 @@ defmodule Task4CClientRobotA.LineFollower do
     count = count + 1
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    # cond do
-    #   s1 == 1 -> pwm(200)
-    #   s2 == 1 -> pwm(180)
-    #   s3 == 1 -> pwm(150)
-    #   s4 == 1 -> pwm(130)
-    #   s5 == 1 -> pwm(110)
-    #   true -> pwm(150)
-    # end
     pwm(120)
     Process.sleep(100)
     motor_action(motor_ref,@right)

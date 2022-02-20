@@ -32,7 +32,8 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
   def handle_in("new_msg", message, socket) do
 
     # determine the obstacle's presence in front of the robot and return the boolean value
-    is_obs_ahead = Task4CPhoenixServerWeb.FindObstaclePresence.is_obstacle_ahead?(message["x"], message["y"], message["face"])
+    # is_obs_ahead = Task4CPhoenixServerWeb.FindObstaclePresence.is_obstacle_ahead?(message["x"], message["y"], message["face"])
+    is_obs_ahead = message["obs"]
 
     # file object to write each action taken by each Robot (A as well as B)
     {:ok, out_file} = File.open("task_4c_output.txt", [:append])
@@ -66,7 +67,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     else
     end
 
-    {:reply, {:ok, is_obs_ahead}, socket}
+    {:reply, {:ok, true}, socket}
   end
 
   def handle_in("get_bots",message,socket) do

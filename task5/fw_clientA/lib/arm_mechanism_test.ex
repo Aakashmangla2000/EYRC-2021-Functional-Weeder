@@ -33,48 +33,6 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     ir_values = Enum.map(ir_ref,fn {_, ref_no} -> GPIO.read(ref_no) end)
   end
 
-
-  def test_motion do
-    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
-    pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
-    Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
-    motion_list = [@forward,@forward,@forward,@forward,@forward,@forward,@stop]
-    Enum.each(motion_list, fn motion -> motor_action(motor_ref,motion) end)
-
-  end
-
-  def weeding do
-    Process.sleep(5000)
-    IO.puts("Opening the Claws...")
-    test_servo_a(0)  #opening claws
-    Process.sleep(1000)
-
-    IO.puts("Positioning the arm...")
-    test_servo_b(45)  #setting arm at height
-    Process.sleep(1000)
-
-    IO.puts("Weeding Begins...")
-    test_servo_b(20)
-    Process.sleep(1000)
-    test_servo_a(180)
-    Process.sleep(1000)
-    test_servo_b(50)
-    Process.sleep(1000)
-
-    IO.puts("Change position...")
-    test_motion
-
-    IO.puts("Weed Depositing...")
-    Process.sleep(1000)
-    test_servo_b(30)
-    Process.sleep(1000)
-    test_servo_a(00)
-    Process.sleep(1000)
-    test_servo_b(50)
-    IO.puts("Weeding Ends...")
-
-  end
-
   def seeding do
     Process.sleep(5000)
     IO.puts("Getting the seed...")
