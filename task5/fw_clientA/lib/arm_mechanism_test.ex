@@ -28,7 +28,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   @pwm_frequency 50
 
   def test_ir do
-    Logger.debug("Testing IR Proximity Sensors")
+    # Logger.debug("Testing IR Proximity Sensors")
     ir_ref = Enum.map(@ir_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :input, pull_mode: :pullup) end)
     ir_values = Enum.map(ir_ref,fn {_, ref_no} -> GPIO.read(ref_no) end)
   end
@@ -172,33 +172,35 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     end
   end
 
-  def find_on_right(motor_ref,count) do
+  def find_on_left(motor_ref,count) do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     count = count + 1
     [a,b] = test_ir()
+      IO.inspect("a: #{a} b: #{b}")
     pwm(120)
     Process.sleep(60)
     motor_action(motor_ref,@right)
     Process.sleep(60)
     motor_action(motor_ref,@stop)
     Process.sleep(60)
-    if(count > 2 and a == 1) do
+    if(count > 2 and b == 1) do
     else
       find_on_right(motor_ref,count)
     end
   end
 
-  def find_on_left(motor_ref,count) do
+  def find_on_right(motor_ref,count) do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     count = count + 1
     [a,b] = test_ir()
+    IO.inspect("a: #{a} b: #{b}")
     pwm(120)
     Process.sleep(60)
     motor_action(motor_ref,@left)
     Process.sleep(60)
     motor_action(motor_ref,@stop)
     Process.sleep(60)
-    if(count > 2 and a == 1) do
+    if(count > 2 and b == 1) do
     else
       find_on_left(motor_ref,count)
     end
