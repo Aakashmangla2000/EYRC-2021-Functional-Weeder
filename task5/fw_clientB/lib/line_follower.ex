@@ -12,6 +12,7 @@ defmodule Task4CClientRobotB.LineFollower do
   @sensor_pins [cs: 5, clock: 25, address: 24, dataout: 23]
   @motor_pins [lf: 12, lb: 13, rf: 20, rb: 21]
   @pwm_pins [enl: 6, enr: 26]
+  @ir_pins [dr: 16, dl: 19]
 
   @ref_atoms [:cs, :clock, :address, :dataout]
   @lf_sensor_data %{sensor0: 0, sensor1: 0, sensor2: 0, sensor3: 0, sensor4: 0, sensor5: 0}
@@ -57,6 +58,24 @@ defmodule Task4CClientRobotB.LineFollower do
     {motor_ref,pwm_ref}
   end
 
+  def pick do
+  end
+
+  def drop do
+  end
+
+
+  def ir_sensors do
+    proximity = test_ir()
+    front  =  Enum.at(proximity, 0)
+    back = Enum.at(proximity, 1)
+    [front,back]
+    IO.puts("front: #{front}")
+    IO.puts("back: #{back}")
+
+  end
+
+
   def pid() do
     Logger.debug("PID")
     Process.sleep(4000)
@@ -77,8 +96,10 @@ defmodule Task4CClientRobotB.LineFollower do
     x = 1
     y = 1
     filter = 1
-    proximity = test_ir()
-    IO.inspect(proximity)
+    [front,back] = ir_sensors()
+
+
+
     # forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
     # pwm(70)
     # IO.puts("right")
@@ -93,6 +114,45 @@ defmodule Task4CClientRobotB.LineFollower do
     # motor_action(motor_ref,@forward)
     # forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
   end
+  def set_pos(motor_ref, count, facing, x, y) do
+    mp = %{:a => 0, :b => 1, :c => 2, :d => 3, :e => 4, :f => 5}
+    y_new =  Map.get(mp, y)
+    if (x < 6  and y_new < 5) do
+      tr = x + (5*y)
+      tl = tr - 1
+      br = tr - 5
+      bl = br - 1
+    end
+
+    [front,back] = ir_sensors()
+    pwm(120)
+    Process.sleep(100)
+    motor_action(motor_ref,@left)
+    Process.sleep(100)
+    motor_action(motor_ref,@stop)
+    Process.sleep(100)
+
+    if (back == 0) do
+    else
+      set_pos(motor_ref, count, facing, x, y)
+    end
+
+  end
+
+  def obs_detect do
+    obs = false
+    [front,back] = ir_sensors()
+    IO.inspect(ir_sensors())
+
+    obs = if front == 0 do
+      true
+    else
+      false
+    end
+    obs
+  end
+
+
   def right(motor_ref,count) do
     count = count + 1
     sensor_vals = test_wlf_sensors()
