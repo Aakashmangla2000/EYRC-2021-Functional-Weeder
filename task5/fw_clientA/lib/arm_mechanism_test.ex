@@ -173,6 +173,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   end
 
   def find_on_right(motor_ref,count) do
+    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     count = count + 1
     [a,b] = test_ir()
     pwm(120)
@@ -188,6 +189,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   end
 
   def find_on_left(motor_ref,count) do
+    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     count = count + 1
     [a,b] = test_ir()
     pwm(120)
