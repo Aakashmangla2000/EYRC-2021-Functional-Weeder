@@ -109,6 +109,9 @@ defmodule Task4CClientRobotA.LineFollower do
     end
     motor_action(motor_ref,@forward)
     forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
+    right(motor_ref,count)
+    forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
+    # left(motor_ref,count)
   end
 
   def right(motor_ref,count) do

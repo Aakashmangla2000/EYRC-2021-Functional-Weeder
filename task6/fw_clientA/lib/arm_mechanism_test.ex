@@ -136,26 +136,35 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   end
 
   def find_on_left(motor_ref,count) do
-    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+    Process.sleep(200)
     count = count + 1
     [a,b] = test_ir()
     IO.inspect("a: #{a} b: #{b} count #{count}")
-    if(a == 1) do
-      pwm(100)
+    if(a == 1 and count < 2) do
       motor_action(motor_ref,@right)
+      pwm(100)
+      Process.sleep(50)
+      motor_action(motor_ref,@stop)
+      Process.sleep(100)
+      find_on_right(motor_ref,count)
     else
       motor_action(motor_ref,@stop)
       Process.sleep(100)
     end
-    [a,b] = test_ir()
-    rep()
-    motor_action(motor_ref,@stop)
-    Process.sleep(100)
   end
 
-  def find() do
+  def find(val) do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
-    find_on_right(motor_ref,0)
+    if(val == 0) do
+      find_on_right(motor_ref,0)
+    else
+      find_on_left(motor_ref,0)
+    end
+    motor_action(motor_ref,@backward)
+    pwm(100)
+    Process.sleep(50)
+    motor_action(motor_ref,@stop)
+    Process.sleep(100)
   end
 
   def find_on_right(motor_ref,count) do
@@ -163,10 +172,10 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     count = count + 1
     [a,b] = test_ir()
     IO.inspect("a: #{a} b: #{b} count #{count}")
-    if(a == 1) do
+    if(a == 1 and count < 2) do
       motor_action(motor_ref,@left)
       pwm(100)
-      Process.sleep(100)
+      Process.sleep(50)
       motor_action(motor_ref,@stop)
       Process.sleep(100)
       find_on_right(motor_ref,count)
