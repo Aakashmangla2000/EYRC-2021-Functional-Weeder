@@ -96,7 +96,18 @@ defmodule Task4CClientRobotB.LineFollower do
     x = 1
     y = 1
     filter = 1
+
+    sensor_vals = test_wlf_sensors()
+    [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+    IO.inspect(sensor_vals)
+    IO.inspect(set_vals(sensor_vals))
+
+    if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
+      find_line()
+    end
+    motor_action(motor_ref,@forward)
     forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
+    # forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
   end
 
   def obs_detect do
@@ -290,7 +301,50 @@ defmodule Task4CClientRobotB.LineFollower do
     motor_action(motor_ref,@stop)
   end
 
-    def set_vals(vals) do
+
+  def find_line() do
+    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+    sensor_vals = test_wlf_sensors()
+    [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+    IO.inspect(set_vals(sensor_vals))
+    if(s1+s2+s3+s4+s5 == 0) do
+      motor_action(motor_ref,@right)
+      pwm(110)
+      Process.sleep(150)
+      motor_action(motor_ref,@stop)
+      sensor_vals = test_wlf_sensors()
+      [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+      IO.inspect(set_vals(sensor_vals))
+      if(s1+s2+s3+s4+s5 == 0) do
+        motor_action(motor_ref,@left)
+        pwm(110)
+        Process.sleep(150)
+        motor_action(motor_ref,@stop)
+      end
+    end
+
+    sensor_vals = test_wlf_sensors()
+    [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+    IO.inspect(set_vals(sensor_vals))
+    if(s1+s2+s3+s4+s5 == 0) do
+      motor_action(motor_ref,@left)
+      pwm(110)
+      Process.sleep(150)
+      motor_action(motor_ref,@stop)
+      sensor_vals = test_wlf_sensors()
+      [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+      IO.inspect(set_vals(sensor_vals))
+      if(s1+s2+s3+s4+s5 == 0) do
+        motor_action(motor_ref,@right)
+        pwm(110)
+        Process.sleep(150)
+        motor_action(motor_ref,@stop)
+      end
+    end
+    Process.sleep(1000)
+  end
+
+  def set_vals(vals) do
     {_s0, vals} = List.pop_at(vals,0)
     # List.replace_at(vals,1,Enum.at(vals,1)+100)
     Enum.map(vals, fn x -> if(x > 850) do

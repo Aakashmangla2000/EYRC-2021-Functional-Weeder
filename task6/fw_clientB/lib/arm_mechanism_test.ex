@@ -23,6 +23,10 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
   @left [0, 1, 0, 1]
   @right [1, 0, 1, 0]
   @stop [0, 0, 0, 0]
+  @leftback [0, 0, 0, 1]
+  @rightback [1, 0, 0, 0]
+  @leftgo [0, 0, 1, 0]
+  @rightgo [0, 1, 0, 0]
 
   @duty_cycles [70]
   @pwm_frequency 50
@@ -50,14 +54,18 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     Process.sleep(1000)
 
     IO.puts("Positioning the arm...")
-    test_servo_a(10)
-    Process.sleep(1000)
-    test_servo_a(0)  #setting arm at height
-    Process.sleep(1000)
+    test_servo_a(40)
+    Process.sleep(500)
+    test_servo_a(30)  #setting arm at height
+    Process.sleep(500)
+    test_servo_a(10)  #setting arm at height
+    Process.sleep(500)
 
     IO.puts("Weeding Begins...")
 
-    test_servo_b(10)
+    test_servo_b(20)
+    Process.sleep(1000)
+    test_servo_b(40)
     Process.sleep(1000)
     test_servo_b(60)
     Process.sleep(1000)
@@ -166,6 +174,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
         end
     end
 
+
   end
 
   def find_on_left(motor_ref,count) do
@@ -177,13 +186,22 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     if(b == 1) do
       pwm(50)
       motor_action(motor_ref,@right)
-      Process.sleep(100)
+      Process.sleep(50)
       motor_action(motor_ref,@stop)
       Process.sleep(100)
       find_on_left(save,count)
     else
       motor_action(motor_ref,@stop)
-      Process.sleep(100)
+      Process.sleep(200)
+      motor_action(motor_ref,@rightgo)
+      Process.sleep(8)
+      motor_action(motor_ref,@stop)
+      Process.sleep(200)
+      # motor_action(motor_ref,@forward)
+      # Process.sleep(1)
+      # motor_action(motor_ref,@stop)
+      # Process.sleep(100)
+
     end
     # [a,b] = test_ir()
     # rep()
@@ -200,13 +218,22 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     if(b == 1) do
       pwm(50)
       motor_action(motor_ref,@left)
-      Process.sleep(100)
+      Process.sleep(50)
       motor_action(motor_ref,@stop)
       Process.sleep(100)
       find_on_right(save, count)
     else
       motor_action(motor_ref,@stop)
+      Process.sleep(200)
+      motor_action(motor_ref,@leftback)
+      Process.sleep(8)
+      motor_action(motor_ref,@stop)
+      Process.sleep(200)
+      motor_action(motor_ref,@forward)
+      Process.sleep(1)
+      motor_action(motor_ref,@stop)
       Process.sleep(100)
+
 
     end
     # [a,b] = test_ir()
