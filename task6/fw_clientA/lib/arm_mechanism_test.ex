@@ -42,7 +42,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     test_servo_b(90)
     Process.sleep(1000)
     IO.puts("Change position...")
-    test_motion
+    # test_motion
   end
 
   def find_plant(robot,goal) do
@@ -153,22 +153,31 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     Process.sleep(100)
   end
 
-  def find_on_right(motor_ref,count) do
+  def find() do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+    find_on_right(motor_ref,0)
+  end
+
+  def find_on_right(motor_ref,count) do
+    Process.sleep(200)
     count = count + 1
     [a,b] = test_ir()
     IO.inspect("a: #{a} b: #{b} count #{count}")
     if(a == 1) do
-      pwm(100)
       motor_action(motor_ref,@left)
+      pwm(100)
+      Process.sleep(100)
+      motor_action(motor_ref,@stop)
+      Process.sleep(100)
+      find_on_right(motor_ref,count)
     else
       motor_action(motor_ref,@stop)
       Process.sleep(100)
     end
-    [a,b] = test_ir()
-    rep()
-    motor_action(motor_ref,@stop)
-    Process.sleep(100)
+    # [a,b] = test_ir()
+    # rep()
+    # motor_action(motor_ref,@stop)
+    # Process.sleep(100)
   end
 
   def rep() do
