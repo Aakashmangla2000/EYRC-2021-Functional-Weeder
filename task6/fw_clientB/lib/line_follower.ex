@@ -268,10 +268,10 @@ defmodule Task4CClientRobotB.LineFollower do
         motor_action(motor_ref,@stop)
         Process.sleep(100)
         pwm(100)
-        motor_action(motor_ref,@backward)
-        Process.sleep(200)
-        motor_action(motor_ref,@stop)
-        Process.sleep(1000)
+        # motor_action(motor_ref,@backward)
+        # Process.sleep(200)
+        # motor_action(motor_ref,@stop)
+        # Process.sleep(1000)
 
         {nodes,count}
     else
