@@ -46,30 +46,36 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
   def weeding do
     Process.sleep(5000)
     IO.puts("Opening the Claws...")
-    test_servo_a(0)  #opening claws
+    test_servo_b(0)  #opening claws
     Process.sleep(1000)
 
     IO.puts("Positioning the arm...")
-    test_servo_b(45)  #setting arm at height
+    test_servo_a(10)
+    Process.sleep(1000)
+    test_servo_a(0)  #setting arm at height
     Process.sleep(1000)
 
     IO.puts("Weeding Begins...")
-    test_servo_b(20)
+
+    test_servo_b(30)
     Process.sleep(1000)
-    test_servo_a(180)
+    test_servo_b(60)
     Process.sleep(1000)
-    test_servo_b(50)
+    test_servo_b(90)
     Process.sleep(1000)
+    test_servo_a(40)
+    Process.sleep(1000)
+
   end
 
    def deposition do
     IO.puts("Weed Depositing...")
     Process.sleep(1000)
-    test_servo_b(30)
+    test_servo_a(30)
     Process.sleep(1000)
-    test_servo_a(00)
+    test_servo_b(0)
     Process.sleep(1000)
-    test_servo_b(50)
+    test_servo_a(40)
     IO.puts("Weeding Ends...")
    end
 
@@ -167,7 +173,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     [a,b] = test_ir()
     IO.inspect("a: #{a} b: #{b} count #{count}")
     if(b == 1) do
-      pwm(100)
+      pwm(70)
       motor_action(motor_ref,@right)
     else
       motor_action(motor_ref,@stop)
@@ -185,11 +191,15 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     [a,b] = test_ir()
     IO.inspect("a: #{a} b: #{b} count #{count}")
     if(b == 1) do
-      pwm(100)
+      pwm(50)
       motor_action(motor_ref,@left)
+      Process.sleep(100)
+      motor_action(motor_ref,@stop)
+      Process.sleep(100)
     else
       motor_action(motor_ref,@stop)
       Process.sleep(100)
+
     end
     [a,b] = test_ir()
     rep()
