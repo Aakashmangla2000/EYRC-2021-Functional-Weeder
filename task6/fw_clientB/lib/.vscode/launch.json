@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [
+        ""
+      ],
+      "stopAtEntry": false,
+      "cwd": "/run/user/1000/gvfs/sftp:host=raspberrypi.local/home/pi/Eyantra/EYRC-2021-Functional-Weeder/task6/fw_clientB/lib",
+      "environment": [],
+      "program": "/run/user/1000/gvfs/sftp:host=raspberrypi.local/home/pi/Eyantra/EYRC-2021-Functional-Weeder/task6/fw_clientB/lib/build/Debug/outDebug",
+      "internalConsoleOptions": "openOnSessionStart",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "externalConsole": false,
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
