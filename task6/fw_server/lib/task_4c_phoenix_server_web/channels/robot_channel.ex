@@ -106,6 +106,8 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
       x
     end)
 
+    IO.puts(y)
+
     {_,y} = List.pop_at(y,0)
     sow = Enum.map(y,fn [a,_b] ->
       a
