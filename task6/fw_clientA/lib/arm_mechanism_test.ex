@@ -185,10 +185,11 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   end
 
   def find_on_left(motor_ref,count) do
+    IO.puts("find on left")
     Process.sleep(200)
     count = count + 1
     [a,b] = test_ir()
-    IO.inspect("a: #{a} b: #{b} count #{count}")
+    # IO.inspect("a: #{a} b: #{b} count #{count}")
     if(a == 1 and count < 2) do
       motor_action(motor_ref,@right)
       pwm(100)
@@ -217,10 +218,11 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   end
 
   def find_on_right(motor_ref,count) do
+    IO.puts("find on right")
     Process.sleep(200)
     count = count + 1
     [a,b] = test_ir()
-    IO.inspect("a: #{a} b: #{b} count #{count}")
+    # IO.inspect("a: #{a} b: #{b} count #{count}")
     if(a == 1 and count < 2) do
       motor_action(motor_ref,@left)
       pwm(100)

@@ -116,6 +116,7 @@ defmodule Task4CClientRobotA.LineFollower do
   end
 
   def right(motor_ref,count) do
+    IO.puts("going right")
     count = count + 1
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
@@ -132,6 +133,7 @@ defmodule Task4CClientRobotA.LineFollower do
   end
 
   def left(motor_ref,count) do
+    IO.puts("going left")
     count = count + 1
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
