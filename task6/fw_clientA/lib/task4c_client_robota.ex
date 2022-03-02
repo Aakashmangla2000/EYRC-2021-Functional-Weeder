@@ -238,7 +238,9 @@ defmodule Task4CClientRobotA do
         Task4CClientRobotA.rep(motor_ref,goal,dir,q,visited,robot,goal_x,goal_y,channel,len)
       end
       #sowing action to server
-      # Task4CClientRobotA.ArmMechanismTest.sowing(robot, channel, goal)
+      IO.puts("Sowing the seed")
+      robot = Task4CClientRobotA.ArmMechanismTest.seeding(robot,goal)
+      Task4CClientRobotA.PhoenixSocketClient.sowing(channel,goal)
       {robot}
   end
 

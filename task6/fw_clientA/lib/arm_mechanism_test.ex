@@ -33,106 +33,155 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     ir_values = Enum.map(ir_ref,fn {_, ref_no} -> GPIO.read(ref_no) end)
   end
 
-  def seeding do
-    Process.sleep(5000)
-    IO.puts("Getting the seed...")
-    test_servo_b(0)
+  def seeding(robot,goal) do
+    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+    {robot,dir} = find_plant(robot,goal)
+    motor_action(motor_ref,@backward)
+    pwm(100)
+    Process.sleep(50)
+    motor_action(motor_ref,@stop)
+    Process.sleep(100)
+
+    change_angle2(20)
     Process.sleep(1000)
-    IO.puts("Dropping the seed...")
-    test_servo_b(90)
-    Process.sleep(1000)
-    IO.puts("Change position...")
-    # test_motion
+    change_angle(120)
+
+    motor_action(motor_ref,@forward)
+    pwm(100)
+    Process.sleep(50)
+    motor_action(motor_ref,@stop)
+    Process.sleep(100)
+    if(dir == 0) do
+      Task4CClientRobotA.LineFollower.left(motor_ref,1)
+    else
+      Task4CClientRobotA.LineFollower.right(motor_ref,1)
+    end
+    robot
+  end
+
+  def change_angle(angle) do
+    if(angle > 0) do
+      test_servo_b(angle-4)
+      change_angle(angle-4)
+    else
+    end
+  end
+
+  def change_angle2(angle) do
+    if(angle < 120) do
+      test_servo_b(angle+4)
+      change_angle2(angle+4)
+    else
+    end
   end
 
   def find_plant(robot,goal) do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     p3 = %{:a => 0, :b => 1, :c => 2, :d => 3, :e => 4, :f => 5}
     Process.sleep(1000)
+    goal = String.to_integer(goal)
+
+    IO.puts("Find plant")
+    IO.inspect(goal)
+    IO.inspect(robot.x)
+    IO.inspect(robot.y)
+    IO.inspect(Map.get(p3,robot.y))
 
     val = cond do
       robot.x == 6 ->
         cond do
-          goal == robot.x + 5*Map.get(p3,robot.y) - 1 -> 1
-          goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
+          goal == (robot.x + (5*Map.get(p3,robot.y)) - 1) -> 1
+          goal == (robot.x + (5*Map.get(p3,robot.y)) - 6) -> 3
         end
       robot.y == :f ->
         cond do
-          goal == robot.x + 5*Map.get(p3,robot.y) - 5 -> 4
-          goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
+          goal == (robot.x + (5*Map.get(p3,robot.y)) - 5) -> 4
+          goal == (robot.x + (5*Map.get(p3,robot.y)) - 6) -> 3
         end
       robot.x == 6 and robot.y == :f ->
         cond do
-          goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
+          goal == (robot.x + (5*Map.get(p3,robot.y)) - 6) -> 3
         end
       true ->
         cond do
-          goal == robot.x + 5*Map.get(p3,robot.y) - 1 -> 1
-          goal == robot.x + 5*Map.get(p3,robot.y) ->     2
-          goal == robot.x + 5*Map.get(p3,robot.y) - 6 -> 3
-          goal == robot.x + 5*Map.get(p3,robot.y) - 5 -> 4
+          goal == (robot.x + (5*Map.get(p3,robot.y)) - 1) -> 1
+          goal == (robot.x + (5*Map.get(p3,robot.y)) ) ->     2
+          goal == (robot.x + (5*Map.get(p3,robot.y)) - 6) -> 3
+          goal == (robot.x + (5*Map.get(p3,robot.y)) - 5) -> 4
         end
     end
 
-    cond do
+    {robot,dir} = cond do
       robot.facing == :north ->
         cond do
           val == 1 ->
-            Task4CClientRobotA.LineFollower.right(motor_ref,0)
+            robot = Task4CClientRobotA.right(robot,motor_ref)
             find_on_left(motor_ref,0)
+            {robot,0}
           val == 2 ->
-            Task4CClientRobotA.LineFollower.left(motor_ref,0)
+            robot = Task4CClientRobotA.left(robot,motor_ref)
             find_on_right(motor_ref,0)
+            {robot,1}
           val == 3 ->
             find_on_left(motor_ref,0)
+            {robot,0}
           val == 4 ->
             find_on_right(motor_ref,0)
+            {robot,1}
         end
       robot.facing == :east ->
         cond do
           val == 1 ->
             find_on_left(motor_ref,0)
+            {robot,0}
           val == 2 ->
-            Task4CClientRobotA.LineFollower.right(motor_ref,0)
+            robot = Task4CClientRobotA.right(robot,motor_ref)
             find_on_left(motor_ref,0)
+            {robot,0}
           val == 3 ->
             find_on_right(motor_ref,0)
+            {robot,1}
           val == 4 ->
-            Task4CClientRobotA.LineFollower.left(motor_ref,0)
+            robot = Task4CClientRobotA.left(robot,motor_ref)
             find_on_right(motor_ref,0)
+            {robot,1}
         end
       robot.facing == :west ->
         cond do
           val == 1 ->
-            Task4CClientRobotA.LineFollower.left(motor_ref,0)
+            robot = Task4CClientRobotA.left(robot,motor_ref)
             find_on_right(motor_ref,0)
+            {robot,1}
           val == 2 ->
             find_on_right(motor_ref,0)
+            {robot,1}
           val == 3 ->
-            Task4CClientRobotA.LineFollower.right(motor_ref,0)
+            robot = Task4CClientRobotA.right(robot,motor_ref)
             find_on_left(motor_ref,0)
+            {robot,0}
           val == 4 ->
             find_on_left(motor_ref,0)
+            {robot,0}
         end
       robot.facing == :south ->
         cond do
           val == 1 ->
             find_on_right(motor_ref,0)
+            {robot,1}
           val == 2 ->
             find_on_left(motor_ref,0)
+            {robot,0}
           val == 3 ->
-            Task4CClientRobotA.LineFollower.left(motor_ref,0)
+            robot = Task4CClientRobotA.left(robot,motor_ref)
             find_on_right(motor_ref,0)
+            {robot,1}
           val == 4 ->
-            Task4CClientRobotA.LineFollower.right(motor_ref,0)
+            robot = Task4CClientRobotA.right(robot,motor_ref)
             find_on_left(motor_ref,0)
+            {robot,0}
         end
     end
-  end
-
-  def sowing(robot, channel, goal) do
-    find_plant(robot,goal)
-    seeding()
+    {robot,dir}
   end
 
   def find_on_left(motor_ref,count) do
@@ -183,10 +232,6 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
       motor_action(motor_ref,@stop)
       Process.sleep(100)
     end
-    # [a,b] = test_ir()
-    # rep()
-    # motor_action(motor_ref,@stop)
-    # Process.sleep(100)
   end
 
   def rep() do
