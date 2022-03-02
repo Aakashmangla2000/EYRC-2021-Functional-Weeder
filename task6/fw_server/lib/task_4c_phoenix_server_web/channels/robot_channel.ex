@@ -178,12 +178,25 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     {:reply, {:ok, socket.assigns[:timer_tick]}, socket}
   end
 
+  def handle_in("sowing", message, socket) do
+    IO.inspect(message)
+    {:reply, {:ok, true}, socket}
+  end
+
+   def handle_in("weeding", message, socket) do
+    {:reply, {:ok, true}, socket}
+  end
+
+   def handle_in("deposition", message, socket) do
+    {:reply, {:ok, true}, socket}
+  end
+
   #########################################
   ## define callback functions as needed ##
   #########################################
 
   def kill_bots() do
-    y = File.stream!("Plant_Positions.csv")
+    y = File.stream!("Robots_handle.csv")
       |> CSV.decode
       |> Enum.map(fn {_,x} ->
         x
@@ -191,7 +204,6 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
 
     {_,y} = List.pop_at(y,0)
     # count = Enum.count(y)
-
     vals = Enum.map(y,fn [_a,b,c,d] ->
      %{bot: b, stop: c, start: d}
     end)

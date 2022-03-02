@@ -48,7 +48,15 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
     ~H"""
     <div id="dashboard-container">
 
+    <div id="deposition2">
+          <div> Deposition Zone </div>
+        </div>
+        <br><br>
       <div class="grid-container">
+       <div id="deposition1">
+          <div> Deposition Zone </div>
+        </div>
+
         <div id="alphabets">
           <div> A </div>
           <div> B </div>
@@ -98,6 +106,48 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
           <div class="robot-container" style={"bottom: #{@bottom_robotB}px; left: #{@left_robotB}px"}>
             <img id="robotB" src={"/images/#{@img_robotB}"} style="height:70px;">
           </div>
+
+          <%= for i <- 0..4 do %>
+            <div class="plant" style={"bottom: 660px; left: #{80+i*150}px"}>
+              <img id="plant" src={"/images/plant.png"} style="height:70px;">
+            </div>
+          <% end %>
+
+          <%= for i <- 0..4 do %>
+            <div class="plant" style={"bottom: 510px; left: #{80+i*150}px"}>
+              <img id="plant" src={"/images/plant.png"} style="height:70px;">
+            </div>
+          <% end %>
+
+          <%= for i <- 0..4 do %>
+            <div class="plant" style={"bottom: 360px; left: #{80+i*150}px"}>
+              <img id="plant" src={"/images/plant.png"} style="height:70px;">
+            </div>
+          <% end %>
+
+          <%= for i <- 0..4 do %>
+            <div class="plant" style={"bottom: 210px; left: #{80+i*150}px"}>
+              <img id="plant" src={"/images/plant.png"} style="height:70px;">
+            </div>
+          <% end %>
+
+          <%= for i <- 0..4 do %>
+            <div class="plant" style={"bottom: 60px; left: #{80+i*150}px"}>
+              <img id="plant" src={"/images/plant.png"} style="height:70px;">
+            </div>
+          <% end %>
+
+          <%= for i <- @robotA_goals do %>
+              <div class="plant" style={"bottom: #{(div(String.to_integer(i)-1,5)*150)+60}px; left: #{(rem(String.to_integer(i)+5,5)-1)*150+80}px"}>
+              <img id="plant" src={"/images/red_plant.jpg"} style="height:70px;">
+            </div>
+          <% end %>
+
+          <%= for i <- @robotB_goals do %>
+              <div class="plant" style={"bottom: #{(div(String.to_integer(i)-1,5)*150)+60}px; left: #{(rem(String.to_integer(i)+4,5))*150+80}px"}>
+              <img id="plant" src={"/images/weed.jpeg"} style="height:70px;">
+            </div>
+          <% end %>
 
         </div>
 
