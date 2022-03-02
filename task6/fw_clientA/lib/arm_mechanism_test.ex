@@ -34,20 +34,31 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   end
 
   def seeding(motor_ref,robot,goal) do
+    robot2 = robot
     {robot,dir} = find_plant(robot,goal,motor_ref)
     motor_action(motor_ref,@backward)
     pwm(100)
-    Process.sleep(50)
+    if(robot == robot2) do
+      Process.sleep(100)
+    else
+      IO.puts("boop")
+      Process.sleep(200)
+    end
     motor_action(motor_ref,@stop)
     Process.sleep(100)
 
     change_angle2(20)
     Process.sleep(1000)
-    change_angle(120)
+    change_angle(140)
 
     motor_action(motor_ref,@forward)
     pwm(100)
-    Process.sleep(50)
+    if(robot == robot2) do
+      Process.sleep(50)
+    else
+      IO.puts("boop2")
+      Process.sleep(150)
+    end
     motor_action(motor_ref,@stop)
     Process.sleep(100)
     if(dir == 0) do
@@ -67,7 +78,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   end
 
   def change_angle2(angle) do
-    if(angle < 120) do
+    if(angle < 140) do
       test_servo_b(angle+4)
       change_angle2(angle+4)
     else
@@ -188,13 +199,13 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     count = count + 1
     [a,b] = test_ir()
     # IO.inspect("a: #{a} b: #{b} count #{count}")
-    if(a == 1 and count < 2) do
+    if(a == 1 or count < 2) do
       motor_action(motor_ref,@right)
       pwm(100)
-      Process.sleep(50)
+      Process.sleep(10)
       motor_action(motor_ref,@stop)
       Process.sleep(100)
-      find_on_right(motor_ref,count)
+      find_on_left(motor_ref,count)
     else
       motor_action(motor_ref,@stop)
       Process.sleep(100)
@@ -210,7 +221,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     end
     motor_action(motor_ref,@backward)
     pwm(100)
-    Process.sleep(50)
+    Process.sleep(10)
     motor_action(motor_ref,@stop)
     Process.sleep(100)
   end
@@ -221,7 +232,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     count = count + 1
     [a,b] = test_ir()
     # IO.inspect("a: #{a} b: #{b} count #{count}")
-    if(a == 1 and count < 2) do
+    if(a == 1 or count < 2) do
       motor_action(motor_ref,@left)
       pwm(100)
       Process.sleep(50)
