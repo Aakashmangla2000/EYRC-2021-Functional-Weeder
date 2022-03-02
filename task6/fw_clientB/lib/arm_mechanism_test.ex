@@ -83,7 +83,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     Process.sleep(1000)
     test_servo_b(0)
     Process.sleep(1000)
-    test_servo_a(40)
+    test_servo_a(60)
     IO.puts("Weeding Ends...")
    end
 
@@ -176,29 +176,41 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
 
 
   end
-
-  def find_on_left(motor_ref,count) do
+  def setpinsr(count,motor_ref) do
     save = motor_ref
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+    find_on_right(motor_ref,count)
+
+  end
+  def setpinsl(count,motor_ref) do
+    save = motor_ref
+    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+    find_on_left(motor_ref,count)
+
+  end
+
+
+  def find_on_left(motor_ref,count) do
+    Process.sleep(200)
     count = count + 1
     [a,b] = test_ir()
     IO.inspect("a: #{a} b: #{b} count #{count}")
     if(b == 1) do
-      pwm(50)
       motor_action(motor_ref,@right)
+      pwm(50)
       Process.sleep(50)
       motor_action(motor_ref,@stop)
-      Process.sleep(100)
-      find_on_left(save,count)
+      Process.sleep(200)
+      find_on_left(motor_ref,count)
     else
       motor_action(motor_ref,@stop)
       Process.sleep(200)
-      motor_action(motor_ref,@rightgo)
-      Process.sleep(8)
+      motor_action(motor_ref,@leftback)
+      Process.sleep(10)
       motor_action(motor_ref,@stop)
       Process.sleep(200)
       # motor_action(motor_ref,@forward)
-      # Process.sleep(1)
+      # Process.sleep(5)
       # motor_action(motor_ref,@stop)
       # Process.sleep(100)
 
@@ -206,31 +218,32 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     # [a,b] = test_ir()
     # rep()
     motor_action(motor_ref,@stop)
-    Process.sleep(50)
+    # Process.sleep(50)
   end
 
+
+
   def find_on_right(motor_ref,count) do
-    save = motor_ref
-    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+    Process.sleep(200)
     count = count + 1
     [a,b] = test_ir()
     IO.inspect("a: #{a} b: #{b} count #{count}")
     if(b == 1) do
-      pwm(50)
       motor_action(motor_ref,@left)
+      pwm(50)
       Process.sleep(50)
       motor_action(motor_ref,@stop)
-      Process.sleep(100)
-      find_on_right(save, count)
+      Process.sleep(200)
+      find_on_right(motor_ref,count)
     else
       motor_action(motor_ref,@stop)
       Process.sleep(200)
       motor_action(motor_ref,@leftback)
-      Process.sleep(8)
+      Process.sleep(5)
       motor_action(motor_ref,@stop)
       Process.sleep(200)
       motor_action(motor_ref,@forward)
-      Process.sleep(1)
+      Process.sleep(5)
       motor_action(motor_ref,@stop)
       Process.sleep(100)
 
@@ -239,7 +252,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     # [a,b] = test_ir()
     # rep()
     motor_action(motor_ref,@stop)
-    Process.sleep(50)
+    # Process.sleep(50)
   end
 
   def rep() do
