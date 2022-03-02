@@ -77,7 +77,7 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
   ######################################################
 
   def timer(channel) do
-    time = PhoenixClient.Channel.push(channel,"time",%{"value" => nil},5000)
+    {:ok, time} = PhoenixClient.Channel.push(channel,"time",%{"value" => nil},5000)
     time
   end
 
