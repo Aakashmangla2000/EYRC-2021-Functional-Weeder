@@ -28,7 +28,7 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
     socket = assign(socket, :robotB_goals, [])
 
     socket = assign(socket, :obstacle_pos, MapSet.new())
-    socket = assign(socket, :timer_tick, 180)
+    socket = assign(socket, :timer_tick, 300)
 
     {:ok,socket}
 

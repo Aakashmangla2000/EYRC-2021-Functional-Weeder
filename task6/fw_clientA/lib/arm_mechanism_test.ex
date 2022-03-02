@@ -33,9 +33,8 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     ir_values = Enum.map(ir_ref,fn {_, ref_no} -> GPIO.read(ref_no) end)
   end
 
-  def seeding(robot,goal) do
-    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
-    {robot,dir} = find_plant(robot,goal)
+  def seeding(motor_ref,robot,goal) do
+    {robot,dir} = find_plant(robot,goal,motor_ref)
     motor_action(motor_ref,@backward)
     pwm(100)
     Process.sleep(50)
@@ -75,8 +74,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     end
   end
 
-  def find_plant(robot,goal) do
-    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+  def find_plant(robot,goal,motor_ref) do
     p3 = %{:a => 0, :b => 1, :c => 2, :d => 3, :e => 4, :f => 5}
     Process.sleep(1000)
     goal = String.to_integer(goal)

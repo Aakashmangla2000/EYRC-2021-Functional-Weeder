@@ -239,8 +239,9 @@ defmodule Task4CClientRobotA do
       end
       #sowing action to server
       IO.puts("Sowing the seed")
-      robot = Task4CClientRobotA.ArmMechanismTest.seeding(robot,goal)
-      Task4CClientRobotA.PhoenixSocketClient.sowing(channel,goal)
+      Task4CClientRobotA.PhoenixSocketClient.sowing2(channel,String.to_integer(goal))
+      robot = Task4CClientRobotA.ArmMechanismTest.seeding(motor_ref,robot,goal)
+      Task4CClientRobotA.PhoenixSocketClient.sowing(channel,String.to_integer(goal))
       {robot}
   end
 
@@ -999,7 +1000,7 @@ end
   def move(%Task4CClientRobotA.Position{x: _, y: y, facing: :north} = robot, motor_ref) when y < @table_top_y do
     maximum = 110
     # Task4CClientRobotA.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
-    Task4CClientRobotA.LineFollower.pid
+    Task4CClientRobotA.LineFollower.pid(motor_ref)
     %Task4CClientRobotA.Position{ robot | y: Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) + 1 end) |> elem(0) }
   end
 
@@ -1009,7 +1010,7 @@ end
   def move(%Task4CClientRobotA.Position{x: x, y: _, facing: :east} = robot, motor_ref) when x < @table_top_x do
     maximum = 110
     # Task4CClientRobotA.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
-    Task4CClientRobotA.LineFollower.pid
+    Task4CClientRobotA.LineFollower.pid(motor_ref)
     %Task4CClientRobotA.Position{robot | x: x + 1}
   end
 
@@ -1019,7 +1020,7 @@ end
   def move(%Task4CClientRobotA.Position{x: _, y: y, facing: :south} = robot, motor_ref) when y > :a do
     maximum = 110
     # Task4CClientRobotA.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
-    Task4CClientRobotA.LineFollower.pid
+    Task4CClientRobotA.LineFollower.pid(motor_ref)
     %Task4CClientRobotA.Position{ robot | y: Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) - 1 end) |> elem(0)}
   end
 
@@ -1029,7 +1030,7 @@ end
   def move(%Task4CClientRobotA.Position{x: x, y: _, facing: :west} = robot, motor_ref) when x > 1 do
     maximum = 110
     # Task4CClientRobotA.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
-    Task4CClientRobotA.LineFollower.pid
+    Task4CClientRobotA.LineFollower.pid(motor_ref)
     %Task4CClientRobotA.Position{robot | x: x - 1}
   end
 

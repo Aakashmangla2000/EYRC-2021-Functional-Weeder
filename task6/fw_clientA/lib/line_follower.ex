@@ -80,10 +80,10 @@ defmodule Task4CClientRobotA.LineFollower do
     {motor_ref,pwm_ref}
   end
 
-  def pid() do
+  def pid(motor_ref) do
     Logger.debug("Going Forward")
     # Process.sleep(4000)
-    {motor_ref,pwm_ref} = open_motor_pwm_pins()
+    # {motor_ref,pwm_ref} = open_motor_pwm_pins()
 
     maximum = 110;
     integral = 0;
@@ -106,7 +106,7 @@ defmodule Task4CClientRobotA.LineFollower do
     # IO.inspect(set_vals(sensor_vals))
 
     if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
-      find_line()
+      find_line(motor_ref)
     end
     motor_action(motor_ref,@forward)
     forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
@@ -268,8 +268,8 @@ defmodule Task4CClientRobotA.LineFollower do
     motor_action(motor_ref,@stop)
   end
 
-  def find_line() do
-    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+  def find_line(motor_ref) do
+    # motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
     # IO.inspect(set_vals(sensor_vals))

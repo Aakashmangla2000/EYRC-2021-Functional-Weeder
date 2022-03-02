@@ -64,7 +64,10 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
       send_obstacle_status(channel,robot)
     end
 
+    time = timer(channel)
+
     IO.puts("Obstacle ahead: #{is_obs_ahead}")
+    IO.puts("Time: #{time}")
     IO.puts("Robot position: #{x} #{y}")
     is_obs_ahead
   end
@@ -72,6 +75,11 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
   ######################################################
   ## You may create extra helper functions as needed. ##
   ######################################################
+
+  def timer(channel) do
+    time = PhoenixClient.Channel.push(channel,"time",%{"value" => nil},5000)
+    time
+  end
 
   def get_start(channel) do
     tup = PhoenixClient.Channel.push(channel,"start_pos",%{"client" => "robot_A"},5000)
@@ -95,6 +103,10 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
 
   def send_obstacle_status(channel, %Task4CClientRobotA.Position{x: x, y: y, facing: facing} = _obs) do
     _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 2, "sender" => "A", "value" => %{"x" => x, "y" => y, "face" => facing}},5000)
+  end
+
+  def sowing2(channel, val) do
+    _res = PhoenixClient.Channel.push(channel,"sowing",%{"sender" => "A", "value" => val},5000)
   end
 
   def sowing(channel, val) do
