@@ -64,7 +64,8 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
       send_obstacle_status(channel,robot)
     end
 
-    # IO.inspect(rep)
+    IO.puts("Obstacle ahead: #{is_obs_ahead}")
+    IO.puts("Robot position: #{x} #{y}")
     is_obs_ahead
   end
 

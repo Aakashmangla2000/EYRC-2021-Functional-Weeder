@@ -54,15 +54,15 @@ defmodule Task4CClientRobotA.LineFollower do
     proximity = test_ir()
     front  =  Enum.at(proximity, 0)
     back = Enum.at(proximity, 1)
+    # IO.puts("front: #{front}")
+    # IO.puts("back: #{back}")
     [front,back]
-    IO.puts("front: #{front}")
-    IO.puts("back: #{back}")
   end
 
   def obs_detect do
     obs = false
     [front,back] = ir_sensors()
-    IO.inspect(ir_sensors())
+    # IO.inspect(ir_sensors())
 
     obs = if front == 0 do
       true
@@ -70,6 +70,7 @@ defmodule Task4CClientRobotA.LineFollower do
       false
     end
     obs
+    false
   end
 
   def open_motor_pwm_pins() do
@@ -80,7 +81,7 @@ defmodule Task4CClientRobotA.LineFollower do
   end
 
   def pid() do
-    Logger.debug("PID")
+    Logger.debug("Going Forward")
     # Process.sleep(4000)
     {motor_ref,pwm_ref} = open_motor_pwm_pins()
 
@@ -101,16 +102,16 @@ defmodule Task4CClientRobotA.LineFollower do
 
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    IO.inspect(sensor_vals)
-    IO.inspect(set_vals(sensor_vals))
+    # IO.inspect(sensor_vals)
+    # IO.inspect(set_vals(sensor_vals))
 
     if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
       find_line()
     end
     motor_action(motor_ref,@forward)
     forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    right(motor_ref,count)
-    forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
+    # right(motor_ref,count)
+    # forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
     # left(motor_ref,count)
   end
 
@@ -189,18 +190,18 @@ defmodule Task4CClientRobotA.LineFollower do
   end
 
   def forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional) when stop == 0 do
-    IO.puts("#{count}")
+    # IO.puts("#{count}")
     count = count + 1
 
     #Simple ReadLine
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    IO.inspect(sensor_vals)
-    IO.inspect(set_vals(sensor_vals))
+    # IO.inspect(sensor_vals)
+    # IO.inspect(set_vals(sensor_vals))
     position = read_line2(sensor_vals)
 
     [s1,s2,s3,s4,s5] = if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
-      IO.puts("zero")
+      # IO.puts("zero")
       # motor_action(motor_ref,@forward)
       sensor_vals = test_wlf_sensors()
       set_vals(sensor_vals)
@@ -211,7 +212,7 @@ defmodule Task4CClientRobotA.LineFollower do
     {nodes,count} = if(count > 12 or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0)) do
         nodes = nodes + 1
         count = 1
-        IO.puts("Node")
+        # IO.puts("Node")
         motor_action(motor_ref,@stop)
         Process.sleep(2000)
         pwm(110)
@@ -269,7 +270,7 @@ defmodule Task4CClientRobotA.LineFollower do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    IO.inspect(set_vals(sensor_vals))
+    # IO.inspect(set_vals(sensor_vals))
     if(s1+s2+s3+s4+s5 == 0) do
       motor_action(motor_ref,@right)
       pwm(110)
@@ -277,7 +278,7 @@ defmodule Task4CClientRobotA.LineFollower do
       motor_action(motor_ref,@stop)
       sensor_vals = test_wlf_sensors()
       [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-      IO.inspect(set_vals(sensor_vals))
+      # IO.inspect(set_vals(sensor_vals))
       if(s1+s2+s3+s4+s5 == 0) do
         motor_action(motor_ref,@left)
         pwm(110)
@@ -288,7 +289,7 @@ defmodule Task4CClientRobotA.LineFollower do
 
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    IO.inspect(set_vals(sensor_vals))
+    # IO.inspect(set_vals(sensor_vals))
     if(s1+s2+s3+s4+s5 == 0) do
       motor_action(motor_ref,@left)
       pwm(110)
@@ -296,7 +297,7 @@ defmodule Task4CClientRobotA.LineFollower do
       motor_action(motor_ref,@stop)
       sensor_vals = test_wlf_sensors()
       [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-      IO.inspect(set_vals(sensor_vals))
+      # IO.inspect(set_vals(sensor_vals))
       if(s1+s2+s3+s4+s5 == 0) do
         motor_action(motor_ref,@right)
         pwm(110)
