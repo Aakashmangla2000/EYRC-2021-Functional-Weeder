@@ -20,12 +20,15 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
     socket = assign(socket, :left_robotA, 0)
     socket = assign(socket, :robotA_start, "")
     socket = assign(socket, :robotA_goals, [])
+    socket = assign(socket, :seeds, [])
+    socket = assign(socket, :depos, [])
 
     socket = assign(socket, :img_robotB, "robot_facing_south_b.png")
     socket = assign(socket, :bottom_robotB, 750)
     socket = assign(socket, :left_robotB, 750)
     socket = assign(socket, :robotB_start, "")
     socket = assign(socket, :robotB_goals, [])
+    socket = assign(socket, :weeds, [])
 
     socket = assign(socket, :obstacle_pos, MapSet.new())
     socket = assign(socket, :timer_tick, 300)
@@ -107,6 +110,12 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
             <img id="robotB" src={"/images/#{@img_robotB}"} style="height:70px;">
           </div>
 
+          <%= for i <- @depos do %>
+            <div class="plant2" style={"bottom: 760px; left: #{80+i*150}px"}>
+              <img id="plant2" src={"/images/weed.jpeg"} style="height:35px;">
+            </div>
+          <% end %>
+
           <%= for i <- 0..4 do %>
             <div class="plant" style={"bottom: 660px; left: #{80+i*150}px"}>
               <img id="plant" src={"/images/plant.png"} style="height:70px;">
@@ -137,15 +146,21 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
             </div>
           <% end %>
 
-          <%= for i <- @robotA_goals do %>
+          <%= for i <- @seeds do %>
               <div class="plant" style={"bottom: #{(div(String.to_integer(i)-1,5)*150)+60}px; left: #{(rem(String.to_integer(i)+5,5)-1)*150+80}px"}>
-              <img id="plant" src={"/images/red_plant.jpg"} style="height:70px;">
+              <img id="plant" src={"/images/seed.png"} style="height:70px;">
             </div>
           <% end %>
 
           <%= for i <- @robotB_goals do %>
               <div class="plant" style={"bottom: #{(div(String.to_integer(i)-1,5)*150)+60}px; left: #{(rem(String.to_integer(i)+4,5))*150+80}px"}>
               <img id="plant" src={"/images/weed.jpeg"} style="height:70px;">
+            </div>
+          <% end %>
+
+          <%= for i <- @weeds do %>
+              <div class="plant" style={"bottom: #{(div(String.to_integer(i)-1,5)*150)+60}px; left: #{(rem(String.to_integer(i)+4,5))*150+80}px"}>
+              <img id="plant" src={"/images/soil.png"} style="height:70px;">
             </div>
           <% end %>
 
@@ -264,6 +279,21 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
 
     {:noreply, socket}
 
+  end
+
+  def handle_info(%{sow: sow} = _data, socket) do
+    socket = assign(socket, :seeds,socket.assigns[:seeds]++[sow])
+    {:noreply, socket}
+  end
+
+  def handle_info(%{weed: weed} = _data, socket) do
+    socket = assign(socket, :weeds,socket.assigns[:weeds]++[weed])
+    {:noreply, socket}
+  end
+
+  def handle_info(%{depos: depos} = _data, socket) do
+    socket = assign(socket, :depos,depos)
+    {:noreply, socket}
   end
 
   def handle_info(%{sow: sow, weed: weed} = _data, socket) do

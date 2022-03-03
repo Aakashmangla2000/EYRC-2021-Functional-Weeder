@@ -180,14 +180,17 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
 
   def handle_in("sowing", message, socket) do
     IO.inspect(message)
+    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{sow: message})
     {:reply, {:ok, true}, socket}
   end
 
    def handle_in("weeding", message, socket) do
+    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{weed: message})
     {:reply, {:ok, true}, socket}
   end
 
    def handle_in("deposition", message, socket) do
+    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{depos: message})
     {:reply, {:ok, true}, socket}
   end
 

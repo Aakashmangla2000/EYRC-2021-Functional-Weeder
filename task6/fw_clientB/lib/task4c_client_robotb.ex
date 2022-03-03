@@ -220,6 +220,7 @@ defmodule Task4CClientRobotB do
         goal_yy = Map.get(mpp, goal_y)
 
         #weeding
+        Task4CClientRobotB.PhoenixSocketClient.weeding2(channel,String.to_integer(goal))
         robot = Task4CClientRobotB.ArmMechanismTest.weeding(motor_ref,robot, goal)
         Task4CClientRobotB.PhoenixSocketClient.weeding(channel,String.to_integer(goal))
 
@@ -237,6 +238,7 @@ defmodule Task4CClientRobotB do
             get_value(motor_ref,goal,robot,6, goal_y,channel)
         end
         Task4CClientRobotB.ArmMechanismTest.deposition(motor_ref,robot, goal)
+        Task4CClientRobotB.PhoenixSocketClient.deposition2(channel,String.to_integer(goal))
 
         {deposited,robot,goal_locs,count}
       end

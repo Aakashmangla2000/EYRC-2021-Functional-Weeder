@@ -122,8 +122,16 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
     _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 4, "sender" => "B", "value" => val},10000)
   end
 
+  def weeding2(channel, val) do
+    _res = PhoenixClient.Channel.push(channel,"weeding",%{"sender" => "B", "value" => val},5000)
+  end
+
    def deposition(channel, ls) do
     _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 5, "sender" => "B", "value" => ls},10000)
+  end
+
+  def deposition2(channel, ls) do
+    _res = PhoenixClient.Channel.push(channel,"deposition",%{"sender" => "B", "value" => ls},10000)
   end
 
   def stopping(channel) do
