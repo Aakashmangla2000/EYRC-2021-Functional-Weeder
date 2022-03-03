@@ -38,43 +38,42 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     IO.inspect(ir_values)
   end
 
-  def testweeding(motor_ref,dir) do
-    Process.sleep(5000)
-    IO.puts("Opening the Claws...")
-    test_servo_b(0)  #opening claws
-    Process.sleep(1000)
+  # def testweeding(motor_ref,dir) do
+  #   Process.sleep(5000)
+  #   IO.puts("Opening the Claws...")
+  #   test_servo_b(0)  #opening claws
+  #   Process.sleep(1000)
 
-    IO.puts("Positioning the arm...")
-    test_servo_a(40)
-    Process.sleep(500)
-    test_servo_a(30)  #setting arm at height
-    Process.sleep(500)
-    test_servo_a(10)  #setting arm at height
-    Process.sleep(500)
+  #   IO.puts("Positioning the arm...")
+  #   test_servo_a(40)
+  #   Process.sleep(500)
+  #   test_servo_a(30)  #setting arm at height
+  #   Process.sleep(500)
+  #   test_servo_a(10)  #setting arm at height
+  #   Process.sleep(500)
 
-    IO.puts("Weeding Begins...")
+  #   IO.puts("Weeding Begins...")
 
-    test_servo_b(20)
-    Process.sleep(1000)
-    test_servo_b(40)
-    Process.sleep(1000)
-    test_servo_b(60)
-    Process.sleep(1000)
-    test_servo_b(90)
-    Process.sleep(1000)
-    test_servo_a(50)
-    Process.sleep(1000)
+  #   test_servo_b(20)
+  #   Process.sleep(1000)
+  #   test_servo_b(40)
+  #   Process.sleep(1000)
+  #   test_servo_b(60)
+  #   Process.sleep(1000)
+  #   test_servo_b(90)
+  #   Process.sleep(1000)
+  #   test_servo_a(50)
+  #   Process.sleep(1000)
 
-    if(dir == 0) do
-      Task4CClientRobotB.LineFollower.left(motor_ref,1)
-    else
-      Task4CClientRobotB.LineFollower.right(motor_ref,1)
-    end
+  #   if(dir == 0) do
+  #     Task4CClientRobotB.LineFollower.left(motor_ref,1)
+  #   else
+  #     Task4CClientRobotB.LineFollower.right(motor_ref,1)
+  #   end
 
-  end
+  # end
 
-  def weeding(motor_ref,dir, robot, goal) do
-    robot2 = robot
+  def weeding(motor_ref,robot, goal) do
     {robot,dir} = find_plant(robot,goal,motor_ref)
 
     Process.sleep(1000)
@@ -108,6 +107,8 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     else
       Task4CClientRobotB.LineFollower.right(motor_ref,1)
     end
+
+    robot
 
   end
 
@@ -236,23 +237,23 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
   end
 
 
-  def setpinsr(count,motor_ref) do
-    save = motor_ref
-    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
-    find_on_right(motor_ref,count)
-    weeding(motor_ref, 1)
-    Process.sleep(50)
+  # def setpinsr(count,motor_ref) do
+  #   save = motor_ref
+  #   motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+  #   find_on_right(motor_ref,count)
+  #   weeding(motor_ref, 1)
+  #   Process.sleep(50)
 
 
-  end
-  def setpinsl(count,motor_ref) do
-    save = motor_ref
-    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
-    find_on_left(motor_ref,count)
-    weeding(motor_ref, 1)
-    Process.sleep(50)
+  # end
+  # def setpinsl(count,motor_ref) do
+  #   save = motor_ref
+  #   motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
+  #   find_on_left(motor_ref,count)
+  #   weeding(motor_ref, 1)
+  #   Process.sleep(50)
 
-  end
+  # end
 
 
   def find_on_left(motor_ref,count) do

@@ -83,7 +83,7 @@ defmodule Task4CClientRobotB.LineFollower do
   def pid(motor_ref) do
     Logger.debug("Going Forward")
     Process.sleep(4000)
-    {motor_ref,pwm_ref} = open_motor_pwm_pins()
+    # {motor_ref,pwm_ref} = open_motor_pwm_pins()
 
     maximum = 100;
     integral = 0;
@@ -103,17 +103,17 @@ defmodule Task4CClientRobotB.LineFollower do
 
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    IO.inspect(sensor_vals)
-    IO.inspect(set_vals(sensor_vals))
+    # IO.inspect(sensor_vals)
+    # IO.inspect(set_vals(sensor_vals))
 
     if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
       find_line(motor_ref)
     end
     motor_action(motor_ref,@forward)
     forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    left(motor_ref,count)
+    # left(motor_ref,count)
     # forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    right(motor_ref,count)
+    # right(motor_ref,count)
     # forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
   end
 
@@ -196,9 +196,9 @@ defmodule Task4CClientRobotB.LineFollower do
   end
 
   def forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional) when stop == 0 do
-    IO.puts("count: #{count}")
+    # IO.puts("count: #{count}")
     count = count + 1
-    IO.puts("nodes: #{nodes}")
+    # IO.puts("nodes: #{nodes}")
     filter = filter + 1
 
     #Simple ReadLine
@@ -235,7 +235,7 @@ defmodule Task4CClientRobotB.LineFollower do
 
 		power_difference = proportional*0.015 + derivative*0.020 #+ integral*0.005;
     power_difference = Kernel.round(power_difference)
-    IO.puts("Power Difference: #{power_difference}")
+    # IO.puts("Power Difference: #{power_difference}")
 		power_difference = if (power_difference > maximum) do
 			maximum
     else
@@ -249,10 +249,10 @@ defmodule Task4CClientRobotB.LineFollower do
     end
 
 		if (power_difference < 0) do
-      IO.puts("r #{maximum + power_difference} l #{maximum}")
+      # IO.puts("r #{maximum + power_difference} l #{maximum}")
       set_motors(motor_ref,maximum,maximum + power_difference)
 		else
-      IO.puts("r #{maximum} l #{maximum - power_difference}")
+      # IO.puts("r #{maximum} l #{maximum - power_difference}")
       set_motors(motor_ref,maximum - power_difference,maximum)
     end
 
@@ -263,8 +263,8 @@ defmodule Task4CClientRobotB.LineFollower do
         nodes = nodes + 1
         count = 1
         # IO.puts(nodes)
-        IO.puts("Node")
-        IO.puts(nodes)
+        # IO.puts("Node")
+        # IO.puts(nodes)
         motor_action(motor_ref,@stop)
         Process.sleep(100)
         pwm(100)
