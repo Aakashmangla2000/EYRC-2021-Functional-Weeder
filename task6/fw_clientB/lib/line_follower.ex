@@ -111,10 +111,6 @@ defmodule Task4CClientRobotB.LineFollower do
     end
     motor_action(motor_ref,@forward)
     forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    # left(motor_ref,count)
-    # forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    # right(motor_ref,count)
-    # forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional)
   end
 
 
@@ -341,19 +337,6 @@ defmodule Task4CClientRobotB.LineFollower do
     end)
   end
 
-
-  @doc """
-  Tests motion of the Robot
-
-  Example:
-
-      iex> FW_DEMO.test_motion
-      :ok
-
-  Note: On executing above function Robot will move forward, backward, left, right
-  for 500ms each and then stops
-  """
-
   def test_motion do
     Logger.debug("Testing Motion of the Robot ")
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
@@ -361,26 +344,6 @@ defmodule Task4CClientRobotB.LineFollower do
     Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
     motion_list = [@forward,@stop]
     Enum.each(motion_list, fn motion -> motor_action(motor_ref,motion) end)
-  end
-
-  @doc """
-  Controls speed of the Robot
-
-  Example:
-
-      iex> FW_DEMO.test_pwm
-      Forward with pwm value = 150
-      Forward with pwm value = 70
-      Forward with pwm value = 0
-      {:ok, :ok, :ok}
-
-  Note: On executing above function Robot will move in forward direction with different velocities
-  """
-  def test_pwm do
-    Logger.debug("Testing PWM for Motion control")
-    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
-    motor_action(motor_ref, @forward)
-    Enum.map(@duty_cycles, fn value -> motion_pwm(value) end)
   end
 
   @doc """
@@ -478,15 +441,6 @@ defmodule Task4CClientRobotB.LineFollower do
   """
   defp motor_action(motor_ref,motion) do
     motor_ref |> Enum.zip(motion) |> Enum.each(fn {{_, ref_no}, value} -> GPIO.write(ref_no, value) end)
-  end
-
-  @doc """
-  Supporting function for test_pwm
-  """
-  defp motion_pwm(value) do
-    IO.puts("Forward with pwm value = #{value}")
-    pwm(value)
-    Process.sleep(2000)
   end
 
   @doc """

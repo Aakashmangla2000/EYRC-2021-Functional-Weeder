@@ -114,7 +114,8 @@ defmodule Task4CClientRobotB do
 
     {motor_ref,pwm_ref} = Task4CClientRobotB.LineFollower.open_motor_pwm_pins()
     count = Enum.count(goal_locs)
-    robot = goal_div(motor_ref,robot, goal_locs, channel,count,mp,mp2)
+    deposited = []
+    robot = goal_div(deposited,motor_ref,robot, goal_locs, channel,count,mp,mp2)
 
     {:ok, robot}
 
@@ -180,13 +181,13 @@ defmodule Task4CClientRobotB do
     Enum.fetch(ls,index)
   end
 
-  def goal_div(motor_ref,robot, goal_locs, channel,count,mp,mp2) when count > 0 do
+  def goal_div(deposited,motor_ref,robot, goal_locs, channel,count,mp,mp2) when count > 0 do
     mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5, :f => 6}
     parent = self()
     pid = spawn_link(fn ->
       count = Enum.count(goal_locs)
-      {robot,goal_locs,_count} = if(count == 0) do
-        {robot,goal_locs,count}
+      {deposited,robot,goal_locs,_count} = if(count == 0) do
+        {deposited,robot,goal_locs,count}
       else
         count = Enum.count(goal_locs)
         index = 0
@@ -220,8 +221,13 @@ defmodule Task4CClientRobotB do
 
         #weeding
         robot = Task4CClientRobotB.ArmMechanismTest.weeding(motor_ref,robot, goal)
+        Task4CClientRobotB.PhoenixSocketClient.weeding(channel,String.to_integer(goal))
+
         #deposition
         IO.puts("deposition")
+        deposited = deposited ++ [String.to_integer(goal)]
+        IO.inspect(deposited)
+        Task4CClientRobotB.PhoenixSocketClient.deposition(channel,String.to_integer(goal))
         {robot} = cond do
           6 - goal_x == 6 - goal_yy ->
             get_value(motor_ref,goal,robot,6, goal_y,channel)
@@ -232,17 +238,17 @@ defmodule Task4CClientRobotB do
         end
         # Task4CClientRobotB.ArmMechanismTest.deposition
 
-        {robot,goal_locs,count}
+        {deposited,robot,goal_locs,count}
       end
       count = Enum.count(goal_locs)
-      send(parent, {:flag_value, {robot,goal_locs,count}})
+      send(parent, {:flag_value, {deposited,robot,goal_locs,count}})
     end)
     Process.register(pid, :client_toyrobotB)
-    {robot,goal_locs,count} = rec_value()
-    goal_div(motor_ref,robot, goal_locs, channel,count,mp,mp2)
+    {deposited,robot,goal_locs,count} = rec_value()
+    goal_div(deposited,motor_ref,robot, goal_locs, channel,count,mp,mp2)
   end
 
-  def goal_div(motor_ref,robot, _goal_locs, _channel, _count,_mp,_mp2) do
+  def goal_div(_deposited,_motor_ref,robot, _goal_locs, _channel, _count,_mp,_mp2) do
    robot
   end
 
@@ -1008,8 +1014,7 @@ end
   Moves the robot to the north, but prevents it to fall
   """
   def move(%Task4CClientRobotB.Position{x: _, y: y, facing: :north} = robot, motor_ref) when y < @table_top_y do
-    maximum = 110
-    Task4CClientRobotB.LineFollower.forward(1,0,1,0,motor_ref,maximum,0,0)
+    Task4CClientRobotB.LineFollower.pid(motor_ref)
     %Task4CClientRobotB.Position{ robot | y: Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) + 1 end) |> elem(0) }
   end
 
@@ -1017,8 +1022,7 @@ end
   Moves the robot to the east, but prevents it to fall
   """
   def move(%Task4CClientRobotB.Position{x: x, y: _, facing: :east} = robot, motor_ref) when x < @table_top_x do
-    maximum = 110
-    Task4CClientRobotB.LineFollower.forward(1,0,1,0,motor_ref,maximum,0,0)
+    Task4CClientRobotB.LineFollower.pid(motor_ref)
     %Task4CClientRobotB.Position{robot | x: x + 1}
   end
 
@@ -1026,8 +1030,7 @@ end
   Moves the robot to the south, but prevents it to fall
   """
   def move(%Task4CClientRobotB.Position{x: _, y: y, facing: :south} = robot, motor_ref) when y > :a do
-    maximum = 110
-    Task4CClientRobotB.LineFollower.forward(1,0,1,0,motor_ref,maximum,0,0)
+    Task4CClientRobotB.LineFollower.pid(motor_ref)
     %Task4CClientRobotB.Position{ robot | y: Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) - 1 end) |> elem(0)}
   end
 
@@ -1035,8 +1038,7 @@ end
   Moves the robot to the west, but prevents it to fall
   """
   def move(%Task4CClientRobotB.Position{x: x, y: _, facing: :west} = robot, motor_ref) when x > 1 do
-    maximum = 110
-    Task4CClientRobotB.LineFollower.forward(1,0,1,0,motor_ref,maximum,0,0)
+    Task4CClientRobotB.LineFollower.pid(motor_ref)
     %Task4CClientRobotB.Position{robot | x: x - 1}
   end
 

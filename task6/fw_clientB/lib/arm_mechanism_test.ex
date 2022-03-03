@@ -110,7 +110,46 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     robot
   end
 
-   def deposition do
+   def deposition(motor_ref,robot, goal) do
+
+    robot = cond do
+      robot.x == 6 and robot.y == :f ->
+        cond do
+          robot.facing == :north ->
+            Task4CClientRobotB.left(robot,motor_ref)
+          robot.facing == :south ->
+            robot
+          robot.facing == :east ->
+            Task4CClientRobotB.right(robot,motor_ref)
+          robot.facing == :west ->
+            robot
+        end
+      robot.x == 6 ->
+        cond do
+          robot.facing == :north ->
+            robot = Task4CClientRobotB.right(robot,motor_ref)
+            Task4CClientRobotB.right(robot,motor_ref)
+          robot.facing == :south ->
+            robot
+          robot.facing == :east ->
+            Task4CClientRobotB.left(robot,motor_ref)
+          robot.facing == :west ->
+            Task4CClientRobotB.right(robot,motor_ref)
+        end
+      robot.y == :f ->
+        cond do
+          robot.facing == :east ->
+            robot = Task4CClientRobotB.right(robot,motor_ref)
+            Task4CClientRobotB.right(robot,motor_ref)
+          robot.facing == :west ->
+            robot
+          robot.facing == :north ->
+            Task4CClientRobotB.left(robot,motor_ref)
+          robot.facing == :south ->
+            Task4CClientRobotB.right(robot,motor_ref)
+        end
+    end
+
     IO.puts("Weed Depositing...")
     Process.sleep(200)
     test_servo_a(50)

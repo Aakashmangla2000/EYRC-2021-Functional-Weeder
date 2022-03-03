@@ -344,26 +344,6 @@ defmodule Task4CClientRobotA.LineFollower do
   end
 
   @doc """
-  Controls speed of the Robot
-
-  Example:
-
-      iex> FW_DEMO.test_pwm
-      Forward with pwm value = 150
-      Forward with pwm value = 70
-      Forward with pwm value = 0
-      {:ok, :ok, :ok}
-
-  Note: On executing above function Robot will move in forward direction with different velocities
-  """
-  def test_pwm do
-    Logger.debug("Testing PWM for Motion control")
-    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
-    motor_action(motor_ref, @forward)
-    Enum.map(@duty_cycles, fn value -> motion_pwm(value) end)
-  end
-
-  @doc """
   Supporting function for test_wlf_sensors
   Configures sensor pins as input or output
 
@@ -457,15 +437,6 @@ defmodule Task4CClientRobotA.LineFollower do
   """
   defp motor_action(motor_ref,motion) do
     motor_ref |> Enum.zip(motion) |> Enum.each(fn {{_, ref_no}, value} -> GPIO.write(ref_no, value) end)
-  end
-
-  @doc """
-  Supporting function for test_pwm
-  """
-  defp motion_pwm(value) do
-    IO.puts("Forward with pwm value = #{value}")
-    pwm(value)
-    Process.sleep(2000)
   end
 
   @doc """
