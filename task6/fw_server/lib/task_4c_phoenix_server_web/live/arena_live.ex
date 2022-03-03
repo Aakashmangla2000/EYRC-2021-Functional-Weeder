@@ -146,15 +146,15 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
             </div>
           <% end %>
 
-          <%= for i <- @seeds do %>
-              <div class="plant" style={"bottom: #{(div(i-1,5)*150)+60}px; left: #{(rem(i+5,5)-1)*150+80}px"}>
-              <img id="plant" src={"/images/seed.png"} style="height:70px;">
-            </div>
-          <% end %>
-
           <%= for i <- @robotA_goals do %>
               <div class="plant" style={"bottom: #{(div(String.to_integer(i)-1,5)*150)+60}px; left: #{(rem(String.to_integer(i)+4,5))*150+80}px"}>
               <img id="plant" src={"/images/soil.png"} style="height:70px;">
+            </div>
+          <% end %>
+
+          <%= for i <- @seeds do %>
+              <div class="seed" style={"bottom: #{(div(i-1,5)*150)+60}px; left: #{(rem(i+5,5)-1)*150+80}px"}>
+              <img id="plant" src={"/images/seed.png"} style="height:80px;">
             </div>
           <% end %>
 

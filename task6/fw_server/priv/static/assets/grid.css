@@ -111,6 +111,12 @@ body {
   transform: translate(-40%, 40%);
 }
 
+.seed {
+  position: absolute;
+  width: 80px;
+  transform: translate(-40%, 40%);
+}
+
 .board-container {
   position: relative;
 }
