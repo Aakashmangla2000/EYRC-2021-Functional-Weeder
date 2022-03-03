@@ -80,7 +80,8 @@ defmodule Task4CClientRobotA.LineFollower do
     {motor_ref,pwm_ref}
   end
 
-  def pid(motor_ref) do
+  def pid(channel,motor_ref) do
+    Task4CClientRobotA.PhoenixSocketClient.timer(channel)
     Logger.debug("Going Forward")
     # Process.sleep(4000)
     # {motor_ref,pwm_ref} = open_motor_pwm_pins()
@@ -109,13 +110,14 @@ defmodule Task4CClientRobotA.LineFollower do
       find_line(motor_ref)
     end
     motor_action(motor_ref,@forward)
-    forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
+    forward(channel,count,nodes,stop,motor_ref,maximum,integral,last_proportional)
     # right(motor_ref,count)
-    # forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional)
+    # forward(channel,count,nodes,stop,motor_ref,maximum,integral,last_proportional)
     # left(motor_ref,count)
   end
 
-  def right(motor_ref,count) do
+  def right(channel,motor_ref,count) do
+    Task4CClientRobotA.PhoenixSocketClient.timer(channel)
     IO.puts("going right")
     count = count + 1
     sensor_vals = test_wlf_sensors()
@@ -132,7 +134,8 @@ defmodule Task4CClientRobotA.LineFollower do
     end
   end
 
-  def left(motor_ref,count) do
+  def left(channel,motor_ref,count) do
+    Task4CClientRobotA.PhoenixSocketClient.timer(channel)
     IO.puts("going left")
     count = count + 1
     sensor_vals = test_wlf_sensors()
@@ -191,7 +194,8 @@ defmodule Task4CClientRobotA.LineFollower do
     end
   end
 
-  def forward(count,nodes,stop,motor_ref,maximum,integral,last_proportional) when stop == 0 do
+  def forward(channel,count,nodes,stop,motor_ref,maximum,integral,last_proportional) when stop == 0 do
+    Task4CClientRobotA.PhoenixSocketClient.timer(channel)
     # IO.puts("#{count}")
     count = count + 1
 
@@ -258,13 +262,13 @@ defmodule Task4CClientRobotA.LineFollower do
 
     # if((s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) or
     if(nodes == 2) do
-      forward(count,nodes,1,motor_ref,maximum,integral,last_proportional)
+      forward(channel,count,nodes,1,motor_ref,maximum,integral,last_proportional)
     else
-      forward(count,nodes,0,motor_ref,maximum,integral,last_proportional)
+      forward(channel,count,nodes,0,motor_ref,maximum,integral,last_proportional)
     end
   end
 
-  def forward(_count,_nodes,_stop,motor_ref,_maximum,_integral,_last_proportional) do
+  def forward(channel,_count,_nodes,_stop,motor_ref,_maximum,_integral,_last_proportional) do
     motor_action(motor_ref,@stop)
   end
 

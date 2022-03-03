@@ -63,6 +63,11 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
     if(is_obs_ahead ==  true) do
       send_obstacle_status(channel,robot)
     end
+    time = timer(channel)
+
+    IO.puts("Obstacle ahead: #{is_obs_ahead}")
+    IO.puts("Time: #{time}")
+    IO.puts("Robot position: #{x} #{y}")
 
     is_obs_ahead
   end
@@ -70,6 +75,24 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
   ######################################################
   ## You may create extra helper functions as needed. ##
   ######################################################
+
+   def timer(channel) do
+    {:ok, {val,time}} = PhoenixClient.Channel.push(channel,"time",%{"value" => nil},5000)
+    %{bot: b, stop: c, start: d} = val
+    if(300-c>= time and 300-d <= time) do
+      server(channel,d-c)
+      stopping(channel)
+      IO.puts("Stopping for #{d-(300-time)} seconds")
+      Process.sleep(1000*(d-(300-time)))
+      starting(channel)
+    else
+    end
+    time
+  end
+
+  def server(channel,val) do
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 6, "sender" => "Server", "value" => %{"A" => val}},5000)
+  end
 
   def get_start(channel) do
     tup = PhoenixClient.Channel.push(channel,"start_pos",%{"client" => "robot_B"},10000)

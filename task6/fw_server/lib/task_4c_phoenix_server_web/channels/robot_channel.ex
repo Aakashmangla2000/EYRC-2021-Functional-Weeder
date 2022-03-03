@@ -173,9 +173,9 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     {:reply, {:ok, true}, socket}
   end
 
-  def handle_in("time", _message, socket) do
-    kill_bots()
-    {:reply, {:ok, socket.assigns[:timer_tick]}, socket}
+  def handle_in("time", message, socket) do
+    val = kill_bots(socket.assigns[:timer_tick],message["sender"])
+    {:reply, {:ok, {val,socket.assigns[:timer_tick]}}, socket}
   end
 
   def handle_in("sowing", message, socket) do
@@ -195,7 +195,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
   ## define callback functions as needed ##
   #########################################
 
-  def kill_bots() do
+  def kill_bots(time,sender) do
     y = File.stream!("Robots_handle.csv")
       |> CSV.decode
       |> Enum.map(fn {_,x} ->
@@ -207,7 +207,11 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     vals = Enum.map(y,fn [_a,b,c,d] ->
      %{bot: b, stop: c, start: d}
     end)
+    vals = Enum.filter(vals, fn %{bot: _b, stop: c, start: _d} = _x -> 300-c < time end)
+    val = Enum.find(vals, fn %{bot: b, stop: _c, start: _d} = _x -> b == sender end)
     IO.inspect(vals)
+    IO.inspect(val)
+    val
   end
 
   def handle_info(%{event: "update_timer_tick", payload: timer_data, topic: "timer:update"}, socket) do
