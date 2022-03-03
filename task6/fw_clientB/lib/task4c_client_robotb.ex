@@ -260,6 +260,7 @@ defmodule Task4CClientRobotB do
       end
       #weeding action to server
       # Task4CClientRobotB.ArmMechanismTest.weeding(channel, goal)
+      Task4CClientRobotB.ArmMechanismTest.weeding(motor_ref, dir)
       {robot}
   end
 
