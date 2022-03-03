@@ -240,7 +240,7 @@ defmodule Task4CClientRobotA do
       #sowing action to server
       IO.puts("Sowing the seed")
       Task4CClientRobotA.PhoenixSocketClient.sowing2(channel,String.to_integer(goal))
-      robot = Task4CClientRobotA.ArmMechanismTest.seeding(motor_ref,robot,goal)
+      robot = Task4CClientRobotA.ArmMechanismTest.seeding(channel,motor_ref,robot,goal)
       Task4CClientRobotA.PhoenixSocketClient.sowing(channel,String.to_integer(goal))
       {robot}
   end
@@ -945,7 +945,7 @@ def forGoal_y(motor_ref,obs,robot,_goal_y, _channel) do
 end
 
 def goX(%Task4CClientRobotA.Position{facing: _facing,x: x, y: _y} = robot, goal_x, goal_y,channel, _ob, motor_ref) when x != goal_x do
-  robot = move(robot,motor_ref)
+  robot = move(channel,robot,motor_ref)
   ob = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
   goX(robot,goal_x,goal_y,channel, ob,motor_ref)
 end
@@ -955,7 +955,7 @@ def goX(robot, _goal_x, _goal_y, _channel, ob, _motor_ref) do
 end
 
 def goY(%Task4CClientRobotA.Position{facing: _facing,x: _x, y: y} = robot, goal_x, goal_y, channel, _ob, motor_ref) when y != goal_y do
-  robot = move(robot,motor_ref)
+  robot = move(channel,robot,motor_ref)
   ob = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
   goY(robot,goal_x,goal_y,channel,ob,motor_ref)
 end
@@ -998,7 +998,7 @@ end
   @doc """
   Moves the robot to the north, but prevents it to fall
   """
-  def move(%Task4CClientRobotA.Position{x: _, y: y, facing: :north} = robot, motor_ref) when y < @table_top_y do
+  def move(channel,%Task4CClientRobotA.Position{x: _, y: y, facing: :north} = robot, motor_ref) when y < @table_top_y do
     maximum = 110
     # Task4CClientRobotA.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
     Task4CClientRobotA.LineFollower.pid(channel,motor_ref)
@@ -1008,7 +1008,7 @@ end
   @doc """
   Moves the robot to the east, but prevents it to fall
   """
-  def move(%Task4CClientRobotA.Position{x: x, y: _, facing: :east} = robot, motor_ref) when x < @table_top_x do
+  def move(channel,%Task4CClientRobotA.Position{x: x, y: _, facing: :east} = robot, motor_ref) when x < @table_top_x do
     maximum = 110
     # Task4CClientRobotA.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
     Task4CClientRobotA.LineFollower.pid(channel,motor_ref)
@@ -1018,7 +1018,7 @@ end
   @doc """
   Moves the robot to the south, but prevents it to fall
   """
-  def move(%Task4CClientRobotA.Position{x: _, y: y, facing: :south} = robot, motor_ref) when y > :a do
+  def move(channel,%Task4CClientRobotA.Position{x: _, y: y, facing: :south} = robot, motor_ref) when y > :a do
     maximum = 110
     # Task4CClientRobotA.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
     Task4CClientRobotA.LineFollower.pid(channel,motor_ref)
@@ -1028,7 +1028,7 @@ end
   @doc """
   Moves the robot to the west, but prevents it to fall
   """
-  def move(%Task4CClientRobotA.Position{x: x, y: _, facing: :west} = robot, motor_ref) when x > 1 do
+  def move(channel,%Task4CClientRobotA.Position{x: x, y: _, facing: :west} = robot, motor_ref) when x > 1 do
     maximum = 110
     # Task4CClientRobotA.LineFollower.forward(1,1,0,motor_ref,maximum,0,0)
     Task4CClientRobotA.LineFollower.pid(channel,motor_ref)
@@ -1039,7 +1039,7 @@ end
   Does not change the position of the robot.
   This function used as fallback if the robot cannot move outside the table
   """
-  def move(robot), do: robot
+  def move(channel,robot), do: robot
 
   def failure do
     raise "Connection has been lost"

@@ -111,9 +111,6 @@ defmodule Task4CClientRobotA.LineFollower do
     end
     motor_action(motor_ref,@forward)
     forward(channel,count,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    # right(motor_ref,count)
-    # forward(channel,count,nodes,stop,motor_ref,maximum,integral,last_proportional)
-    # left(motor_ref,count)
   end
 
   def right(channel,motor_ref,count) do
@@ -130,7 +127,7 @@ defmodule Task4CClientRobotA.LineFollower do
     Process.sleep(100)
     if(count > 2 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
     else
-      right(motor_ref,count)
+      right(channel,motor_ref,count)
     end
   end
 
@@ -148,7 +145,7 @@ defmodule Task4CClientRobotA.LineFollower do
     Process.sleep(100)
     if(count > 2 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
     else
-      left(motor_ref,count)
+      left(channel,motor_ref,count)
     end
   end
 
