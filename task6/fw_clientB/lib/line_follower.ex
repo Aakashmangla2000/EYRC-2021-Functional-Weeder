@@ -130,7 +130,7 @@ defmodule Task4CClientRobotB.LineFollower do
     # if(count > 5 and (s1 == 0 or s2 == 0 or s3 == 1 or s4 == 1 or s5 == 0)) do
     # if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 1 and s5 == 0) do
     # if(count > 4 and (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 or s5 == 1)) do
-    if(count > 4 or (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
+    if(count > 4 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
     else
       right(motor_ref,count)
     end
@@ -150,7 +150,7 @@ defmodule Task4CClientRobotB.LineFollower do
     motor_action(motor_ref,@stop)
     Process.sleep(100)
     # if(count > 4 and (s1 == 1 or s2 == 1 or s3 == 1 and s4 == 0 and s5 == 0)) do
-    if(count > 4 or (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
+    if(count > 4 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
     else
       left(motor_ref,count)
     end

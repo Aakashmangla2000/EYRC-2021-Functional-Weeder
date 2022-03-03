@@ -227,9 +227,6 @@ defmodule Task4CClientRobotB do
         IO.puts("deposition")
         deposited = deposited ++ [String.to_integer(goal)]
         IO.inspect(deposited)
-
-        robot = Task4CClientRobotB.ArmMechanismTest.deposition(motor_ref,robot, goal)
-
         Task4CClientRobotB.PhoenixSocketClient.deposition(channel,String.to_integer(goal))
         {robot} = cond do
           6 - goal_x == 6 - goal_yy ->
@@ -239,7 +236,7 @@ defmodule Task4CClientRobotB do
           6 - goal_x < 6 - goal_yy ->
             get_value(motor_ref,goal,robot,6, goal_y,channel)
         end
-        # Task4CClientRobotB.ArmMechanismTest.deposition
+        Task4CClientRobotB.ArmMechanismTest.deposition(motor_ref,robot, goal)
 
         {deposited,robot,goal_locs,count}
       end

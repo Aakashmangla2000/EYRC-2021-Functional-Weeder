@@ -346,7 +346,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
       motor_action(motor_ref,@stop)
       Process.sleep(200)
       motor_action(motor_ref,@forward)
-      Process.sleep(5)
+      Process.sleep(10)
       motor_action(motor_ref,@stop)
       Process.sleep(100)
 
