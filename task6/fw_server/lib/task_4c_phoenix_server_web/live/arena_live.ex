@@ -147,8 +147,14 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
           <% end %>
 
           <%= for i <- @seeds do %>
-              <div class="plant" style={"bottom: #{(div(String.to_integer(i)-1,5)*150)+60}px; left: #{(rem(String.to_integer(i)+5,5)-1)*150+80}px"}>
+              <div class="plant" style={"bottom: #{(div(i-1,5)*150)+60}px; left: #{(rem(i+5,5)-1)*150+80}px"}>
               <img id="plant" src={"/images/seed.png"} style="height:70px;">
+            </div>
+          <% end %>
+
+          <%= for i <- @robotA_goals do %>
+              <div class="plant" style={"bottom: #{(div(String.to_integer(i)-1,5)*150)+60}px; left: #{(rem(String.to_integer(i)+4,5))*150+80}px"}>
+              <img id="plant" src={"/images/soil.png"} style="height:70px;">
             </div>
           <% end %>
 
@@ -159,7 +165,7 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
           <% end %>
 
           <%= for i <- @weeds do %>
-              <div class="plant" style={"bottom: #{(div(String.to_integer(i)-1,5)*150)+60}px; left: #{(rem(String.to_integer(i)+4,5))*150+80}px"}>
+              <div class="plant" style={"bottom: #{(div(i-1,5)*150)+60}px; left: #{(rem(i+4,5))*150+80}px"}>
               <img id="plant" src={"/images/soil.png"} style="height:70px;">
             </div>
           <% end %>
@@ -281,18 +287,21 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
 
   end
 
-  def handle_info(%{sow: sow} = _data, socket) do
+  def handle_info(%{seed: sow} = _data, socket) do
     socket = assign(socket, :seeds,socket.assigns[:seeds]++[sow])
+    IO.inspect(socket.assigns[:seeds])
     {:noreply, socket}
   end
 
-  def handle_info(%{weed: weed} = _data, socket) do
+  def handle_info(%{wee: weed} = _data, socket) do
     socket = assign(socket, :weeds,socket.assigns[:weeds]++[weed])
+    IO.inspect(socket.assigns[:weeds])
     {:noreply, socket}
   end
 
   def handle_info(%{depos: depos} = _data, socket) do
     socket = assign(socket, :depos,depos)
+    IO.inspect(socket.assigns[:depos])
     {:noreply, socket}
   end
 

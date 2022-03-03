@@ -135,7 +135,7 @@ defmodule Task4CClientRobotB.LineFollower do
     # if(count > 4 and (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 or s5 == 1)) do
     if(count > 2 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
     else
-      right(motor_ref,count)
+      right(channel,motor_ref,count)
     end
   end
 
@@ -157,7 +157,7 @@ defmodule Task4CClientRobotB.LineFollower do
     # if(count > 4 and (s1 == 1 or s2 == 1 or s3 == 1 and s4 == 0 and s5 == 0)) do
     if(count > 2 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
     else
-      left(motor_ref,count)
+      left(channel,motor_ref,count)
     end
   end
 

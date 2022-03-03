@@ -175,22 +175,22 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
 
   def handle_in("time", message, socket) do
     val = kill_bots(socket.assigns[:timer_tick],message["sender"])
-    {:reply, {:ok, {val,socket.assigns[:timer_tick]}}, socket}
+    {:reply, {:ok, [val,socket.assigns[:timer_tick]]}, socket}
   end
 
   def handle_in("sowing", message, socket) do
     IO.inspect(message)
-    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{sow: message})
+    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{seed: message["value"]})
     {:reply, {:ok, true}, socket}
   end
 
    def handle_in("weeding", message, socket) do
-    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{weed: message})
+    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{wee: message["value"]})
     {:reply, {:ok, true}, socket}
   end
 
    def handle_in("deposition", message, socket) do
-    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{depos: message})
+    Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{depos: message["value"]})
     {:reply, {:ok, true}, socket}
   end
 
@@ -199,6 +199,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
   #########################################
 
   def kill_bots(time,sender) do
+    # time = String.to_integer(time)
     y = File.stream!("Robots_handle.csv")
       |> CSV.decode
       |> Enum.map(fn {_,x} ->
@@ -208,11 +209,17 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     {_,y} = List.pop_at(y,0)
     # count = Enum.count(y)
     vals = Enum.map(y,fn [_a,b,c,d] ->
-     %{bot: b, stop: c, start: d}
+     %{bot: b, stop: String.to_integer(c), start: String.to_integer(d)}
     end)
-    vals = Enum.filter(vals, fn %{bot: _b, stop: c, start: _d} = _x -> 300-c < time end)
+    vals = Enum.filter(vals, fn %{bot: _b, stop: _c, start: d} = _x -> 300-d < time end)
     val = Enum.find(vals, fn %{bot: b, stop: _c, start: _d} = _x -> b == sender end)
     IO.inspect(vals)
+    IO.inspect(val)
+    val = if(val == nil) do
+       %{bot: sender, stop: 0, start: 0}
+    else
+      val
+    end
     IO.inspect(val)
     val
   end

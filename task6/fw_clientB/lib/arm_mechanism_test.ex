@@ -38,7 +38,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     IO.inspect(ir_values)
   end
 
-  # def testweeding(motor_ref,dir) do
+  # def testweeding(channel,motor_ref,dir) do
   #   Process.sleep(5000)
   #   IO.puts("Opening the Claws...")
   #   test_servo_b(0)  #opening claws
@@ -73,8 +73,8 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
 
   # end
 
-  def weeding(motor_ref,robot, goal) do
-    {robot,dir} = find_plant(robot,goal,motor_ref)
+  def weeding(channel,motor_ref,robot, goal) do
+    {robot,dir} = find_plant(channel,robot,goal,motor_ref)
 
     Process.sleep(500)
     IO.puts("Opening the Claws...")
@@ -103,50 +103,50 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     Process.sleep(500)
 
     if(dir == 0) do
-      Task4CClientRobotB.LineFollower.left(motor_ref,1)
+      Task4CClientRobotB.LineFollower.left(channel,motor_ref,1)
     else
-      Task4CClientRobotB.LineFollower.right(motor_ref,1)
+      Task4CClientRobotB.LineFollower.right(channel,motor_ref,1)
     end
     robot
   end
 
-   def deposition(motor_ref,robot, goal) do
+   def deposition(channel,motor_ref,robot, goal) do
 
     robot = cond do
       robot.x == 6 and robot.y == :f ->
         cond do
           robot.facing == :north ->
-            Task4CClientRobotB.left(robot,motor_ref)
+            Task4CClientRobotB.left(channel,robot,motor_ref)
           robot.facing == :south ->
             robot
           robot.facing == :east ->
-            Task4CClientRobotB.right(robot,motor_ref)
+            Task4CClientRobotB.right(channel,robot,motor_ref)
           robot.facing == :west ->
             robot
         end
       robot.y == :f ->
         cond do
           robot.facing == :north ->
-            robot = Task4CClientRobotB.right(robot,motor_ref)
-            Task4CClientRobotB.right(robot,motor_ref)
+            robot = Task4CClientRobotB.right(channel,robot,motor_ref)
+            Task4CClientRobotB.right(channel,robot,motor_ref)
           robot.facing == :south ->
             robot
           robot.facing == :east ->
-            Task4CClientRobotB.right(robot,motor_ref)
+            Task4CClientRobotB.right(channel,robot,motor_ref)
           robot.facing == :west ->
-            Task4CClientRobotB.left(robot,motor_ref)
+            Task4CClientRobotB.left(channel,robot,motor_ref)
         end
       robot.x == 6 ->
         cond do
           robot.facing == :east ->
-            robot = Task4CClientRobotB.right(robot,motor_ref)
-            Task4CClientRobotB.right(robot,motor_ref)
+            robot = Task4CClientRobotB.right(channel,robot,motor_ref)
+            Task4CClientRobotB.right(channel,robot,motor_ref)
           robot.facing == :west ->
             robot
           robot.facing == :north ->
-            Task4CClientRobotB.left(robot,motor_ref)
+            Task4CClientRobotB.left(channel,robot,motor_ref)
           robot.facing == :south ->
-            Task4CClientRobotB.right(robot,motor_ref)
+            Task4CClientRobotB.right(channel,robot,motor_ref)
         end
     end
 
@@ -167,7 +167,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
 
   # 1 - top left 2-top right 3- bottom left 4- bottom right
 
-  def find_plant(robot,goal,motor_ref) do
+  def find_plant(channel,robot,goal,motor_ref) do
     p3 = %{:a => 0, :b => 1, :c => 2, :d => 3, :e => 4, :f => 5}
     Process.sleep(1000)
     goal = String.to_integer(goal)
@@ -206,11 +206,11 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
       robot.facing == :north ->
         cond do
           val == 1 ->
-            robot = Task4CClientRobotB.right(robot,motor_ref)
+            robot = Task4CClientRobotB.right(channel,robot,motor_ref)
             find_on_left(motor_ref,0)
             {robot,0}
           val == 2 ->
-            robot = Task4CClientRobotB.left(robot,motor_ref)
+            robot = Task4CClientRobotB.left(channel,robot,motor_ref)
             find_on_right(motor_ref,0)
             {robot,1}
           val == 3 ->
@@ -226,28 +226,28 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
             find_on_left(motor_ref,0)
             {robot,0}
           val == 2 ->
-            robot = Task4CClientRobotB.right(robot,motor_ref)
+            robot = Task4CClientRobotB.right(channel,robot,motor_ref)
             find_on_left(motor_ref,0)
             {robot,0}
           val == 3 ->
             find_on_right(motor_ref,0)
             {robot,1}
           val == 4 ->
-            robot = Task4CClientRobotB.left(robot,motor_ref)
+            robot = Task4CClientRobotB.left(channel,robot,motor_ref)
             find_on_right(motor_ref,0)
             {robot,1}
         end
       robot.facing == :west ->
         cond do
           val == 1 ->
-            robot = Task4CClientRobotB.left(robot,motor_ref)
+            robot = Task4CClientRobotB.left(channel,robot,motor_ref)
             find_on_right(motor_ref,0)
             {robot,1}
           val == 2 ->
             find_on_right(motor_ref,0)
             {robot,1}
           val == 3 ->
-            robot = Task4CClientRobotB.right(robot,motor_ref)
+            robot = Task4CClientRobotB.right(channel,robot,motor_ref)
             find_on_left(motor_ref,0)
             {robot,0}
           val == 4 ->
@@ -263,11 +263,11 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
             find_on_left(motor_ref,0)
             {robot,0}
           val == 3 ->
-            robot = Task4CClientRobotB.left(robot,motor_ref)
+            robot = Task4CClientRobotB.left(channel,robot,motor_ref)
             find_on_right(motor_ref,0)
             {robot,1}
           val == 4 ->
-            robot = Task4CClientRobotB.right(robot,motor_ref)
+            robot = Task4CClientRobotB.right(channel,robot,motor_ref)
             find_on_left(motor_ref,0)
             {robot,0}
         end
@@ -280,7 +280,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
   #   save = motor_ref
   #   motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
   #   find_on_right(motor_ref,count)
-  #   weeding(motor_ref, 1)
+  #   weeding(channel,motor_ref, 1)
   #   Process.sleep(50)
 
 
@@ -289,7 +289,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
   #   save = motor_ref
   #   motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
   #   find_on_left(motor_ref,count)
-  #   weeding(motor_ref, 1)
+  #   weeding(channel,motor_ref, 1)
   #   Process.sleep(50)
 
   # end

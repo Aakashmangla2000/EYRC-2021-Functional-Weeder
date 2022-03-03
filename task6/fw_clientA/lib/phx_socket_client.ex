@@ -79,6 +79,7 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
   def timer(channel) do
     {:ok, [val,time]} = PhoenixClient.Channel.push(channel,"time",%{"sender"=> "A", "value" => nil},5000)
     IO.inspect(val)
+    IO.puts("Timer func: #{time}")
     %{"bot" => b, "stop" => c, "start" => d} = val
     IO.puts("#{300-c} #{300-d}")
     if(300-c> = time and 300-d <= time) do

@@ -221,7 +221,7 @@ defmodule Task4CClientRobotB do
 
         #weeding
         Task4CClientRobotB.PhoenixSocketClient.weeding2(channel,String.to_integer(goal))
-        robot = Task4CClientRobotB.ArmMechanismTest.weeding(motor_ref,robot, goal)
+        robot = Task4CClientRobotB.ArmMechanismTest.weeding(channel,motor_ref,robot, goal)
         Task4CClientRobotB.PhoenixSocketClient.weeding(channel,String.to_integer(goal))
 
         #deposition
@@ -237,7 +237,7 @@ defmodule Task4CClientRobotB do
           6 - goal_x < 6 - goal_yy ->
             get_value(motor_ref,goal,robot,6, goal_y,channel)
         end
-        Task4CClientRobotB.ArmMechanismTest.deposition(motor_ref,robot, goal)
+        Task4CClientRobotB.ArmMechanismTest.deposition(channel,motor_ref,robot, goal)
         Task4CClientRobotB.PhoenixSocketClient.deposition2(channel,String.to_integer(goal))
 
         {deposited,robot,goal_locs,count}
@@ -962,7 +962,7 @@ end
 
 
 def goX(%Task4CClientRobotB.Position{facing: _facing,x: x, y: _y} = robot, goal_x, goal_y, channel,_ob,motor_ref) when x != goal_x do
-  robot = move(robot,motor_ref)
+  robot = move(channel,robot,motor_ref)
   obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
   goX(robot,goal_x,goal_y,channel,obs,motor_ref)
 end
@@ -972,7 +972,7 @@ def goX(robot, _goal_x, _goal_y, _channel,ob,_motor_ref) do
 end
 
 def goY(%Task4CClientRobotB.Position{facing: _facing,x: _x, y: y} = robot, goal_x, goal_y, channel,_ob,motor_ref) when y != goal_y do
-  robot = move(robot,motor_ref)
+  robot = move(channel,robot,motor_ref)
   obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
   goY(robot,goal_x,goal_y,channel,obs,motor_ref)
 end
@@ -1016,7 +1016,7 @@ end
   @doc """
   Moves the robot to the north, but prevents it to fall
   """
-  def move(%Task4CClientRobotB.Position{x: _, y: y, facing: :north} = robot, motor_ref) when y < @table_top_y do
+  def move(channel,%Task4CClientRobotB.Position{x: _, y: y, facing: :north} = robot, motor_ref) when y < @table_top_y do
     Task4CClientRobotB.LineFollower.pid(channel,motor_ref)
     %Task4CClientRobotB.Position{ robot | y: Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) + 1 end) |> elem(0) }
   end
@@ -1024,7 +1024,7 @@ end
   @doc """
   Moves the robot to the east, but prevents it to fall
   """
-  def move(%Task4CClientRobotB.Position{x: x, y: _, facing: :east} = robot, motor_ref) when x < @table_top_x do
+  def move(channel,%Task4CClientRobotB.Position{x: x, y: _, facing: :east} = robot, motor_ref) when x < @table_top_x do
     Task4CClientRobotB.LineFollower.pid(channel,motor_ref)
     %Task4CClientRobotB.Position{robot | x: x + 1}
   end
@@ -1032,7 +1032,7 @@ end
   @doc """
   Moves the robot to the south, but prevents it to fall
   """
-  def move(%Task4CClientRobotB.Position{x: _, y: y, facing: :south} = robot, motor_ref) when y > :a do
+  def move(channel,%Task4CClientRobotB.Position{x: _, y: y, facing: :south} = robot, motor_ref) when y > :a do
     Task4CClientRobotB.LineFollower.pid(channel,motor_ref)
     %Task4CClientRobotB.Position{ robot | y: Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) - 1 end) |> elem(0)}
   end
@@ -1040,7 +1040,7 @@ end
   @doc """
   Moves the robot to the west, but prevents it to fall
   """
-  def move(%Task4CClientRobotB.Position{x: x, y: _, facing: :west} = robot, motor_ref) when x > 1 do
+  def move(channel,%Task4CClientRobotB.Position{x: x, y: _, facing: :west} = robot, motor_ref) when x > 1 do
     Task4CClientRobotB.LineFollower.pid(channel,motor_ref)
     %Task4CClientRobotB.Position{robot | x: x - 1}
   end
@@ -1049,7 +1049,7 @@ end
   Does not change the position of the robot.
   This function used as fallback if the robot cannot move outside the table
   """
-  def move(robot), do: robot
+  def move(channel,robot), do: robot
 
   def failure do
     raise "Connection has been lost"
