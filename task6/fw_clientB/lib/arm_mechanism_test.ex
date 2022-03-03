@@ -107,9 +107,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     else
       Task4CClientRobotB.LineFollower.right(motor_ref,1)
     end
-
     robot
-
   end
 
    def deposition do
@@ -286,8 +284,6 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     motor_action(motor_ref,@stop)
     # Process.sleep(50)
   end
-
-
 
   def find_on_right(motor_ref,count) do
     Process.sleep(200)

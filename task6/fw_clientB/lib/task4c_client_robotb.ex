@@ -218,6 +218,8 @@ defmodule Task4CClientRobotB do
         mpp = %{:a => 1, :b => 2, :c => 3, :d => 5, :e => 5, :f => 6}
         goal_yy = Map.get(mpp, goal_y)
 
+        #weeding
+        robot = Task4CClientRobotB.ArmMechanismTest.weeding(motor_ref,robot, goal)
         #deposition
         IO.puts("deposition")
         {robot} = cond do
@@ -260,7 +262,7 @@ defmodule Task4CClientRobotB do
       end
       #weeding action to server
       # Task4CClientRobotB.ArmMechanismTest.weeding(channel, goal)
-      robot = Task4CClientRobotB.ArmMechanismTest.weeding(motor_ref,robot, goal)
+      # robot = Task4CClientRobotB.ArmMechanismTest.weeding(motor_ref,robot, goal)
       {robot}
   end
 
