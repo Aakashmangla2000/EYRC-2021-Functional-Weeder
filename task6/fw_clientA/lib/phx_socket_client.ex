@@ -82,7 +82,7 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
     IO.puts("Timer func: #{time}")
     %{"bot" => b, "stop" => c, "start" => d} = val
     IO.puts("#{300-c} #{300-d}")
-    if(300-c> = time and 300-d <= time) do
+    if(300-c >= time and 300-d <= time) do
       server(channel,d-c)
       stopping(channel)
       IO.puts("Stopping for #{d-(300-time)} seconds")
