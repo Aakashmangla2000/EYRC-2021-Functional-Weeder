@@ -57,8 +57,8 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
     ###########################
     # Process.sleep(1000)
     is_obs_ahead = Task4CClientRobotB.LineFollower.obs_detect()
-    _tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_B","x" => x, "y" => y, "face" => facing, "obs" => is_obs_ahead},5000)
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 1, "sender" => "B", "value" => %{"x" => x, "y" => y, "face" => facing}},5000)
+    _tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_B","x" => x, "y" => y, "face" => facing, "obs" => is_obs_ahead},10000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 1, "sender" => "B", "value" => %{"x" => x, "y" => y, "face" => facing}},10000)
     # {:ok, is_obs_ahead} = tup
     if(is_obs_ahead ==  true) do
       send_obstacle_status(channel,robot)
@@ -72,47 +72,47 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
   ######################################################
 
   def get_start(channel) do
-    tup = PhoenixClient.Channel.push(channel,"start_pos",%{"client" => "robot_B"},5000)
+    tup = PhoenixClient.Channel.push(channel,"start_pos",%{"client" => "robot_B"},10000)
     {:ok, start} = tup
     start
   end
 
   def get_bot_position(bool,channel,robot) do
     %Task4CClientRobotB.Position{facing: facing,x: x, y: y} = robot
-    tup = PhoenixClient.Channel.push(channel,"get_bots",%{"client" => "robot_B","x" => x, "y" => y, "face" => facing, "alive" => bool},5000)
+    tup = PhoenixClient.Channel.push(channel,"get_bots",%{"client" => "robot_B","x" => x, "y" => y, "face" => facing, "alive" => bool},10000)
     {:ok, rep} = tup
     [ax,ay,afacing,_bx,_by,_bfacing,a_alive,_b_alive] = rep
     [ax,String.to_atom(ay),String.to_atom(afacing),a_alive]
   end
 
   def get_goals(channel) do
-    tup = PhoenixClient.Channel.push(channel,"goals",%{"client" => "robot_B"},5000)
+    tup = PhoenixClient.Channel.push(channel,"goals",%{"client" => "robot_B"},10000)
     {:ok, weed} = tup
     weed
   end
 
   def send_obstacle_status(channel, %Task4CClientRobotB.Position{x: x, y: y, facing: facing} = _obs) do
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 2, "sender" => "B", "value" => %{"x" => x, "y" => y, "face" => facing}},5000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 2, "sender" => "B", "value" => %{"x" => x, "y" => y, "face" => facing}},10000)
   end
 
   def weeding(channel, val) do
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 4, "sender" => "B", "value" => val},5000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 4, "sender" => "B", "value" => val},10000)
   end
 
    def deposition(channel, ls) do
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 5, "sender" => "B", "value" => ls},5000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 5, "sender" => "B", "value" => ls},10000)
   end
 
   def stopping(channel) do
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 7, "sender" => "B", "value" => nil},5000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 7, "sender" => "B", "value" => nil},10000)
   end
 
   def starting(channel) do
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 8, "sender" => "B", "value" => nil},5000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 8, "sender" => "B", "value" => nil},10000)
   end
 
   def done(channel) do
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 9, "sender" => "B", "value" => nil},5000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 9, "sender" => "B", "value" => nil},10000)
   end
 
 end

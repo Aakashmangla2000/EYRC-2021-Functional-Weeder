@@ -82,7 +82,7 @@ defmodule Task4CClientRobotB.LineFollower do
 
   def pid(motor_ref) do
     Logger.debug("Going Forward")
-    Process.sleep(4000)
+    Process.sleep(400)
     # {motor_ref,pwm_ref} = open_motor_pwm_pins()
 
     maximum = 100;
@@ -117,6 +117,7 @@ defmodule Task4CClientRobotB.LineFollower do
   def right(motor_ref,count) do
     IO.puts("going right")
     count = count + 1
+    IO.inspect(count)
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
     IO.inspect(sensor_vals)
@@ -130,7 +131,7 @@ defmodule Task4CClientRobotB.LineFollower do
     # if(count > 5 and (s1 == 0 or s2 == 0 or s3 == 1 or s4 == 1 or s5 == 0)) do
     # if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 1 and s5 == 0) do
     # if(count > 4 and (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 or s5 == 1)) do
-    if(count > 4 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
+    if(count > 2 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
     else
       right(motor_ref,count)
     end
@@ -139,6 +140,7 @@ defmodule Task4CClientRobotB.LineFollower do
   def left(motor_ref,count) do
     IO.puts("going left")
     count = count + 1
+    IO.inspect(count)
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
     IO.inspect(sensor_vals)
@@ -150,7 +152,7 @@ defmodule Task4CClientRobotB.LineFollower do
     motor_action(motor_ref,@stop)
     Process.sleep(100)
     # if(count > 4 and (s1 == 1 or s2 == 1 or s3 == 1 and s4 == 0 and s5 == 0)) do
-    if(count > 4 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
+    if(count > 2 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
     else
       left(motor_ref,count)
     end
@@ -194,9 +196,9 @@ defmodule Task4CClientRobotB.LineFollower do
   end
 
   def forward(count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional) when stop == 0 do
-    # IO.puts("count: #{count}")
+    IO.puts("count: #{count}")
     count = count + 1
-    # IO.puts("nodes: #{nodes}")
+    IO.puts("nodes: #{nodes}")
     filter = filter + 1
 
     #Simple ReadLine
@@ -247,10 +249,10 @@ defmodule Task4CClientRobotB.LineFollower do
     end
 
 		if (power_difference < 0) do
-      # IO.puts("r #{maximum + power_difference} l #{maximum}")
+      IO.puts("r #{maximum + power_difference} l #{maximum}")
       set_motors(motor_ref,maximum,maximum + power_difference)
 		else
-      # IO.puts("r #{maximum} l #{maximum - power_difference}")
+      IO.puts("r #{maximum} l #{maximum - power_difference}")
       set_motors(motor_ref,maximum - power_difference,maximum)
     end
 

@@ -76,10 +76,10 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
   def weeding(motor_ref,robot, goal) do
     {robot,dir} = find_plant(robot,goal,motor_ref)
 
-    Process.sleep(1000)
+    Process.sleep(500)
     IO.puts("Opening the Claws...")
     test_servo_b(0)  #opening claws
-    Process.sleep(1000)
+    Process.sleep(500)
 
     IO.puts("Positioning the arm...")
     test_servo_a(40)
@@ -92,15 +92,15 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     IO.puts("Weeding Begins...")
 
     test_servo_b(20)
-    Process.sleep(1000)
+    Process.sleep(500)
     test_servo_b(40)
-    Process.sleep(1000)
+    Process.sleep(500)
     test_servo_b(60)
-    Process.sleep(1000)
+    Process.sleep(500)
     test_servo_b(90)
-    Process.sleep(1000)
+    Process.sleep(500)
     test_servo_a(50)
-    Process.sleep(1000)
+    Process.sleep(500)
 
     if(dir == 0) do
       Task4CClientRobotB.LineFollower.left(motor_ref,1)
@@ -153,11 +153,11 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     IO.puts("Weed Depositing...")
     Process.sleep(200)
     test_servo_a(50)
-    Process.sleep(1000)
+    Process.sleep(500)
     test_servo_a(30)
-    Process.sleep(1000)
+    Process.sleep(500)
     test_servo_b(0)
-    Process.sleep(1000)
+    Process.sleep(500)
     test_servo_a(60)
     IO.puts("Weeding Ends...")
 
