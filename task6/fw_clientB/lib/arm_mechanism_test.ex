@@ -124,7 +124,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
           robot.facing == :west ->
             robot
         end
-      robot.x == 6 ->
+      robot.y == :f ->
         cond do
           robot.facing == :north ->
             robot = Task4CClientRobotB.right(robot,motor_ref)
@@ -132,11 +132,11 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
           robot.facing == :south ->
             robot
           robot.facing == :east ->
-            Task4CClientRobotB.left(robot,motor_ref)
-          robot.facing == :west ->
             Task4CClientRobotB.right(robot,motor_ref)
+          robot.facing == :west ->
+            Task4CClientRobotB.left(robot,motor_ref)
         end
-      robot.y == :f ->
+      robot.x == 6 ->
         cond do
           robot.facing == :east ->
             robot = Task4CClientRobotB.right(robot,motor_ref)
@@ -160,6 +160,8 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     Process.sleep(1000)
     test_servo_a(60)
     IO.puts("Weeding Ends...")
+
+    robot
    end
 
 
