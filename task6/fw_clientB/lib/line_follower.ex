@@ -331,7 +331,7 @@ defmodule Task4CClientRobotB.LineFollower do
   def set_vals(vals) do
     {_s0, vals} = List.pop_at(vals,0)
     # List.replace_at(vals,1,Enum.at(vals,1)+100)
-    Enum.map(vals, fn x -> if(x > 400) do
+    Enum.map(vals, fn x -> if(x > 900) do
         1
       else
         0
