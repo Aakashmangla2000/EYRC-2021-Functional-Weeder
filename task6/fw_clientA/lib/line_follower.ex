@@ -126,9 +126,9 @@ defmodule Task4CClientRobotA.LineFollower do
 
   def right(channel,motor_ref,count) do
     Task4CClientRobotA.PhoenixSocketClient.timer(channel)
-    pwm(120)
+    pwm(100)
     motor_action(motor_ref,@forward)
-    Process.sleep(70)
+    Process.sleep(50)
     motor_action(motor_ref,@stop)
     IO.puts("Going right")
     count = count + 1
@@ -148,9 +148,9 @@ defmodule Task4CClientRobotA.LineFollower do
 
   def left(channel,motor_ref,count) do
     Task4CClientRobotA.PhoenixSocketClient.timer(channel)
-    pwm(120)
+    pwm(100)
     motor_action(motor_ref,@forward)
-    Process.sleep(70)
+    Process.sleep(50)
     motor_action(motor_ref,@stop)
     IO.puts("Going left")
     count = count + 1

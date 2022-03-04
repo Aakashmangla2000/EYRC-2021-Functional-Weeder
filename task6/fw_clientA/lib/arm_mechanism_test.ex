@@ -37,12 +37,17 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     robot2 = robot
     {robot,dir} = find_plant(channel,robot,goal,motor_ref)
     motor_action(motor_ref,@backward)
-    pwm(100)
+    pwm(120)
     if(robot == robot2) do
-      Process.sleep(100)
+      IO.puts("lol")
+      Process.sleep(80)
     else
-      # IO.puts("boop")
+      IO.puts("boop")
       Process.sleep(200)
+      # motor_action(motor_ref,@right)
+      # pwm(80)
+      # Process.sleep(30)
+      # motor_action(motor_ref,@stop)
     end
     motor_action(motor_ref,@stop)
     Process.sleep(100)
@@ -52,12 +57,12 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     change_angle(140)
 
     motor_action(motor_ref,@forward)
-    pwm(100)
+    pwm(120)
     if(robot == robot2) do
       Process.sleep(50)
     else
       # IO.puts("boop2")
-      Process.sleep(150)
+      Process.sleep(100)
     end
     motor_action(motor_ref,@stop)
     Process.sleep(100)
@@ -211,7 +216,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     # IO.inspect("a: #{a} b: #{b} count #{count}")
     if(a == 1 or count < 2) do
       motor_action(motor_ref,@right)
-      pwm(100)
+      pwm(80)
       Process.sleep(10)
       motor_action(motor_ref,@stop)
       Process.sleep(100)
@@ -244,7 +249,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     # IO.inspect("a: #{a} b: #{b} count #{count}")
     if(a == 1 or count < 2) do
       motor_action(motor_ref,@left)
-      pwm(100)
+      pwm(80)
       Process.sleep(50)
       motor_action(motor_ref,@stop)
       Process.sleep(100)

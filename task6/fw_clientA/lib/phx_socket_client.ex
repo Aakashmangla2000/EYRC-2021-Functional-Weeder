@@ -56,8 +56,8 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
     ###########################
     # Process.sleep(1000)
     is_obs_ahead = Task4CClientRobotA.LineFollower.obs_detect()
-    _tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing, "obs" => is_obs_ahead},10000)
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 1, "sender" => "A", "value" => %{"x" => x, "y" => y, "face" => facing}},10000)
+    _tup = PhoenixClient.Channel.push(channel,"new_msg",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing, "obs" => is_obs_ahead},15000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 1, "sender" => "A", "value" => %{"x" => x, "y" => y, "face" => facing}},15000)
     # {:ok, is_obs_ahead} = tup
 
     if(is_obs_ahead ==  true) do
@@ -77,7 +77,7 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
   ######################################################
 
   def timer(channel) do
-    {:ok, [val,time]} = PhoenixClient.Channel.push(channel,"time",%{"sender"=> "A", "value" => nil},10000)
+    {:ok, [val,time]} = PhoenixClient.Channel.push(channel,"time",%{"sender"=> "A", "value" => nil},15000)
     # IO.inspect(val)
     IO.puts("Timer func: #{time}")
     %{"bot" => b, "stop" => c, "start" => d} = val
@@ -94,51 +94,51 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
   end
 
   def server(channel,val) do
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 6, "sender" => "Server", "value" => %{"A" => val}},10000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 6, "sender" => "Server", "value" => %{"A" => val}},15000)
   end
 
   def get_start(channel) do
-    tup = PhoenixClient.Channel.push(channel,"start_pos",%{"client" => "robot_A"},10000)
+    tup = PhoenixClient.Channel.push(channel,"start_pos",%{"client" => "robot_A"},15000)
     {:ok, start} = tup
     start
   end
 
   def get_bot_position(bool,channel,robot) do
     %Task4CClientRobotA.Position{facing: facing,x: x, y: y} = robot
-    tup = PhoenixClient.Channel.push(channel,"get_bots",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing, "alive" => bool},10000)
+    tup = PhoenixClient.Channel.push(channel,"get_bots",%{"client" => "robot_A","x" => x, "y" => y, "face" => facing, "alive" => bool},15000)
     {:ok, rep} = tup
     [_ax,_ay,_afacing,bx,by,bfacing,_a_alive,b_alive] = rep
     [bx,String.to_atom(by),String.to_atom(bfacing),b_alive]
   end
 
   def get_goals(channel) do
-    tup = PhoenixClient.Channel.push(channel,"goals",%{"client" => "robot_A"},10000)
+    tup = PhoenixClient.Channel.push(channel,"goals",%{"client" => "robot_A"},15000)
     {:ok, seed} = tup
     seed
   end
 
   def send_obstacle_status(channel, %Task4CClientRobotA.Position{x: x, y: y, facing: facing} = _obs) do
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 2, "sender" => "A", "value" => %{"x" => x, "y" => y, "face" => facing}},10000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 2, "sender" => "A", "value" => %{"x" => x, "y" => y, "face" => facing}},15000)
   end
 
   def sowing2(channel, val) do
-    _res = PhoenixClient.Channel.push(channel,"sowing",%{"sender" => "A", "value" => val},10000)
+    _res = PhoenixClient.Channel.push(channel,"sowing",%{"sender" => "A", "value" => val},15000)
   end
 
   def sowing(channel, val) do
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 3, "sender" => "A", "value" => val},10000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 3, "sender" => "A", "value" => val},15000)
   end
 
   def stopping(channel) do
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 7, "sender" => "A", "value" => nil},10000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 7, "sender" => "A", "value" => nil},15000)
   end
 
   def starting(channel) do
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 8, "sender" => "A", "value" => nil},10000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 8, "sender" => "A", "value" => nil},15000)
   end
 
   def done(channel) do
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 9, "sender" => "A", "value" => nil},10000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 9, "sender" => "A", "value" => nil},15000)
   end
 
 end
