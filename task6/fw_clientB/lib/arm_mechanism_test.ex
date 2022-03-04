@@ -311,6 +311,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
       motor_action(motor_ref,@stop)
       Process.sleep(200)
       motor_action(motor_ref,@leftback)
+      pwm(50)
       Process.sleep(10)
       motor_action(motor_ref,@stop)
       Process.sleep(200)
@@ -320,10 +321,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
       # Process.sleep(100)
 
     end
-    # [a,b] = test_ir()
-    # rep()
     motor_action(motor_ref,@stop)
-    # Process.sleep(50)
   end
 
   def find_on_right(motor_ref,count) do
@@ -339,23 +337,26 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
       Process.sleep(200)
       find_on_right(motor_ref,count)
     else
+      IO.puts("inside else")
       motor_action(motor_ref,@stop)
-      Process.sleep(200)
+      Process.sleep(100)
       motor_action(motor_ref,@leftback)
-      Process.sleep(20)
+      pwm(50)
+      Process.sleep(50)
+      IO.puts("1")
       motor_action(motor_ref,@stop)
-      Process.sleep(200)
+      Process.sleep(50)
+      IO.puts("2")
       motor_action(motor_ref,@forward)
-      Process.sleep(70)
+      pwm(50)
+      Process.sleep(150)
+      IO.puts("3")
       motor_action(motor_ref,@stop)
       Process.sleep(100)
 
 
     end
-    # [a,b] = test_ir()
-    # rep()
     motor_action(motor_ref,@stop)
-    # Process.sleep(50)
   end
 
   def rep() do
