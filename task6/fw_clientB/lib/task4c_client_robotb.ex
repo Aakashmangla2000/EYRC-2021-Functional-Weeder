@@ -184,7 +184,7 @@ defmodule Task4CClientRobotB do
   def goal_div(deposited,motor_ref,robot, goal_locs, channel,count,mp,mp2) when count > 0 do
     mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5, :f => 6}
     parent = self()
-    pid = spawn_link(fn ->
+    # pid = spawn_link(fn ->
       count = Enum.count(goal_locs)
       {deposited,robot,goal_locs,_count} = if(count == 0) do
         {deposited,robot,goal_locs,count}
@@ -243,10 +243,10 @@ defmodule Task4CClientRobotB do
         {deposited,robot,goal_locs,count}
       end
       count = Enum.count(goal_locs)
-      send(parent, {:flag_value, {deposited,robot,goal_locs,count}})
-    end)
-    Process.register(pid, :client_toyrobotB)
-    {deposited,robot,goal_locs,count} = rec_value()
+    #   send(parent, {:flag_value, {deposited,robot,goal_locs,count}})
+    # end)
+    # Process.register(pid, :client_toyrobotB)
+    # {deposited,robot,goal_locs,count} = rec_value()
     goal_div(deposited,motor_ref,robot, goal_locs, channel,count,mp,mp2)
   end
 
