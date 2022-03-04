@@ -67,7 +67,7 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
 
     IO.puts("Obstacle ahead: #{is_obs_ahead}")
     IO.puts("Time: #{time}")
-    IO.puts("Robot position: #{x} #{y}")
+    IO.puts("Robot position: #{x} #{y} #{facing}")
 
     is_obs_ahead
   end

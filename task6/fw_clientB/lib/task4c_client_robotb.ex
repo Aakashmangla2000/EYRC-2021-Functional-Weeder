@@ -237,7 +237,7 @@ defmodule Task4CClientRobotB do
           6 - goal_x < 6 - goal_yy ->
             get_value(motor_ref,goal,robot,6, goal_y,channel)
         end
-        Task4CClientRobotB.ArmMechanismTest.deposition(channel,motor_ref,robot, goal)
+        robot = Task4CClientRobotB.ArmMechanismTest.deposition(channel,motor_ref,robot, goal)
         Task4CClientRobotB.PhoenixSocketClient.deposition2(channel,deposited)
 
         {deposited,robot,goal_locs,count}
@@ -606,8 +606,8 @@ defmodule Task4CClientRobotB do
     first = 0
     # IO.puts(len)
     # IO.puts("a pos #{ax} #{ay} #{afacing}")
-    # IO.puts("b pos #{robot.x} #{robot.y}")
-    # IO.puts("#{new_goal_x} #{new_goal_y}")
+    IO.puts("b pos #{robot.x} #{robot.y}")
+    IO.puts("#{new_goal_x} #{new_goal_y}")
     first = if(new_goal_x == ax and new_goal_y == ay and (robot.x != new_goal_x or robot.y != new_goal_y)) do
       x = cond do
         a_alive == false ->
