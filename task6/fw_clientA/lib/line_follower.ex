@@ -70,7 +70,6 @@ defmodule Task4CClientRobotA.LineFollower do
       false
     end
     obs
-    false
   end
 
   def open_motor_pwm_pins() do
