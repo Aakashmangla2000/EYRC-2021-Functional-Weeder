@@ -102,6 +102,12 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     test_servo_a(50)
     Process.sleep(500)
 
+    motor_action(motor_ref,@backward)
+    pwm(50)
+    Process.sleep(100)
+    motor_action(motor_ref,@stop)
+    Process.sleep(100)
+
     if(dir == 0) do
       Task4CClientRobotB.LineFollower.left(channel,motor_ref,1)
     else
