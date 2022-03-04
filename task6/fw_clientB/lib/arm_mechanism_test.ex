@@ -341,7 +341,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
       Process.sleep(200)
       find_on_left(motor_ref,count)
     else
-      IO.puts("inside else")
+      # IO.puts("inside else")
       motor_action(motor_ref,@stop)
       Process.sleep(200)
       motor_action(motor_ref,@leftback)
@@ -371,7 +371,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
       Process.sleep(200)
       find_on_right(motor_ref,count)
     else
-      IO.puts("inside else")
+      # IO.puts("inside else")
       motor_action(motor_ref,@stop)
       Process.sleep(100)
       motor_action(motor_ref,@leftback)

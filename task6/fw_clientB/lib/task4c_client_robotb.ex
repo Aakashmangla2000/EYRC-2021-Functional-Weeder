@@ -607,7 +607,7 @@ defmodule Task4CClientRobotB do
     # IO.puts(len)
     # IO.puts("a pos #{ax} #{ay} #{afacing}")
     IO.puts("b pos #{robot.x} #{robot.y}")
-    IO.puts("#{new_goal_x} #{new_goal_y}")
+    # IO.puts("#{new_goal_x} #{new_goal_y}")
     first = if(new_goal_x == ax and new_goal_y == ay and (robot.x != new_goal_x or robot.y != new_goal_y)) do
       x = cond do
         a_alive == false ->
