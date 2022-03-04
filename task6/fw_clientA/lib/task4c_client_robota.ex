@@ -67,7 +67,7 @@ defmodule Task4CClientRobotA do
     start = repss(channel,0)
     {x,y,facing} = change_start(start)
     goal_locs = Task4CClientRobotA.PhoenixSocketClient.get_goals(channel)
-    IO.puts(goal_locs)
+    # IO.puts(goal_locs)
     {:ok, robot} = start(x,y,facing)
     _obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
     {_,robot} = stop(robot,goal_locs,channel)

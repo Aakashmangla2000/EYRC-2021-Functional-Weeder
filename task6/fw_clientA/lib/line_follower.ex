@@ -116,7 +116,7 @@ defmodule Task4CClientRobotA.LineFollower do
 
   def right(channel,motor_ref,count) do
     Task4CClientRobotA.PhoenixSocketClient.timer(channel)
-    IO.puts("going right")
+    IO.puts("Going right")
     count = count + 1
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
@@ -134,7 +134,7 @@ defmodule Task4CClientRobotA.LineFollower do
 
   def left(channel,motor_ref,count) do
     Task4CClientRobotA.PhoenixSocketClient.timer(channel)
-    IO.puts("going left")
+    IO.puts("Going left")
     count = count + 1
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)

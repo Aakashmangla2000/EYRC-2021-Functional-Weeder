@@ -41,7 +41,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     if(robot == robot2) do
       Process.sleep(100)
     else
-      IO.puts("boop")
+      # IO.puts("boop")
       Process.sleep(200)
     end
     motor_action(motor_ref,@stop)
@@ -56,7 +56,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     if(robot == robot2) do
       Process.sleep(50)
     else
-      IO.puts("boop2")
+      # IO.puts("boop2")
       Process.sleep(150)
     end
     motor_action(motor_ref,@stop)
@@ -91,10 +91,10 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     goal = String.to_integer(goal)
 
     IO.puts("Find plant")
-    IO.inspect(goal)
-    IO.inspect(robot.x)
-    IO.inspect(robot.y)
-    IO.inspect(Map.get(p3,robot.y))
+    # IO.inspect(goal)
+    # IO.inspect(robot.x)
+    # IO.inspect(robot.y)
+    # IO.inspect(Map.get(p3,robot.y))
 
     val = cond do
       robot.x == 6 ->
@@ -202,7 +202,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   end
 
   def find_on_left(motor_ref,count) do
-    IO.puts("find on left")
+    IO.puts("Find plant on left")
     Process.sleep(200)
     count = count + 1
     [a,b] = test_ir()
@@ -235,7 +235,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   end
 
   def find_on_right(motor_ref,count) do
-    IO.puts("find on right")
+    IO.puts("Find plant on right")
     Process.sleep(200)
     count = count + 1
     [a,b] = test_ir()
@@ -255,7 +255,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
 
   def rep() do
     [a,b] = test_ir()
-    IO.inspect("a: #{a} b: #{b}")
+    # IO.inspect("a: #{a} b: #{b}")
     if(a == 1) do
       rep()
     else
