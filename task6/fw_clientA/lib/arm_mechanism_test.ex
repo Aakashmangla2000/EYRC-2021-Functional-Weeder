@@ -72,6 +72,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   def change_angle(angle) do
     if(angle > 0) do
       test_servo_b(angle-4)
+      Process.sleep(50)
       change_angle(angle-4)
     else
     end
@@ -80,6 +81,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   def change_angle2(angle) do
     if(angle < 140) do
       test_servo_b(angle+4)
+      Process.sleep(50)
       change_angle2(angle+4)
     else
     end

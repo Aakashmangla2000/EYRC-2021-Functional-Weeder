@@ -214,8 +214,11 @@ defmodule Task4CClientRobotA do
     # end)
     # Process.register(pid, :client_toyrobotA)
     # {robot,goal_locs,count} = rec_value()
-
-    goal_div(motor_ref,robot, goal_locs,channel,count,mp,mp2)
+    if(Enum.count(goal_locs) == 2) do
+      goal_div(motor_ref,robot, goal_locs,channel,0,mp,mp2)
+    else
+      goal_div(motor_ref,robot, goal_locs,channel,count,mp,mp2)
+    end
   end
 
   def goal_div(motor_ref,robot, _goal_locs, _channel, _count,_mp,_mp2) do

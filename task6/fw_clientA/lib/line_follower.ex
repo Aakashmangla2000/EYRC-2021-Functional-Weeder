@@ -51,6 +51,11 @@ defmodule Task4CClientRobotA.LineFollower do
   end
 
    def ir_sensors do
+    Process.sleep(1000)
+    proximity = test_ir()
+    proximity = test_ir()
+    proximity = test_ir()
+    proximity = test_ir()
     proximity = test_ir()
     front  =  Enum.at(proximity, 0)
     back = Enum.at(proximity, 1)
@@ -70,6 +75,7 @@ defmodule Task4CClientRobotA.LineFollower do
       false
     end
     obs
+    false
   end
 
   def open_motor_pwm_pins() do
@@ -111,10 +117,19 @@ defmodule Task4CClientRobotA.LineFollower do
     motor_action(motor_ref,@forward)
     forward(channel,count,nodes,stop,motor_ref,maximum,integral,last_proportional)
     Task4CClientRobotA.PhoenixSocketClient.timer(channel)
+    sensor_vals = test_wlf_sensors()
+    [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
+    if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
+      find_line(motor_ref)
+    end
   end
 
   def right(channel,motor_ref,count) do
     Task4CClientRobotA.PhoenixSocketClient.timer(channel)
+    pwm(120)
+    motor_action(motor_ref,@forward)
+    Process.sleep(70)
+    motor_action(motor_ref,@stop)
     IO.puts("Going right")
     count = count + 1
     sensor_vals = test_wlf_sensors()
@@ -125,7 +140,7 @@ defmodule Task4CClientRobotA.LineFollower do
     Process.sleep(100)
     motor_action(motor_ref,@stop)
     Process.sleep(100)
-    if(count > 2 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
+    if(count > 3 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
     else
       right(channel,motor_ref,count)
     end
@@ -133,6 +148,10 @@ defmodule Task4CClientRobotA.LineFollower do
 
   def left(channel,motor_ref,count) do
     Task4CClientRobotA.PhoenixSocketClient.timer(channel)
+    pwm(120)
+    motor_action(motor_ref,@forward)
+    Process.sleep(70)
+    motor_action(motor_ref,@stop)
     IO.puts("Going left")
     count = count + 1
     sensor_vals = test_wlf_sensors()
@@ -143,7 +162,7 @@ defmodule Task4CClientRobotA.LineFollower do
     Process.sleep(100)
     motor_action(motor_ref,@stop)
     Process.sleep(100)
-    if(count > 2 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
+    if(count > 3 and (s1 == 1 or s2 == 1 or s3 == 1 or s4 == 1 or s5 == 1)) do
     else
       left(channel,motor_ref,count)
     end
