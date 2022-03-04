@@ -90,8 +90,8 @@ defmodule Task4CClientRobotB.LineFollower do
     integral = 0;
     last_proportional = 0
     motor_action(motor_ref,@stop)
-    pwm(70)
-    motor_action(motor_ref,@forward)
+    pwm(10)
+    # motor_action(motor_ref,@forward)
     Process.sleep(5)
 
     count = 1
