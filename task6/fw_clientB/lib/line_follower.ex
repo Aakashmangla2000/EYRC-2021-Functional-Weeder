@@ -202,7 +202,7 @@ defmodule Task4CClientRobotB.LineFollower do
 
   def forward(channel,count,filter,nodes,stop,motor_ref,maximum,integral,last_proportional) when stop == 0 do
     # Task4CClientRobotB.PhoenixSocketClient.timer(channel)
-    IO.puts("count: #{count}")
+    # IO.puts("count: #{count}")
     count = count + 1
     IO.puts("nodes: #{nodes}")
     filter = filter + 1
@@ -255,10 +255,10 @@ defmodule Task4CClientRobotB.LineFollower do
     end
 
 		if (power_difference < 0) do
-      IO.puts("r #{maximum + power_difference} l #{maximum}")
+      # IO.puts("r #{maximum + power_difference} l #{maximum}")
       set_motors(motor_ref,maximum,maximum + power_difference)
 		else
-      IO.puts("r #{maximum} l #{maximum - power_difference}")
+      # IO.puts("r #{maximum} l #{maximum - power_difference}")
       set_motors(motor_ref,maximum - power_difference,maximum)
     end
 

@@ -65,7 +65,7 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
     end
     time = timer(channel)
 
-    IO.puts("Obstacle ahead: #{is_obs_ahead}")
+    # IO.puts("Obstacle ahead: #{is_obs_ahead}")
     IO.puts("Time: #{time}")
     IO.puts("Robot position: #{x} #{y} #{facing}")
 
