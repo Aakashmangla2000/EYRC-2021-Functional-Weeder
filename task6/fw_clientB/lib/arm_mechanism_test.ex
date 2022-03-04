@@ -122,11 +122,15 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
       robot.x == 6 and robot.y == :f ->
         cond do
           robot.facing == :north ->
-            Task4CClientRobotB.left(channel,robot,motor_ref)
+            robot = Task4CClientRobotB.left(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+            robot
           robot.facing == :south ->
             robot
           robot.facing == :east ->
-            Task4CClientRobotB.right(channel,robot,motor_ref)
+            robot = Task4CClientRobotB.right(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+            robot
           robot.facing == :west ->
             robot
         end
@@ -134,25 +138,39 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
         cond do
           robot.facing == :north ->
             robot = Task4CClientRobotB.right(channel,robot,motor_ref)
-            Task4CClientRobotB.right(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+            robot = Task4CClientRobotB.right(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+            robot
           robot.facing == :south ->
             robot
           robot.facing == :east ->
-            Task4CClientRobotB.right(channel,robot,motor_ref)
+            robot = Task4CClientRobotB.right(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+            robot
           robot.facing == :west ->
-            Task4CClientRobotB.left(channel,robot,motor_ref)
+            robot = Task4CClientRobotB.left(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+            robot
         end
       robot.x == 6 ->
         cond do
           robot.facing == :east ->
             robot = Task4CClientRobotB.right(channel,robot,motor_ref)
-            Task4CClientRobotB.right(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+            robot = Task4CClientRobotB.right(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+            robot
           robot.facing == :west ->
             robot
           robot.facing == :north ->
-            Task4CClientRobotB.left(channel,robot,motor_ref)
+            robot = Task4CClientRobotB.left(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+            robot
           robot.facing == :south ->
-            Task4CClientRobotB.right(channel,robot,motor_ref)
+            robot = Task4CClientRobotB.right(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
+            robot
         end
     end
 
@@ -213,10 +231,12 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
         cond do
           val == 1 ->
             robot = Task4CClientRobotB.right(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_left(motor_ref,0)
             {robot,0}
           val == 2 ->
             robot = Task4CClientRobotB.left(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_right(motor_ref,0)
             {robot,1}
           val == 3 ->
@@ -233,6 +253,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
             {robot,0}
           val == 2 ->
             robot = Task4CClientRobotB.right(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_left(motor_ref,0)
             {robot,0}
           val == 3 ->
@@ -240,6 +261,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
             {robot,1}
           val == 4 ->
             robot = Task4CClientRobotB.left(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_right(motor_ref,0)
             {robot,1}
         end
@@ -247,6 +269,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
         cond do
           val == 1 ->
             robot = Task4CClientRobotB.left(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_right(motor_ref,0)
             {robot,1}
           val == 2 ->
@@ -254,6 +277,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
             {robot,1}
           val == 3 ->
             robot = Task4CClientRobotB.right(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_left(motor_ref,0)
             {robot,0}
           val == 4 ->
@@ -270,10 +294,12 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
             {robot,0}
           val == 3 ->
             robot = Task4CClientRobotB.left(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_right(motor_ref,0)
             {robot,1}
           val == 4 ->
             robot = Task4CClientRobotB.right(channel,robot,motor_ref)
+            Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_left(motor_ref,0)
             {robot,0}
         end

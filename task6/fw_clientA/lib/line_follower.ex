@@ -81,7 +81,6 @@ defmodule Task4CClientRobotA.LineFollower do
   end
 
   def pid(channel,motor_ref) do
-    Task4CClientRobotA.PhoenixSocketClient.timer(channel)
     Logger.debug("Going Forward")
     # Process.sleep(4000)
     # {motor_ref,pwm_ref} = open_motor_pwm_pins()
@@ -90,6 +89,7 @@ defmodule Task4CClientRobotA.LineFollower do
     integral = 0;
     last_proportional = 0
     motor_action(motor_ref,@stop)
+    Task4CClientRobotA.PhoenixSocketClient.timer(channel)
     pwm(10)
 
     Process.sleep(5)
@@ -111,6 +111,7 @@ defmodule Task4CClientRobotA.LineFollower do
     end
     motor_action(motor_ref,@forward)
     forward(channel,count,nodes,stop,motor_ref,maximum,integral,last_proportional)
+    Task4CClientRobotA.PhoenixSocketClient.timer(channel)
   end
 
   def right(channel,motor_ref,count) do
@@ -192,7 +193,7 @@ defmodule Task4CClientRobotA.LineFollower do
   end
 
   def forward(channel,count,nodes,stop,motor_ref,maximum,integral,last_proportional) when stop == 0 do
-    Task4CClientRobotA.PhoenixSocketClient.timer(channel)
+    # Task4CClientRobotA.PhoenixSocketClient.timer(channel)
     # IO.puts("#{count}")
     count = count + 1
 

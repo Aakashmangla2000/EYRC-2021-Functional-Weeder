@@ -111,62 +111,62 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
           </div>
 
           <%= for i <- @depos do %>
-            <div class="plant2" style={"bottom: 760px; left: #{80+i*150}px"}>
-              <img id="plant2" src={"/images/weed.jpeg"} style="height:35px;">
+            <div class="plant2" style={"bottom: 800px; left: #{80+((Enum.find_index(@depos, fn x -> x == i end))+1)*150}px"}>
+              <img id={"pl#{i}"} src={"/images/weed.jpeg"} style="height:50px;">
             </div>
           <% end %>
 
           <%= for i <- 0..4 do %>
             <div class="plant" style={"bottom: 660px; left: #{80+i*150}px"}>
-              <img id="plant" src={"/images/plant.png"} style="height:70px;">
+              <img id={"plant_1_#{i}"} src={"/images/plant.png"} style="height:71px;">
             </div>
           <% end %>
 
           <%= for i <- 0..4 do %>
             <div class="plant" style={"bottom: 510px; left: #{80+i*150}px"}>
-              <img id="plant" src={"/images/plant.png"} style="height:70px;">
+              <img id={"plant_2_#{i}"} src={"/images/plant.png"} style="height:71px;">
             </div>
           <% end %>
 
           <%= for i <- 0..4 do %>
             <div class="plant" style={"bottom: 360px; left: #{80+i*150}px"}>
-              <img id="plant" src={"/images/plant.png"} style="height:70px;">
+              <img id={"plant_3_#{i}"} src={"/images/plant.png"} style="height:71px;">
             </div>
           <% end %>
 
           <%= for i <- 0..4 do %>
             <div class="plant" style={"bottom: 210px; left: #{80+i*150}px"}>
-              <img id="plant" src={"/images/plant.png"} style="height:70px;">
+              <img id={"plant_4_#{i}"} src={"/images/plant.png"} style="height:71px;">
             </div>
           <% end %>
 
           <%= for i <- 0..4 do %>
             <div class="plant" style={"bottom: 60px; left: #{80+i*150}px"}>
-              <img id="plant" src={"/images/plant.png"} style="height:70px;">
+              <img id={"plant_5_#{i}"} src={"/images/plant.png"} style="height:71px;">
             </div>
           <% end %>
 
           <%= for i <- @robotA_goals do %>
               <div class="plant" style={"bottom: #{(div(String.to_integer(i)-1,5)*150)+60}px; left: #{(rem(String.to_integer(i)+4,5))*150+80}px"}>
-              <img id="plant" src={"/images/soil.png"} style="height:70px;">
+              <img id={"pot_#{i}"} src={"/images/pot.png"} style="height:70px;">
             </div>
           <% end %>
 
           <%= for i <- @seeds do %>
               <div class="seed" style={"bottom: #{(div(i-1,5)*150)+60}px; left: #{(rem(i+5,5)-1)*150+80}px"}>
-              <img id="plant" src={"/images/seed.png"} style="height:80px;">
+              <img id={"seed_#{i}"} src={"/images/seed.png"} style="height:80px;">
             </div>
           <% end %>
 
           <%= for i <- @robotB_goals do %>
               <div class="plant" style={"bottom: #{(div(String.to_integer(i)-1,5)*150)+60}px; left: #{(rem(String.to_integer(i)+4,5))*150+80}px"}>
-              <img id="plant" src={"/images/weed.jpeg"} style="height:70px;">
+              <img id={"weed_#{i}"} src={"/images/weed.jpeg"} style="height:70px;">
             </div>
           <% end %>
 
           <%= for i <- @weeds do %>
               <div class="plant" style={"bottom: #{(div(i-1,5)*150)+60}px; left: #{(rem(i+4,5))*150+80}px"}>
-              <img id="plant" src={"/images/soil.png"} style="height:70px;">
+              <img id={"soil_#{i}"} src={"/images/soil.png"} style="height:70px;">
             </div>
           <% end %>
 

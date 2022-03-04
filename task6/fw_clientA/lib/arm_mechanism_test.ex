@@ -125,10 +125,12 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
         cond do
           val == 1 ->
             robot = Task4CClientRobotA.right(channel,robot,motor_ref)
+            Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_left(motor_ref,0)
             {robot,0}
           val == 2 ->
             robot = Task4CClientRobotA.left(channel,robot,motor_ref)
+            Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_right(motor_ref,0)
             {robot,1}
           val == 3 ->
@@ -145,6 +147,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
             {robot,0}
           val == 2 ->
             robot = Task4CClientRobotA.right(channel,robot,motor_ref)
+            Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_left(motor_ref,0)
             {robot,0}
           val == 3 ->
@@ -152,6 +155,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
             {robot,1}
           val == 4 ->
             robot = Task4CClientRobotA.left(channel,robot,motor_ref)
+            Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_right(motor_ref,0)
             {robot,1}
         end
@@ -159,6 +163,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
         cond do
           val == 1 ->
             robot = Task4CClientRobotA.left(channel,robot,motor_ref)
+            Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_right(motor_ref,0)
             {robot,1}
           val == 2 ->
@@ -166,6 +171,7 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
             {robot,1}
           val == 3 ->
             robot = Task4CClientRobotA.right(channel,robot,motor_ref)
+            Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_left(motor_ref,0)
             {robot,0}
           val == 4 ->
@@ -182,10 +188,12 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
             {robot,0}
           val == 3 ->
             robot = Task4CClientRobotA.left(channel,robot,motor_ref)
+            Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_right(motor_ref,0)
             {robot,1}
           val == 4 ->
             robot = Task4CClientRobotA.right(channel,robot,motor_ref)
+            Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
             find_on_left(motor_ref,0)
             {robot,0}
         end
