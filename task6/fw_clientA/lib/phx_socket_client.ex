@@ -76,6 +76,12 @@ defmodule Task4CClientRobotA.PhoenixSocketClient do
   ## You may create extra helper functions as needed. ##
   ######################################################
 
+  @doc """
+  The timer function checks whether we have reached the instance
+  where the robot is supposed to be killed according to robot_handle file,
+  if yes then the robot killed for that much department.
+  """
+
   def timer(channel) do
     {:ok, [val,time]} = PhoenixClient.Channel.push(channel,"time",%{"sender"=> "A", "value" => nil},15000)
     # IO.inspect(val)
