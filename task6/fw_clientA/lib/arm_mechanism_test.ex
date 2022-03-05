@@ -1,8 +1,9 @@
 defmodule Task4CClientRobotA.ArmMechanismTest do
   @moduledoc """
-  Documentation for `ArmMechanismTest'
+  This module implements seeding functionality for the seeder robot.
   """
 
+  ## importing necessary libraries and setting pins
   require Logger
   use Bitwise
   alias Circuits.GPIO
@@ -27,31 +28,34 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
   @duty_cycles [70]
   @pwm_frequency 50
 
+  @doc """
+  test_ir function reads and returns the ir sensor values detecting the obstacles or the plants.
+  The presence of an object is indicated by 0 and the absence is indicated by 1.
+  """
   def test_ir do
-    # Logger.debug("Testing IR Proximity Sensors")
     ir_ref = Enum.map(@ir_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :input, pull_mode: :pullup) end)
     ir_values = Enum.map(ir_ref,fn {_, ref_no} -> GPIO.read(ref_no) end)
   end
 
+  @doc """
+  seeding function calls the find_plant function defined below.
+  Once the plant is located and the robot is positioned accordingly,
+  the seeding is initiated.
+  """
   def seeding(channel,motor_ref,robot,goal) do
     robot2 = robot
     {robot,dir} = find_plant(channel,robot,goal,motor_ref)
     motor_action(motor_ref,@backward)
     pwm(120)
+
     if(robot == robot2) do
-      IO.puts("lol")
       Process.sleep(80)
     else
-      IO.puts("boop")
       Process.sleep(200)
-      # motor_action(motor_ref,@right)
-      # pwm(80)
-      # Process.sleep(30)
-      # motor_action(motor_ref,@stop)
     end
+
     motor_action(motor_ref,@stop)
     Process.sleep(100)
-
     change_angle2(20)
     Process.sleep(1000)
     change_angle(140)
@@ -61,11 +65,12 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     if(robot == robot2) do
       Process.sleep(50)
     else
-      # IO.puts("boop2")
       Process.sleep(100)
     end
     motor_action(motor_ref,@stop)
     Process.sleep(100)
+
+    #This condition sets the robot back to its original position on the line,once the weed is picked up
     if(dir == 0) do
       Task4CClientRobotA.LineFollower.left(channel,motor_ref,1)
     else
@@ -74,6 +79,10 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     robot
   end
 
+  @doc """
+  The change_angle and change_angle2 functions rotate the servo plate/disk
+  slowly from angle 0 to angle 140 to drop the seed from the cavity.
+  """
   def change_angle(angle) do
     if(angle > 0) do
       test_servo_b(angle-4)
@@ -82,7 +91,6 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     else
     end
   end
-
   def change_angle2(angle) do
     if(angle < 140) do
       test_servo_b(angle+4)
@@ -92,17 +100,18 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     end
   end
 
+  @doc """
+  find_plant function finds the plant to be seeded and position the robot for seeding using
+  find_on_right and find_on_left functions. This function checks, if the goal plant is at the top, bottom,
+  right or left of the plant on basis of the robot current position and facing. Once this is done the robot's backside
+  is positioned just in front of the plant.
+  """
   def find_plant(channel,robot,goal,motor_ref) do
     p3 = %{:a => 0, :b => 1, :c => 2, :d => 3, :e => 4, :f => 5}
     Process.sleep(1000)
     goal = String.to_integer(goal)
 
     IO.puts("Find plant")
-    # IO.inspect(goal)
-    # IO.inspect(robot.x)
-    # IO.inspect(robot.y)
-    # IO.inspect(Map.get(p3,robot.y))
-
     val = cond do
       robot.x == 6 ->
         cond do
@@ -208,12 +217,17 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     {robot,dir}
   end
 
+  @doc """
+  find_on_left rotates the backside of the robot to the left i.e.
+  the robot to the right to find the plant on the left and
+  accordingly position the arm mechanism just above the plant.
+  """
   def find_on_left(motor_ref,count) do
     IO.puts("Find plant on left")
     Process.sleep(200)
     count = count + 1
     [a,b] = test_ir()
-    # IO.inspect("a: #{a} b: #{b} count #{count}")
+    # If ir sensor at the arm indicates 1 then the bot will rotate further,else it will stop and position the arm
     if(a == 1 or count < 2) do
       motor_action(motor_ref,@right)
       pwm(80)
@@ -241,12 +255,17 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     Process.sleep(100)
   end
 
+  @doc """
+  find_on_right rotates the backside of the robot to the right i.e.
+  the robot to the left to find the plant on the right and
+  accordingly position the arm mechanism just above the plant.
+  """
   def find_on_right(motor_ref,count) do
     IO.puts("Find plant on right")
     Process.sleep(200)
     count = count + 1
     [a,b] = test_ir()
-    # IO.inspect("a: #{a} b: #{b} count #{count}")
+    # If ir sensor at the arm indicates 1 then the bot will rotate further,else it will stop and position the arm
     if(a == 1 or count < 2) do
       motor_action(motor_ref,@left)
       pwm(80)
@@ -260,21 +279,15 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     end
   end
 
-  def rep() do
-    [a,b] = test_ir()
-    # IO.inspect("a: #{a} b: #{b}")
-    if(a == 1) do
-      rep()
-    else
-      [a,b]
-    end
-  end
+  # def test_servo_a(angle) do
+  #   val = trunc(((2.5 + 10.0 * angle / 180) / 100 ) * 255)
+  #   Pigpiox.Pwm.set_pwm_frequency(@servo_a_pin, @pwm_frequency)
+  #   Pigpiox.Pwm.gpio_pwm(@servo_a_pin, val)
+  # end
 
-  def test_servo_a(angle) do
-    val = trunc(((2.5 + 10.0 * angle / 180) / 100 ) * 255)
-    Pigpiox.Pwm.set_pwm_frequency(@servo_a_pin, @pwm_frequency)
-    Pigpiox.Pwm.gpio_pwm(@servo_a_pin, val)
-  end
+  @doc """
+  test_servo_b sets the angle for the servo controlling rotation of the plate.
+  """
 
   def test_servo_b(angle) do
     val = trunc(((2.5 + 10.0 * angle / 180) / 100 ) * 255)
@@ -282,13 +295,20 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     Pigpiox.Pwm.gpio_pwm(@servo_b_pin, val)
   end
 
+  @doc """
+  Function defining pin values for various movements.
+  """
   defp motor_action(motor_ref,motion) do
-    # IO.puts("a #{inspect(motor_ref)}")
     motor_ref |> Enum.zip(motion) |> Enum.each(fn {{_, ref_no}, value} -> GPIO.write(ref_no, value) end)
     pwm(100)
     Process.sleep(200)
   end
 
+  @doc """
+  Function defining pwm values to motor pins
+  Note: "duty" variable can take value from 0 to 255. Value 255 indicates 100% duty cycle
+
+  """
   defp pwm(duty) do
     Enum.each(@pwm_pins, fn {_atom, pin_no} -> Pigpiox.Pwm.gpio_pwm(pin_no, duty) end)
   end

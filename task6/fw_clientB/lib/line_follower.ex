@@ -432,14 +432,14 @@ defmodule Task4CClientRobotB.LineFollower do
   end
 
   @doc """
-  Supporting function for test_motion
+  Function defining pin values for various movements.
   """
   defp motor_action(motor_ref,motion) do
     motor_ref |> Enum.zip(motion) |> Enum.each(fn {{_, ref_no}, value} -> GPIO.write(ref_no, value) end)
   end
 
   @doc """
-  Supporting function for test_pwm is pwm
+  Function defining pwm values to motor pins
   Note: "duty" variable can take value from 0 to 255. Value 255 indicates 100% duty cycle
   pwml and pwmr spefically sets pwm value for left and right wheels
   """
