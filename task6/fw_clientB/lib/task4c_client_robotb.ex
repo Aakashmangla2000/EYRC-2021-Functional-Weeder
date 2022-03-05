@@ -257,7 +257,8 @@ defmodule Task4CClientRobotB do
   @doc """
   get_value function defines the queue and visited queue for the implementation of deapth first search algorithm
   for finding the best possible path. The function calls another function rep and calls the weeding function
-  from Task4CClientRobotA.ArmMechanismTest module. """
+  from Task4CClientRobotA.ArmMechanismTest module.
+  """
   def get_value(motor_ref,goal,robot,goal_x, goal_y,channel) do
       len = 1
       q = :queue.new()
@@ -275,7 +276,8 @@ defmodule Task4CClientRobotB do
       {robot}
   end
    @doc """
-  plus and minus functions are used to increment or decrement of y position coordinate of the robot"""
+  plus and minus functions are used to increment or decrement of y position coordinate of the robot
+  """
   def plus(y) do
     Enum.find(@robot_map_y_atom_to_num, fn {_, val} -> val == Map.get(@robot_map_y_atom_to_num, y) + 1 end) |> elem(0)
   end
@@ -285,7 +287,8 @@ defmodule Task4CClientRobotB do
 
   @doc """
   decide_dir defines the first step of the robot in terms of x and y coordinate
-  along with the facing based on the next goal it has to reach """
+  along with the facing based on the next goal it has to reach
+  """
   def decide_dir(facing,x,y,goal_x,goal_y) do
     mp2 = %{:a => 0, :b => 1, :c => 2, :d => 3, :e => 4, :f => 5}
     goal_y = Map.get(mp2, goal_y)
@@ -584,7 +587,8 @@ defmodule Task4CClientRobotB do
   rep function is responsible for the deciding the entire path of the robot. This functions uses depth-first-search approach
   to determine the next node the robot has to visit. This function check the presence of obstacle with every movement and changes
   the course of the traversal path if one is encountered. It calls multiple functions defined in this module like, decide_dir, dir_select, goX,
-  goY, forGoal_x, forGoal_y"""
+  goY, forGoal_x, forGoal_y
+  """
   def rep(motor_ref,goal,dir,q,visited,robot,goal_x,goal_y,channel,len) when len != 0 do
     Task4CClientRobotB.PhoenixSocketClient.timer(channel)
     #getting next block
@@ -878,7 +882,8 @@ defmodule Task4CClientRobotB do
   end
 
   @doc """
-  forGoal_x function sets the facing or direction of the robot """
+  forGoal_x function sets the facing or direction of the robot
+  """
   def forGoal_x(motor_ref,_obs,robot,goal_x, channel) when robot.x < goal_x and robot.facing != :east do
     obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
      [_obs,robot] = cond do
@@ -924,7 +929,8 @@ def forGoal_x(motor_ref,obs,robot, _goal_x, _channel) do
 end
 
 @doc """
-  forGoal_y function sets the facing or direction of the robot """
+  forGoal_y function sets the facing or direction of the robot
+"""
 def forGoal_y(motor_ref,_obs,robot,goal_y, channel) when robot.y < goal_y and robot.facing != :north do
 obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
   [_obs,robot] = cond do
@@ -969,7 +975,8 @@ def forGoal_y(motor_ref,obs,robot, _goal_y, _channel) do
 end
 
 @doc """
-goX function moves the bot along x axis """
+goX function moves the bot along x axis
+"""
 def goX(%Task4CClientRobotB.Position{facing: _facing,x: x, y: _y} = robot, goal_x, goal_y, channel,_ob,motor_ref) when x != goal_x do
   robot = move(channel,robot,motor_ref)
   obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
@@ -981,7 +988,8 @@ def goX(robot, _goal_x, _goal_y, _channel,ob,_motor_ref) do
 end
 
 @doc """
-goY function moves the bot along y axis """
+goY function moves the bot along y axis
+"""
 def goY(%Task4CClientRobotB.Position{facing: _facing,x: _x, y: y} = robot, goal_x, goal_y, channel,_ob,motor_ref) when y != goal_y do
   robot = move(channel,robot,motor_ref)
   obs = Task4CClientRobotB.PhoenixSocketClient.send_robot_status(channel,robot)
