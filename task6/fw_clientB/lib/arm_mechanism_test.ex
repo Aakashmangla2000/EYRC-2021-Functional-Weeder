@@ -35,7 +35,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
   def test_ir do
     ir_ref = Enum.map(@ir_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :input, pull_mode: :pullup) end)
     ir_values = Enum.map(ir_ref,fn {_, ref_no} -> GPIO.read(ref_no) end)
-    IO.inspect(ir_values)
+    # IO.inspect(ir_values)
   end
 
   # def testweeding(channel,motor_ref,dir) do
@@ -197,10 +197,10 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     goal = String.to_integer(goal)
 
     IO.puts("Find plant")
-    IO.inspect(goal)
-    IO.inspect(robot.x)
-    IO.inspect(robot.y)
-    IO.inspect(Map.get(p3,robot.y))
+    # IO.inspect(goal)
+    # IO.inspect(robot.x)
+    # IO.inspect(robot.y)
+    # IO.inspect(Map.get(p3,robot.y))
 
     val = cond do
       robot.x == 6 ->
@@ -329,14 +329,14 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
 
   def find_on_left(motor_ref,count) do
     IO.puts("find on left")
-    Process.sleep(200)
+    Process.sleep(300)
     count = count + 1
     [a,b] = test_ir()
     IO.inspect("a: #{a} b: #{b} count #{count}")
     if(b == 1) do
-      motor_action(motor_ref,@right)
       pwm(50)
-      Process.sleep(50)
+      motor_action(motor_ref,@right)
+      Process.sleep(1)
       motor_action(motor_ref,@stop)
       Process.sleep(200)
       find_on_left(motor_ref,count)
@@ -346,12 +346,12 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
       Process.sleep(200)
       motor_action(motor_ref,@leftback)
       pwm(50)
-      Process.sleep(50)
+      Process.sleep(70)
       motor_action(motor_ref,@stop)
       Process.sleep(50)
       motor_action(motor_ref,@forward)
       pwm(50)
-      Process.sleep(100)
+      Process.sleep(120)
       motor_action(motor_ref,@stop)
       Process.sleep(100)
     end
@@ -366,7 +366,7 @@ defmodule Task4CClientRobotB.ArmMechanismTest do
     if(b == 1) do
       motor_action(motor_ref,@left)
       pwm(50)
-      Process.sleep(50)
+      Process.sleep(10)
       motor_action(motor_ref,@stop)
       Process.sleep(200)
       find_on_right(motor_ref,count)

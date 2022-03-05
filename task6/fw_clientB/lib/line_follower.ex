@@ -70,6 +70,7 @@ defmodule Task4CClientRobotB.LineFollower do
       false
     end
     obs
+    false
   end
 
   def open_motor_pwm_pins() do
@@ -105,7 +106,7 @@ defmodule Task4CClientRobotB.LineFollower do
 
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    # IO.inspect(sensor_vals)
+    IO.inspect(sensor_vals)
     # IO.inspect(set_vals(sensor_vals))
 
     if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
@@ -121,10 +122,9 @@ defmodule Task4CClientRobotB.LineFollower do
     Task4CClientRobotB.PhoenixSocketClient.timer(channel)
     IO.puts("going right")
     count = count + 1
-    IO.inspect(count)
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    IO.inspect(sensor_vals)
+    # IO.inspect(sensor_vals)
     IO.inspect(set_vals(sensor_vals))
     pwm(120)
     Process.sleep(100)
@@ -145,10 +145,9 @@ defmodule Task4CClientRobotB.LineFollower do
     Task4CClientRobotB.PhoenixSocketClient.timer(channel)
     IO.puts("going left")
     count = count + 1
-    IO.inspect(count)
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    IO.inspect(sensor_vals)
+    # IO.inspect(sensor_vals)
     IO.inspect(set_vals(sensor_vals))
     pwm(120)
     Process.sleep(100)
@@ -210,7 +209,7 @@ defmodule Task4CClientRobotB.LineFollower do
     #Simple ReadLine
     sensor_vals = test_wlf_sensors()
     position = read_line2(sensor_vals)
-    IO.inspect(sensor_vals)
+    # IO.inspect(sensor_vals)
 
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
 
@@ -265,7 +264,7 @@ defmodule Task4CClientRobotB.LineFollower do
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
 
-    {nodes,count} = if(count >= 12 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) and count > 5)) do
+    {nodes,count} = if(count >= 13 or ((s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) and count > 5)) do
         nodes = nodes + 1
         count = 1
         # IO.puts(nodes)

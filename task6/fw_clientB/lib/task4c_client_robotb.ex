@@ -247,7 +247,14 @@ defmodule Task4CClientRobotB do
     # end)
     # Process.register(pid, :client_toyrobotB)
     # {deposited,robot,goal_locs,count} = rec_value()
-    goal_div(deposited,motor_ref,robot, goal_locs, channel,count,mp,mp2)
+    # IO.puts("count to stop #{count}")
+    if(Enum.count(goal_locs) == 3)do
+      # IO.puts("inside stopping cond")
+      goal_div(deposited,motor_ref,robot, goal_locs, channel,0,mp,mp2)
+    else
+      goal_div(deposited,motor_ref,robot, goal_locs, channel,count,mp,mp2)
+    end
+
   end
 
   def goal_div(_deposited,_motor_ref,robot, _goal_locs, _channel, _count,_mp,_mp2) do

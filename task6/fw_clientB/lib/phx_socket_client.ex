@@ -77,7 +77,7 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
   ######################################################
 
    def timer(channel) do
-    {:ok, [val,time]} = PhoenixClient.Channel.push(channel,"time",%{"sender" => "B", "value" => nil},5000)
+    {:ok, [val,time]} = PhoenixClient.Channel.push(channel,"time",%{"sender" => "B", "value" => nil},15000)
     %{"bot" => b, "stop" => c, "start" => d} = val
     # IO.puts("Timer func: #{time}")
     # IO.inspect(val)
@@ -93,7 +93,7 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
   end
 
   def server(channel,val) do
-    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 6, "sender" => "Server", "value" => %{"A" => val}},5000)
+    _res = PhoenixClient.Channel.push(channel,"event_msg",%{"event_id" => 6, "sender" => "Server", "value" => %{"A" => val}},10000)
   end
 
   def get_start(channel) do
@@ -125,7 +125,7 @@ defmodule Task4CClientRobotB.PhoenixSocketClient do
   end
 
   def weeding2(channel, val) do
-    _res = PhoenixClient.Channel.push(channel,"weeding",%{"sender" => "B", "value" => val},5000)
+    _res = PhoenixClient.Channel.push(channel,"weeding",%{"sender" => "B", "value" => val},10000)
   end
 
    def deposition(channel, ls) do
