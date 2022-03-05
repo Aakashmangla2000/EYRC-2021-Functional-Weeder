@@ -1,4 +1,9 @@
 defmodule Task4CClientRobotA do
+
+  @moduledoc """
+  This module implements the client-A functionality of the theme.
+  This includes moving and controlling the robot on arena and sending updates to liveview. It performs seeding part of the theme.
+  """
   # max x-coordinate of table top
   @table_top_x 6
   # max y-coordinate of table top
@@ -7,12 +12,17 @@ defmodule Task4CClientRobotA do
   @robot_map_y_atom_to_num %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5, :f => 6}
 
   @doc """
-  Places the robot to the default position of (1, A, North)
-
+  ALl the place functions puts the robot to the provided position of (x, y, facing), this is used in start function.
+  Prevents it to be placed outside of the table and facing invalid direction.
   Examples:
+      iex> Task4CClientRobotA.place(1, :b, :south)
+      {:ok, %Task4CClientRobotA.Position{facing: :south,x: 1, y: :b}}
 
-      iex> Task4CClientRobotA.place
-      {:ok, %Task4CClientRobotA.Position{facing: :north,x: 1, y: :a}}
+      iex> Task4CClientRobotA.place(-1, :f, :north)
+      {:failure, "Invalid position"}
+
+      iex> Task4CClientRobotA.place(3, :c, :north_east)
+      {:failure, "Invalid facing direction"}
   """
   def place do
     {:ok, %Task4CClientRobotA.Position{}}
@@ -26,21 +36,6 @@ defmodule Task4CClientRobotA do
     {:failure, "Invalid facing direction"}
   end
 
-  @doc """
-  Places the robot to the provided position of (x, y, facing),
-  but prevents it to be placed outside of the table and facing invalid direction.
-
-  Examples:
-
-      iex> Task4CClientRobotA.place(1, :b, :south)
-      {:ok, %Task4CClientRobotA.Position{facing: :south,x: 1, y: :b}}
-
-      iex> Task4CClientRobotA.place(-1, :f, :north)
-      {:failure, "Invalid position"}
-
-      iex> Task4CClientRobotA.place(3, :c, :north_east)
-      {:failure, "Invalid facing direction"}
-  """
   def place(x, y, facing) do
     {:ok, %Task4CClientRobotA.Position{x: x, y: y, facing: facing}}
   end
@@ -56,7 +51,6 @@ defmodule Task4CClientRobotA do
   Main function to initiate the sequence of tasks to achieve by the Client Robot A,
   such as connect to the Phoenix server, get the robot A's start and goal locations to be traversed.
   Call the respective functions from this module and others as needed.
-  You may create extra helper functions as needed.
   """
   def main do
 
@@ -67,7 +61,6 @@ defmodule Task4CClientRobotA do
     start = repss(channel,0)
     {x,y,facing} = change_start(start)
     goal_locs = Task4CClientRobotA.PhoenixSocketClient.get_goals(channel)
-    # IO.puts(goal_locs)
     {:ok, robot} = start(x,y,facing)
     _obs = Task4CClientRobotA.PhoenixSocketClient.send_robot_status(channel,robot)
     {_,robot} = stop(robot,goal_locs,channel)
@@ -101,8 +94,8 @@ defmodule Task4CClientRobotA do
   end
 
   @doc """
-  Provide GOAL positions to the robot as given location of [(x1, y1),(x2, y2),..] and plan the path from START to these locations.
-  Make a call to ToyRobot.PhoenixSocketClient.send_robot_status/2 to get the indication of obstacle presence ahead of the robot.
+  stop function is called in the main fucntion. It provide GOAL positions to the robot as given location of [(x1, y1),(x2, y2),..]
+  and plan the path from START to these locations.
   """
   def stop(robot, goal_locs,channel) do
 
@@ -121,6 +114,10 @@ defmodule Task4CClientRobotA do
 
   end
 
+  @doc """
+  goal_select and min functions calls the nearby function to determine the nodes of the goal and
+  then select the closest node to the robot's current position.
+  """
   def goal_select(robot, parent, goal_locs,channel,min, index, count,mp,mp2) when count > 0 do
     mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5, :f => 6}
     val = Enum.at(goal_locs,count)
@@ -142,6 +139,9 @@ defmodule Task4CClientRobotA do
     index
   end
 
+  @doc """
+  nearby function takes the goal and applies a formula so as to find the four nodes surrounding it.
+  """
   def nearby(goal) do
     goal = String.to_integer(goal)
     x = rem(goal,5)
@@ -158,6 +158,9 @@ defmodule Task4CClientRobotA do
     [[x,y],[x+1,y],[x,y+1],[x+1,y+1]]
   end
 
+  @doc """
+  nearby function takes the goal and applies a formula so as to find the four nodes surrounding it.
+  """
   def min(robot,ls,count,min,index) when count < 4 do
     mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5, :f => 6}
     distance = abs(robot.x - Enum.at(Enum.at(ls,count),0)) + abs(Map.get(mp3, robot.y) -  Enum.at(Enum.at(ls,count),1))
@@ -173,10 +176,13 @@ defmodule Task4CClientRobotA do
     Enum.fetch(ls,index)
   end
 
+  @doc """
+  goal_div functions select the best goal out of all the goals, based on the robot's current position.
+  It calls goal_select to find the nearest node to the selected goal plant. Then it calls get_value to do the further process.
+  """
   def goal_div(motor_ref,robot, goal_locs,channel,count,mp,mp2) when count > 0 do
     mp3 = %{:a => 1, :b => 2, :c => 3, :d => 4, :e => 5, :f => 6}
     parent = self()
-    # pid = spawn_link(fn ->
       count = Enum.count(goal_locs)
       {robot,goal_locs,_count} = if(count == 0) do
         {robot,goal_locs,count}
@@ -210,10 +216,7 @@ defmodule Task4CClientRobotA do
         {robot,goal_locs,count}
       end
       count = Enum.count(goal_locs)
-      # send(parent, {:flag_value, {robot,goal_locs,count}})
-    # end)
-    # Process.register(pid, :client_toyrobotA)
-    # {robot,goal_locs,count} = rec_value()
+
     if(Enum.count(goal_locs) == 2) do
       goal_div(motor_ref,robot, goal_locs,channel,0,mp,mp2)
     else
@@ -225,7 +228,9 @@ defmodule Task4CClientRobotA do
    robot
   end
 
-
+  @doc """
+  get_value function defines the queue and visited queue
+  """
   def get_value(motor_ref,goal,robot,goal_x, goal_y,channel) do
       len = 1
       q = :queue.new()
