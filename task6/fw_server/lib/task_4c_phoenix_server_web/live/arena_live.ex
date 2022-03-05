@@ -287,6 +287,10 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
 
   end
 
+  @doc """
+  Handle info functions for sowing weeding and deposition to depict them on Live View
+  """
+
   def handle_info(%{seed: sow} = _data, socket) do
     socket = assign(socket, :seeds,socket.assigns[:seeds]++[sow])
     IO.inspect(socket.assigns[:seeds])
@@ -304,6 +308,10 @@ defmodule Task4CPhoenixServerWeb.ArenaLive do
     IO.inspect(socket.assigns[:depos])
     {:noreply, socket}
   end
+
+  @doc """
+  This assigns the goals decided by both the robots and shows them on live view
+  """
 
   def handle_info(%{sow: sow, weed: weed} = _data, socket) do
     socket = if(sow != nil) do

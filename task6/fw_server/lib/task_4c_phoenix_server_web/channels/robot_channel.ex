@@ -70,6 +70,10 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     {:reply, {:ok, true}, socket}
   end
 
+  @doc """
+  This gives the details of the other bot to the client to prevent crash between them
+  """
+
   def handle_in("get_bots",message,socket) do
     resource_id = {User, {:id, 1}}
     update_user = fn(parent,message) ->
@@ -91,6 +95,7 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
       {:pos, value} -> value
     end
 
+    #This stops the timer and the run when bot bots send their status as dead
     if a_alive == false and b_alive == false do
       Task4CPhoenixServerWeb.Endpoint.broadcast("timer:stop", "stop_timer", %{})
     end
@@ -99,6 +104,9 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     {:reply, {:ok, rep}, socket}
   end
 
+  @doc """
+  This gives the plant positions to the client from csv file
+  """
   def handle_in("goals", message, socket) do
     y = File.stream!("Plant_Positions.csv")
     |> CSV.decode
@@ -123,8 +131,10 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     {:reply, {:ok, goals}, socket}
   end
 
+  @doc """
+  This sends the start positions to both the robots when the start button is clicked to start the timer
+  """
   def handle_in("start_pos", message, socket) do
-
     if(GenServer.whereis(Positions) == nil) do
       {:ok, _} = GenServer.start_link(Task4CPhoenixServer.Stack, [{"0","0","0","0","0","0",0,0,false,false}], name: Positions)
     end
@@ -173,23 +183,35 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     {:reply, {:ok, true}, socket}
   end
 
+
+  @doc """
+  This sends the current time to the clients
+  """
   def handle_in("time", message, socket) do
     val = kill_bots(socket.assigns[:timer_tick],message["sender"])
     {:reply, {:ok, [val,socket.assigns[:timer_tick]]}, socket}
   end
 
+  @doc """
+  This receives message from client to depict sowing action
+  """
   def handle_in("sowing", message, socket) do
-    IO.inspect(message)
     Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{seed: message["value"]})
     {:reply, {:ok, true}, socket}
   end
 
-   def handle_in("weeding", message, socket) do
+  @doc """
+  This receives message from client to depict weeding action
+  """
+  def handle_in("weeding", message, socket) do
     Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{wee: message["value"]})
     {:reply, {:ok, true}, socket}
   end
 
-   def handle_in("deposition", message, socket) do
+  @doc """
+  This receives message from client to deposition sowing action
+  """
+  def handle_in("deposition", message, socket) do
     Phoenix.PubSub.broadcast(Task4CPhoenixServer.PubSub, "robot:update", %{depos: message["value"]})
     {:reply, {:ok, true}, socket}
   end
@@ -198,6 +220,10 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
   ## define callback functions as needed ##
   #########################################
 
+
+  @doc """
+  This sends the robots the recent time they have to kill themselves and for how long
+  """
   def kill_bots(time,sender) do
     # time = String.to_integer(time)
     y = File.stream!("Robots_handle.csv")
@@ -211,16 +237,15 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     vals = Enum.map(y,fn [_a,b,c,d] ->
      %{bot: b, stop: String.to_integer(c), start: String.to_integer(d)}
     end)
+
+    #Filter outs all the times that has passed already
     vals = Enum.filter(vals, fn %{bot: _b, stop: _c, start: d} = _x -> 300-d < time end)
     val = Enum.find(vals, fn %{bot: b, stop: _c, start: _d} = _x -> b == sender end)
-    IO.inspect(vals)
-    IO.inspect(val)
     val = if(val == nil) do
        %{bot: sender, stop: 0, start: 0}
     else
       val
     end
-    IO.inspect(val)
     val
   end
 
@@ -229,6 +254,9 @@ defmodule Task4CPhoenixServerWeb.RobotChannel do
     {:noreply, socket}
   end
 
+  @doc """
+  This sets the start positions of both the robots in genserver
+  """
   def handle_info(%{robotA_start: a, robotB_start: b} = _data, socket) do
 
     resource_id = {User, {:id, 1}}
