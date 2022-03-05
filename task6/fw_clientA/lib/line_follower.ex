@@ -1,8 +1,8 @@
 defmodule Task4CClientRobotA.LineFollower do
   @moduledoc """
-  Documentation for `LineFollower`.
+  This module implements line following functionality for the seeder robot.
   """
-
+  ## importing necessary libraries and setting pins
   require Logger
   use Bitwise
   alias Integer
@@ -28,13 +28,7 @@ defmodule Task4CClientRobotA.LineFollower do
   @pwm_frequency 50
 
   @doc """
-  Tests white line sensor modules reading
-
-  Example:
-
-      iex> FW_DEMO.test_wlf_sensors
-      [0, 958, 851, 969, 975, 943]  // on white surface
-      [0, 449, 356, 312, 321, 267]  // on black surface
+  test_wlf_sensors function reads and returns the 5-array ir sensor values detecting white line and black surface.
   """
   def test_wlf_sensors do
     # Logger.debug("Testing white line sensors connected ")
@@ -44,12 +38,19 @@ defmodule Task4CClientRobotA.LineFollower do
     get_lfa_readings([0,1,2,3,4], sensor_ref)
   end
 
+  @doc """
+  test_ir function reads and returns the ir sensor values detecting the obstacles or the plants.
+  The presence of an object is indicated by 0 and the absence is indicated by 1.
+  """
   def test_ir do
     ir_ref = Enum.map(@ir_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :input, pull_mode: :pullup) end)
     ir_values = Enum.map(ir_ref,fn {_, ref_no} -> GPIO.read(ref_no) end)
-    # IO.inspect(ir_values)
   end
 
+   @doc """
+  ir_sensors function calls test_ir() function to store and return the ir sensor values placed at the front and at the back of
+  the robot. The value is returned in the form of an array with first element as the front sensor value and the second element as the back sensor value.
+  """
    def ir_sensors do
     Process.sleep(1000)
     proximity = test_ir()
@@ -59,25 +60,27 @@ defmodule Task4CClientRobotA.LineFollower do
     proximity = test_ir()
     front  =  Enum.at(proximity, 0)
     back = Enum.at(proximity, 1)
-    # IO.puts("front: #{front}")
-    # IO.puts("back: #{back}")
     [front,back]
   end
 
+  @doc """
+  obs_detect function calls ir_sensors function to check the presence of obstacles in the front ir sensor.
+  In case the front value is 0 the function returns true else it return false.
+  """
   def obs_detect do
     obs = false
     [front,back] = ir_sensors()
-    # IO.inspect(ir_sensors())
-
     obs = if front == 0 do
       true
     else
       false
     end
     obs
-    false
   end
 
+   @doc """
+  open_motor_pwm_pins function is setting up motor and pwm pins for further use.
+  """
   def open_motor_pwm_pins() do
     motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
@@ -85,10 +88,14 @@ defmodule Task4CClientRobotA.LineFollower do
     {motor_ref,pwm_ref}
   end
 
+  @doc """
+  pid function implements forward movement of the robot along the white grid lines.
+  This function sets up the default values of the variables and calls find_line function which helps the robot locate the line.
+  Once the line is located, the function calls the forward function to move the robot along the line.
+  The individual variables are all explained in the Task4CClientRobotB.LineFollower module.
+  """
   def pid(channel,motor_ref) do
     Logger.debug("Going Forward")
-    # Process.sleep(4000)
-    # {motor_ref,pwm_ref} = open_motor_pwm_pins()
 
     maximum = 110;
     integral = 0;
@@ -96,9 +103,7 @@ defmodule Task4CClientRobotA.LineFollower do
     motor_action(motor_ref,@stop)
     Task4CClientRobotA.PhoenixSocketClient.timer(channel)
     pwm(10)
-
     Process.sleep(5)
-
     count = 1
     nodes = 1
     stop = 0
@@ -108,9 +113,8 @@ defmodule Task4CClientRobotA.LineFollower do
 
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    # IO.inspect(sensor_vals)
-    # IO.inspect(set_vals(sensor_vals))
 
+    #If the 5-array ir sensor is entirely on the black surface detecting no line, find_line function will be called
     if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
       find_line(motor_ref)
     end
@@ -124,6 +128,10 @@ defmodule Task4CClientRobotA.LineFollower do
     end
   end
 
+  @doc """
+  right function implements the right turn of the robot by reading the 5-array ir sensor.
+  The robot will turn until it detects a white line under the sensors.
+  """
   def right(channel,motor_ref,count) do
     Task4CClientRobotA.PhoenixSocketClient.timer(channel)
     pwm(100)
@@ -146,6 +154,10 @@ defmodule Task4CClientRobotA.LineFollower do
     end
   end
 
+  @doc """
+  left function implements the left turn of the robot by reading the 5-array ir sensor.
+  The robot will turn until it detects a white line under the sensors.
+  """
   def left(channel,motor_ref,count) do
     Task4CClientRobotA.PhoenixSocketClient.timer(channel)
     pwm(100)
@@ -168,20 +180,17 @@ defmodule Task4CClientRobotA.LineFollower do
     end
   end
 
-  def twice(motor_ref) do
-    pwm(150)
-    Process.sleep(230)
-    motor_action(motor_ref,@left)
-    Process.sleep(500)
-    motor_action(motor_ref,@stop)
-    Process.sleep(500)
-  end
-
+   @doc """
+  set_motors provide pwm value for left and right wheels of the robot
+  """
   def set_motors(_motor_ref,r,l) do
     pwml(l)
     pwmr(r)
   end
 
+  @doc """
+  loop function recieves the sensor values in the form of 0s and 1s and applies a formula.
+  """
   def loop(j,i,sensor_vals) when j < 5 do
     sensor_vals = List.replace_at(sensor_vals,j,1000*i*Enum.at(sensor_vals,j))
     loop(j+1,i-1,sensor_vals)
@@ -191,6 +200,9 @@ defmodule Task4CClientRobotA.LineFollower do
     sensor_vals
   end
 
+  @doc """
+  read_line2 function calls the loop function to recieve the tuned values of the sensor and calculates the average to find the position.
+  """
   def read_line2(sensor_vals) do
     sensor_vals = set_vals(sensor_vals)
     denominator = Enum.sum(sensor_vals)
@@ -210,27 +222,28 @@ defmodule Task4CClientRobotA.LineFollower do
     end
   end
 
+  @doc """
+  forward function implements pid- proportional,integral,derivative to set the pwm value for the right and lef wheels.
+  pid requires position value which is calculated with read_line2. Here, the pid calculates the error in position of the robot with
+  the help of sensor value to set pwm value in the left and right value and keep the robot along the line.
+  """
+
   def forward(channel,count,nodes,stop,motor_ref,maximum,integral,last_proportional) when stop == 0 do
-    # Task4CClientRobotA.PhoenixSocketClient.timer(channel)
-    # IO.puts("#{count}")
     count = count + 1
 
     #Simple ReadLine
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    # IO.inspect(sensor_vals)
-    # IO.inspect(set_vals(sensor_vals))
     position = read_line2(sensor_vals)
 
     [s1,s2,s3,s4,s5] = if(s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) do
-      # IO.puts("zero")
-      # motor_action(motor_ref,@forward)
       sensor_vals = test_wlf_sensors()
       set_vals(sensor_vals)
     else
       [s1,s1,s3,s4,s5]
     end
 
+    #Check if the next node is reached, if yes then the robot will be stopped
     {nodes,count} = if(count > 12 or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 0 and s2 == 0 and s3 == 1 and s4 == 1 and s5 == 1) or (s1 == 1 and s2 == 1 and s3 == 1 and s4 == 0 and s5 == 0) or (s1 == 0 and s2 == 1 and s3 == 1 and s4 == 1 and s5 == 0)) do
         nodes = nodes + 1
         count = 1
@@ -253,9 +266,9 @@ defmodule Task4CClientRobotA.LineFollower do
 		# Remember the last position.
 		last_proportional = proportional
 
-		power_difference = proportional*0.02 + derivative*0.015 #+ integral*0.005;
+		power_difference = proportional*0.02 + derivative*0.015
     power_difference = Kernel.round(power_difference)
-    # IO.puts("Power Difference: #{power_difference}")
+
 		power_difference = if (power_difference > maximum) do
 			maximum
     else
@@ -269,14 +282,11 @@ defmodule Task4CClientRobotA.LineFollower do
     end
 
 		if (power_difference < 0) do
-      # IO.puts("r #{maximum + power_difference} l #{maximum}")
       set_motors(motor_ref,maximum,maximum + power_difference)
 		else
-      # IO.puts("r #{maximum} l #{maximum - power_difference}")
       set_motors(motor_ref,maximum - power_difference,maximum)
     end
 
-    # if((s1 == 0 and s2 == 0 and s3 == 0 and s4 == 0 and s5 == 0) or
     if(nodes == 2) do
       forward(channel,count,nodes,1,motor_ref,maximum,integral,last_proportional)
     else
@@ -288,11 +298,14 @@ defmodule Task4CClientRobotA.LineFollower do
     motor_action(motor_ref,@stop)
   end
 
+  @doc """
+  find_line function is used in the case where robot is completely on the black surface indicating no line.
+  This function shifts the robot left and right accordingly in order to search for the line.
+  """
   def find_line(motor_ref) do
-    # motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    # IO.inspect(set_vals(sensor_vals))
+
     if(s1+s2+s3+s4+s5 == 0) do
       motor_action(motor_ref,@right)
       pwm(110)
@@ -300,7 +313,7 @@ defmodule Task4CClientRobotA.LineFollower do
       motor_action(motor_ref,@stop)
       sensor_vals = test_wlf_sensors()
       [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-      # IO.inspect(set_vals(sensor_vals))
+
       if(s1+s2+s3+s4+s5 == 0) do
         motor_action(motor_ref,@left)
         pwm(110)
@@ -311,7 +324,7 @@ defmodule Task4CClientRobotA.LineFollower do
 
     sensor_vals = test_wlf_sensors()
     [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-    # IO.inspect(set_vals(sensor_vals))
+
     if(s1+s2+s3+s4+s5 == 0) do
       motor_action(motor_ref,@left)
       pwm(110)
@@ -319,7 +332,7 @@ defmodule Task4CClientRobotA.LineFollower do
       motor_action(motor_ref,@stop)
       sensor_vals = test_wlf_sensors()
       [s1,s2,s3,s4,s5] = set_vals(sensor_vals)
-      # IO.inspect(set_vals(sensor_vals))
+
       if(s1+s2+s3+s4+s5 == 0) do
         motor_action(motor_ref,@right)
         pwm(110)
@@ -330,9 +343,11 @@ defmodule Task4CClientRobotA.LineFollower do
     Process.sleep(1000)
   end
 
+  @doc """
+  set_vals function converts every individual sensor value to 0 and 1 depending on the threshold value defined.
+  """
   def set_vals(vals) do
     {_s0, vals} = List.pop_at(vals,0)
-    # List.replace_at(vals,1,Enum.at(vals,1)+100)
     Enum.map(vals, fn x -> if(x > 900) do
         1
       else
@@ -341,27 +356,6 @@ defmodule Task4CClientRobotA.LineFollower do
     end)
   end
 
-
-  @doc """
-  Tests motion of the Robot
-
-  Example:
-
-      iex> FW_DEMO.test_motion
-      :ok
-
-  Note: On executing above function Robot will move forward, backward, left, right
-  for 500ms each and then stops
-  """
-
-  def test_motion do
-    Logger.debug("Testing Motion of the Robot ")
-    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
-    pwm_ref = Enum.map(@pwm_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
-    Enum.map(pwm_ref,fn {_, ref_no} -> GPIO.write(ref_no, 1) end)
-    motion_list = [@forward,@stop]
-    Enum.each(motion_list, fn motion -> motor_action(motor_ref,motion) end)
-  end
 
   @doc """
   Supporting function for test_wlf_sensors
@@ -398,7 +392,6 @@ defmodule Task4CClientRobotA.LineFollower do
     Enum.each(0..5, fn n -> provide_clock(sensor_ref) end)
     GPIO.write(sensor_ref[:cs], 1)
     Process.sleep(50)
-    # get_lfa_readings(sensor_list, sensor_ref)
     vals
   end
 
@@ -460,9 +453,9 @@ defmodule Task4CClientRobotA.LineFollower do
   end
 
   @doc """
-  Supporting function for test_pwm
-
+  Supporting function for test_pwm is pwm
   Note: "duty" variable can take value from 0 to 255. Value 255 indicates 100% duty cycle
+  pwml and pwmr spefically sets pwm value for left and right wheels
   """
   defp pwm(duty) do
     Enum.each(@pwm_pins, fn {_atom, pin_no} -> Pigpiox.Pwm.gpio_pwm(pin_no, duty) end)
