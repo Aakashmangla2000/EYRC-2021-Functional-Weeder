@@ -241,20 +241,6 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
     end
   end
 
-  def find(val) do
-    motor_ref = Enum.map(@motor_pins, fn {_atom, pin_no} -> GPIO.open(pin_no, :output) end)
-    if(val == 0) do
-      find_on_right(motor_ref,0)
-    else
-      find_on_left(motor_ref,0)
-    end
-    motor_action(motor_ref,@backward)
-    pwm(100)
-    Process.sleep(10)
-    motor_action(motor_ref,@stop)
-    Process.sleep(100)
-  end
-
   @doc """
   find_on_right rotates the backside of the robot to the right i.e.
   the robot to the left to find the plant on the right and
@@ -278,12 +264,6 @@ defmodule Task4CClientRobotA.ArmMechanismTest do
       Process.sleep(100)
     end
   end
-
-  # def test_servo_a(angle) do
-  #   val = trunc(((2.5 + 10.0 * angle / 180) / 100 ) * 255)
-  #   Pigpiox.Pwm.set_pwm_frequency(@servo_a_pin, @pwm_frequency)
-  #   Pigpiox.Pwm.gpio_pwm(@servo_a_pin, val)
-  # end
 
   @doc """
   test_servo_b sets the angle for the servo controlling rotation of the plate.
